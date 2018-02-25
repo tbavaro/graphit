@@ -1,0 +1,6 @@
+.PropertiesView {
+  flex-basis: 20em;
+  flex-grow: 0;
+  background-color: #ddddee;
+  border-left: 1px solid black;
+}
