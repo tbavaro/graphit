@@ -3,7 +3,13 @@ import * as Interact from 'interactjs';
 // import MyNodeDatum from './MyNodeDatum';
 import './NodeView.css';
 
+export interface NodeActionManager {
+  onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
+}
+
 interface Props {
+  actionManager?: NodeActionManager;
+  id: number;
   label: string;
   x: number;
   y: number;
@@ -20,14 +26,16 @@ class NodeView extends React.Component<Props, object> {
   }
 
   componentWillReceiveProps() {
+    this.dataX = 0;
+    this.dataY = 0;
     this.setInteractions();
   }
 
   render() {
-
     var style = {
       left: this.props.x,
-      top: this.props.y
+      top: this.props.y,
+      transform: ""
     };
     return (
       <div
@@ -47,20 +55,32 @@ class NodeView extends React.Component<Props, object> {
   private setInteractions() {
     this.interact = Interact(this.node);
     this.interact.draggable({
-      onmove: this.onDragMove
+      onmove: this.onDragMove,
+      onend: this.onDragEnd
     });
   }
 
   private onDragMove = (event: Interact.InteractEvent) => {
-    console.log(this.dataX, this.dataY);
-    var x = this.dataX + event.dx;
-    var y = this.dataY + event.dy;
-    console.log(x, y);
-    event.target.style.transform = "translate(" + x + "px, " + y + "px)";
+    this.dataX += event.dx;
+    this.dataY += event.dy;
 
-    this.dataX = x;
-    this.dataY = y;
-    // console.log("move", event.x0);
+    event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
+
+    this.triggerOnNodeMoved(/*stopped=*/false);
+  }
+
+  private onDragEnd = (event: Interact.InteractEvent) => {
+    this.triggerOnNodeMoved(/*stopped=*/true);
+  }
+
+  private triggerOnNodeMoved(stopped: boolean) {
+    if (this.props.actionManager) {
+      this.props.actionManager.onNodeMoved(
+        this.props.id,
+        this.props.x + this.dataX,
+        this.props.y + this.dataY,
+        stopped);
+    }
   }
 }
 
