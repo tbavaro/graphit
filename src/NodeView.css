@@ -1,5 +1,12 @@
 .NodeView {
   position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+}
+
+.NodeView-content {
+  position: absolute;
   background-color: #555555;
   color: white;
   border: 1px solid black;
