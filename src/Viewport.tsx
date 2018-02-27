@@ -59,11 +59,8 @@ class Viewport extends React.Component<Props, object> {
 
   zoom = 1;
 
-  maxInitialized = false;
-  maxX = 0;
-  maxY = 0;
-  maxXId = -1;
-  maxYId = -1;
+  renderNodes = true;
+  renderLinks = true;
 
   simulation =
     D3Force.forceSimulation(this.props.document.nodes)
@@ -83,7 +80,6 @@ class Viewport extends React.Component<Props, object> {
         node.fx = x;
         node.fy = y;
       }
-      this.updateBoundsForNode(node, id);
       this.restartSimulation();
     },
 
@@ -120,14 +116,10 @@ class Viewport extends React.Component<Props, object> {
   }
 
   render() {
-    if (!this.maxInitialized) {
-      this.updateBoundsForAllNodes();
-      this.maxInitialized = true;
-    }
+    var linkLines = (!this.renderLinks ? "" : this.props.document.links.map(this.renderLink));
+    var nodeViews = (!this.renderNodes ? "" : this.props.document.nodes.map(this.renderNode));
 
-    var linkLines = this.props.document.links.map(this.renderLink);
-    var nodeViews = this.props.document.nodes.map(this.renderNode);
-
+    // figure out max sizes
     var maxX = 0;
     var maxY = 0;
     this.props.document.nodes.forEach((node) => {
@@ -140,13 +132,17 @@ class Viewport extends React.Component<Props, object> {
     });
 
     var innerStyle = {
-      zoom: this.zoom
+      zoom: this.zoom,
     };
 
     return (
       <div className="Viewport">
         <div className="Viewport-inner" style={innerStyle}>
-          <svg className="Viewport-linkLines" width={maxX + "px"} height={maxY + "px"}>
+          <svg
+            className="Viewport-linkLines"
+            width={maxX + "px"}
+            height={maxY + "px"}
+          >
             {linkLines}
           </svg>
           {nodeViews}
@@ -189,36 +185,6 @@ class Viewport extends React.Component<Props, object> {
     if (this.fpsView) {
       this.fpsView.onTick();
     }
-  }
-
-  private updateBoundsForAllNodes = () => {
-    this.maxX = 0;
-    this.maxY = 0;
-    this.maxXId = -1;
-    this.maxYId = -1;
-    this.props.document.nodes.forEach(this.updateBoundsForNode);
-  }
-
-  // returns TRUE if the given node might have been on the bounds before but isn't now
-  private updateBoundsForNode = (node: MyNodeDatum, id: number): boolean => {
-    var result = false;
-    if (node.x) {
-      if (node.x > this.maxX) {
-        this.maxX = node.x;
-        this.maxXId = id;
-      } else {
-        result = result || (this.maxXId === id);
-      }
-    }
-    if (node.y) {
-      if (node.y > this.maxY) {
-        this.maxY = node.y;
-        this.maxYId = id;
-      } else {
-        result = result || (this.maxYId === id);
-      }
-    }
-    return result;
   }
 }
 

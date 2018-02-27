@@ -72,15 +72,7 @@ class App extends React.Component<object, State> {
   }
 
   componentDidMount() {
-    setTimeout(
-      () => {
-        this.loadDataFromUrl("data.json");
-        // this.setState({
-        //   document: this.createDummyDocument()
-        // });
-      },
-      2000
-    );
+    this.loadDataFromUrl("data.json");
   }
 
   render() {

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as Interact from 'interactjs';
-// import MyNodeDatum from './MyNodeDatum';
 import './NodeView.css';
 
 export interface NodeActionManager {
@@ -67,7 +66,7 @@ class NodeView extends React.Component<Props, object> {
     this.dataX += event.dx / this.props.viewportZoom;
     this.dataY += event.dy / this.props.viewportZoom;
 
-    event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
+    // event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
 
     this.triggerOnNodeMoved(/*stopped=*/false);
   }
