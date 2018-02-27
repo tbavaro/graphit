@@ -57,9 +57,7 @@ class Viewport extends React.Component {
         this.nodes[id].fy = y;
       }
       this.simulation.alpha(1);
-      if (stopped) {
-        this.simulation.restart();
-      }
+      this.simulation.restart();
     }
   };
 
@@ -68,10 +66,14 @@ class Viewport extends React.Component {
   }
 
   render() {
+    var linkLines = this.links.map(this.renderLink);
     var nodeViews = this.nodes.map(this.renderNode);
 
     return (
       <div className="Viewport">
+        <svg height="100%" width="100%">
+          {linkLines}
+        </svg>
         {nodeViews}
       </div>
     );
@@ -87,6 +89,18 @@ class Viewport extends React.Component {
         x={node.x || 0}
         y={node.y || 0}
       />
+    );
+  }
+
+  private renderLink = (link: D3Force.SimulationLinkDatum<MyNodeDatum>, id: number) => {
+    var source = link.source as MyNodeDatum;
+    var target = link.target as MyNodeDatum;
+    var style = {
+      stroke: "black",
+      strokeWidth: 2
+    };
+    return (
+      <line x1={source.x} y1={source.y} x2={target.x} y2={target.y} style={style}/>
     );
   }
 
