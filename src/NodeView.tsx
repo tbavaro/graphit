@@ -5,14 +5,17 @@ import './NodeView.css';
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
+  toggleIsLocked: (id: number) => void;
 }
 
 interface Props {
   actionManager?: NodeActionManager;
   id: number;
   label: string;
+  isLocked: boolean;
   x: number;
   y: number;
+  viewportZoom: number;
 }
 
 class NodeView extends React.Component<Props, object> {
@@ -40,10 +43,10 @@ class NodeView extends React.Component<Props, object> {
     return (
       <div
         ref={this.ref}
-        className="NodeView"
+        className={"NodeView" + (this.props.isLocked ? " locked" : "")}
         style={style}
       >
-        <div className="NodeView-content">{this.props.label}</div>
+        <div className="NodeView-content" onDoubleClick={this.onDoubleClick}>{this.props.label}</div>
       </div>
     );
   }
@@ -61,8 +64,8 @@ class NodeView extends React.Component<Props, object> {
   }
 
   private onDragMove = (event: Interact.InteractEvent) => {
-    this.dataX += event.dx;
-    this.dataY += event.dy;
+    this.dataX += event.dx / this.props.viewportZoom;
+    this.dataY += event.dy / this.props.viewportZoom;
 
     event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
 
@@ -80,6 +83,12 @@ class NodeView extends React.Component<Props, object> {
         this.props.x + this.dataX,
         this.props.y + this.dataY,
         stopped);
+    }
+  }
+
+  private onDoubleClick = () => {
+    if (this.props.actionManager) {
+      this.props.actionManager.toggleIsLocked(this.props.id);
     }
   }
 }
