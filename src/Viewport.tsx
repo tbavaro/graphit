@@ -57,14 +57,14 @@ class FPSView {
 class Viewport extends React.Component<Props, object> {
   fpsView?: FPSView;
 
-  zoom = 1;
+  zoom = 0.5;
 
   renderNodes = true;
   renderLinks = true;
 
   simulation =
     D3Force.forceSimulation(this.props.document.nodes)
-      .force("charge", D3Force.forceManyBody())
+      .force("charge", D3Force.forceManyBody().strength(-500).distanceMax(300))
       .force("links", D3Force.forceLink(this.props.document.links).distance(100))
       .on("tick", () => this.onSimulationTick());
 

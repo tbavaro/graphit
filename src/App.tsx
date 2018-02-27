@@ -61,8 +61,12 @@ class App extends React.Component<object, State> {
     var req = new XMLHttpRequest();
     req.open("get", url);
     req.onload = (evt => {
+      var doc = GraphDocument.load(req.responseText);
+      doc.nodes.forEach((node) => {
+        node.label = node.label.replace(/ /g, "\n");
+      });
       this.setState({
-        document: GraphDocument.load(req.responseText)
+        document: doc
       });
     });
     req.onerror = (evt => {
