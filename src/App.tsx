@@ -53,12 +53,31 @@ class App extends React.Component<object, State> {
     return new GraphDocument(nodes, links);
   }
 
+  loadDataFromUrl(url: string) {
+    this.setState({
+      document: undefined
+    });
+
+    var req = new XMLHttpRequest();
+    req.open("get", url);
+    req.onload = (evt => {
+      this.setState({
+        document: GraphDocument.load(req.responseText)
+      });
+    });
+    req.onerror = (evt => {
+      alert("error: " + req.status);
+    });
+    req.send();
+  }
+
   componentDidMount() {
     setTimeout(
       () => {
-        this.setState({
-          document: this.createDummyDocument()
-        });
+        this.loadDataFromUrl("data.json");
+        // this.setState({
+        //   document: this.createDummyDocument()
+        // });
       },
       2000
     );
