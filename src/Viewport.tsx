@@ -10,7 +10,53 @@ interface Props {
   document: GraphDocument;
 }
 
+class FPSView {
+  private element?: HTMLDivElement;
+  private ticksSinceUpdate: number;
+  private lastUpdateTime: number;
+  private intervalId?: NodeJS.Timer;
+
+  constructor() {
+    this.element = document.createElement("div");
+    this.element.className = "Viewport-FPSView";
+    document.body.appendChild(this.element);
+    this.ticksSinceUpdate = 0;
+    this.lastUpdateTime = new Date().getTime();
+    this.intervalId = setInterval(this.update, 1000);
+  }
+
+  destroy() {
+    if (this.element) {
+      if (this.element.parentElement) {
+        this.element.parentElement.removeChild(this.element);
+      }
+      this.element = undefined;
+    }
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
+    }
+  }
+
+  onTick() {
+    this.ticksSinceUpdate += 1;
+  }
+
+  private update = () => {
+    var now = new Date().getTime();
+    var diff = now - this.lastUpdateTime;
+    var fps = this.ticksSinceUpdate / (diff / 1000);
+    if (this.element) {
+      this.element.innerText = Math.floor(fps) + "fps";
+    }
+    this.ticksSinceUpdate = 0;
+    this.lastUpdateTime = now;
+  }
+}
+
 class Viewport extends React.Component<Props, object> {
+  fpsView?: FPSView;
+
   zoom = 1;
 
   maxInitialized = false;
@@ -61,8 +107,16 @@ class Viewport extends React.Component<Props, object> {
     });
   }
 
+  componentDidMount() {
+    this.fpsView = new FPSView();
+  }
+
   componentWillUnmount() {
     this.simulation.stop();
+    if (this.fpsView) {
+      this.fpsView.destroy();
+      this.fpsView = undefined;
+    }
   }
 
   render() {
@@ -132,6 +186,9 @@ class Viewport extends React.Component<Props, object> {
   private onSimulationTick = () => {
     // console.log("tick");
     this.forceUpdate();
+    if (this.fpsView) {
+      this.fpsView.onTick();
+    }
   }
 
   private updateBoundsForAllNodes = () => {
