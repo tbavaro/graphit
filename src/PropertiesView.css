@@ -1,7 +1,23 @@
 .PropertiesView {
+  flex-grow: 0;
+  flex-shrink: 0;
+  border-left: 1px solid black;
+}
+
+.PropertiesView.expanded {
   flex-basis: 20em;
   flex-grow: 0;
   flex-shrink: 0;
   background-color: #ddddee;
-  border-left: 1px solid black;
+}
+
+.PropertiesView.collapsed {
+  flex-basis: 1em;
+  background-color: black;
+  color: white;
+}
+
+.PropertiesView.collapsed::before {
+  align-content: center;
+  content: "<";
 }

@@ -4,7 +4,7 @@ import './PropertiesView.css';
 class PropertiesView extends React.Component {
   render() {
     return (
-      <div className="PropertiesView" />
+      <div className="PropertiesView collapsed" />
     );
   }
 }

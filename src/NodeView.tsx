@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as Interact from 'interactjs';
+import * as D3 from "d3";
 import './NodeView.css';
 
 export interface NodeActionManager {
@@ -14,23 +14,30 @@ interface Props {
   isLocked: boolean;
   x: number;
   y: number;
-  viewportZoom: number;
+  dragBehavior?: D3.DragBehavior<any, number, any>;
 }
 
-class NodeView extends React.Component<Props, object> {
-  node: HTMLDivElement;
-  interact: Interact.Interactable;
-  dataX = 0;
-  dataY = 0;
+class NodeView extends React.PureComponent<Props, object> {
+  ref?: HTMLDivElement;
 
   componentDidMount() {
-    this.setInteractions();
+    if (!this.ref) {
+      throw new Error("ref not set");
+    }
+
+    var sel = D3.select(this.ref);
+    sel.datum(this.props.id);
+
+    if (this.props.dragBehavior) {
+      sel.call(this.props.dragBehavior);
+    }
   }
 
-  componentWillReceiveProps() {
-    this.dataX = 0;
-    this.dataY = 0;
-    this.setInteractions();
+  componentWillReceiveProps(newProps: Readonly<Props>) {
+    // clear old drag behavior if it's changing
+    if (this.ref && this.props.dragBehavior !== newProps.dragBehavior) {
+      D3.select(this.ref).on(".drag", null);
+    }
   }
 
   render() {
@@ -41,7 +48,7 @@ class NodeView extends React.Component<Props, object> {
     };
     return (
       <div
-        ref={this.ref}
+        ref={this.setRef}
         className={"NodeView" + (this.props.isLocked ? " locked" : "")}
         style={style}
       >
@@ -50,41 +57,41 @@ class NodeView extends React.Component<Props, object> {
     );
   }
 
-  private ref = (node: HTMLDivElement) => {
-    this.node = node;
+  private setRef = (newRef: HTMLDivElement) => {
+    this.ref = newRef;
   }
 
-  private setInteractions() {
-    this.interact = Interact(this.node);
-    this.interact.draggable({
-      onmove: this.onDragMove,
-      onend: this.onDragEnd,
-      stop
-    }).preventDefault("always");
-  }
+  // private setInteractions() {
+  //   this.interact = Interact(this.node);
+  //   this.interact.draggable({
+  //     onmove: this.onDragMove,
+  //     onend: this.onDragEnd,
+  //     stop
+  //   }).preventDefault("always");
+  // }
 
-  private onDragMove = (event: Interact.InteractEvent) => {
-    this.dataX += event.dx / this.props.viewportZoom;
-    this.dataY += event.dy / this.props.viewportZoom;
+  // private onDragMove = (event: Interact.InteractEvent) => {
+  //   this.dataX += event.dx / this.props.viewportZoom;
+  //   this.dataY += event.dy / this.props.viewportZoom;
 
-    // event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
+  //   // event.target.style.transform = "translate(" + this.dataX + "px, " + this.dataY + "px)";
 
-    this.triggerOnNodeMoved(/*stopped=*/false);
-  }
+  //   this.triggerOnNodeMoved(/*stopped=*/false);
+  // }
 
-  private onDragEnd = (event: Interact.InteractEvent) => {
-    this.triggerOnNodeMoved(/*stopped=*/true);
-  }
+  // private onDragEnd = (event: Interact.InteractEvent) => {
+  //   this.triggerOnNodeMoved(/*stopped=*/true);
+  // }
 
-  private triggerOnNodeMoved(stopped: boolean) {
-    if (this.props.actionManager) {
-      this.props.actionManager.onNodeMoved(
-        this.props.id,
-        this.props.x + this.dataX,
-        this.props.y + this.dataY,
-        stopped);
-    }
-  }
+  // private triggerOnNodeMoved(stopped: boolean) {
+  //   if (this.props.actionManager) {
+  //     this.props.actionManager.onNodeMoved(
+  //       this.props.id,
+  //       this.props.x + this.dataX,
+  //       this.props.y + this.dataY,
+  //       stopped);
+  //   }
+  // }
 
   private onDoubleClick = () => {
     if (this.props.actionManager) {

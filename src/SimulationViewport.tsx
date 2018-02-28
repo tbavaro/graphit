@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as D3 from "d3";
 import * as D3Force from 'd3-force';
 import MyNodeDatum from './MyNodeDatum';
 import NodeView from './NodeView';
@@ -59,6 +60,7 @@ class SimulationViewport extends React.Component<Props, object> {
   fpsView?: FPSView;
 
   svgRef?: SVGGElement;
+  viewportRef?: HTMLDivElement;
 
   renderNodes = true;
   renderLinks = true;
@@ -68,6 +70,9 @@ class SimulationViewport extends React.Component<Props, object> {
       .force("charge", D3Force.forceManyBody().strength(-500).distanceMax(300))
       .force("links", D3Force.forceLink(this.props.document.links).distance(100))
       .on("tick", () => this.onSimulationTick());
+
+  drag = D3.drag<any, number>();
+    // .on("drag", this.onDragMove);
 
   nodeActionManager: NodeActionManager = {
     onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => {
@@ -106,6 +111,12 @@ class SimulationViewport extends React.Component<Props, object> {
 
   componentDidMount() {
     this.fpsView = new FPSView();
+    if (this.viewportRef) {
+      this.drag.container(this.viewportRef);
+    }
+    this.drag
+      .on("drag", this.onDragMove)
+      .on("end", this.onDragEnd);
   }
 
   componentWillUnmount() {
@@ -122,6 +133,7 @@ class SimulationViewport extends React.Component<Props, object> {
 
     return (
       <Viewport
+        innerRef={this.setViewportRef}
         manuallyTransformedChildren={
           <svg
             key="linkLines"
@@ -153,7 +165,7 @@ class SimulationViewport extends React.Component<Props, object> {
         isLocked={node.isLocked}
         x={node.x || 0}
         y={node.y || 0}
-        viewportZoom={1}
+        dragBehavior={this.drag}
       />
     );
   }
@@ -178,10 +190,40 @@ class SimulationViewport extends React.Component<Props, object> {
     this.svgRef = newRef;
   }
 
+  private setViewportRef = (newRef: HTMLDivElement) => {
+    this.viewportRef = newRef;
+  }
+
   private onViewportZoom = (transform: string) => {
     if (this.svgRef) {
       this.svgRef.style.transform = transform;
     }
+  }
+
+  private onDragMoveOrEnd = (id: number, isEnd: boolean) => {
+    var ev = D3.event as D3.D3DragEvent<any, number, any>;
+
+    console.log("drag", ev.subject);
+
+    var node = this.props.document.nodes[id];
+    node.x = ev.x;
+    node.y = ev.y;
+    if (isEnd && !node.isLocked) {
+      node.fx = undefined;
+      node.fy = undefined;
+    } else {
+      node.fx = node.x;
+      node.fy = node.y;
+    }
+    this.restartSimulation();
+  }
+
+  private onDragMove = (id: number) => {
+    this.onDragMoveOrEnd(id, /*isEnd=*/false);
+  }
+
+  private onDragEnd = (id: number) => {
+    this.onDragMoveOrEnd(id, /*isEnd=*/true);
   }
 }
 

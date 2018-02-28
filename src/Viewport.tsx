@@ -8,6 +8,7 @@ interface Props {
   autoTransformedChildren?: any;
   manuallyTransformedChildren?: any;
   onZoom?: (transform: string) => void;
+  innerRef?: (ref: HTMLDivElement) => void;
 }
 
 class Viewport extends React.Component<Props, object> {
@@ -43,6 +44,9 @@ class Viewport extends React.Component<Props, object> {
 
   private setInnerRef = (newRef: HTMLDivElement) => {
     this.innerRef = newRef;
+    if (this.props.innerRef) {
+      this.props.innerRef(newRef);
+    }
   }
 
   private zoomed = () => {
