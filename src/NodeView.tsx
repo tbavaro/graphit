@@ -58,8 +58,9 @@ class NodeView extends React.Component<Props, object> {
     this.interact = Interact(this.node);
     this.interact.draggable({
       onmove: this.onDragMove,
-      onend: this.onDragEnd
-    });
+      onend: this.onDragEnd,
+      stop
+    }).preventDefault("always");
   }
 
   private onDragMove = (event: Interact.InteractEvent) => {

@@ -1,17 +1,14 @@
-.Simulation {
-  position: relative;
-  overflow: hidden;
-}
-
-.Simulation-linkLines {
+.SimulationViewport-linkLines {
   position: absolute;
   left: 0;
   top: 0;
+  width: 100%;
+  height: 100%;
   stroke: darkgray;
   stroke-width: 2px;
 }
 
-.Simulation-FPSView {
+.SimulationViewport-FPSView {
   position: absolute;
   z-index: 1000;
   left: 0;

@@ -3,8 +3,9 @@ import * as D3Force from 'd3-force';
 import MyNodeDatum from './MyNodeDatum';
 import NodeView from './NodeView';
 import { NodeActionManager } from './NodeView';
-import './Simulation.css';
+import './SimulationViewport.css';
 import GraphDocument from './GraphDocument';
+import Viewport from './Viewport';
 
 interface Props {
   document: GraphDocument;
@@ -18,7 +19,7 @@ class FPSView {
 
   constructor() {
     this.element = document.createElement("div");
-    this.element.className = "Simulation-FPSView";
+    this.element.className = "SimulationViewport-FPSView";
     document.body.appendChild(this.element);
     this.ticksSinceUpdate = 0;
     this.lastUpdateTime = new Date().getTime();
@@ -54,8 +55,10 @@ class FPSView {
   }
 }
 
-class Simulation extends React.Component<Props, object> {
+class SimulationViewport extends React.Component<Props, object> {
   fpsView?: FPSView;
+
+  svgRef?: SVGGElement;
 
   renderNodes = true;
   renderLinks = true;
@@ -117,31 +120,22 @@ class Simulation extends React.Component<Props, object> {
     var linkLines = (!this.renderLinks ? "" : this.props.document.links.map(this.renderLink));
     var nodeViews = (!this.renderNodes ? "" : this.props.document.nodes.map(this.renderNode));
 
-    // figure out max sizes
-    var maxX = 0;
-    var maxY = 0;
-    this.props.document.nodes.forEach((node) => {
-      if (node.x && node.x > maxX) {
-        maxX = node.x;
-      }
-      if (node.y && node.y > maxY) {
-        maxY = node.y;
-      }
-    });
-
-    return [
-      (
-      <svg
-        key="linkLines"
-        className="Simulation-linkLines"
-        width={maxX + "px"}
-        height={maxY + "px"}
-      >
-        {linkLines}
-      </svg>
-      ),
-      nodeViews
-    ];
+    return (
+      <Viewport
+        manuallyTransformedChildren={
+          <svg
+            key="linkLines"
+            className="SimulationViewport-linkLines"
+          >
+            <g ref={this.setSvgRef}>
+              {linkLines}
+            </g>
+          </svg>
+        }
+        autoTransformedChildren={nodeViews}
+        onZoom={this.onViewportZoom}
+      />
+    );
   }
 
   private restartSimulation = () => {
@@ -179,6 +173,16 @@ class Simulation extends React.Component<Props, object> {
       this.fpsView.onTick();
     }
   }
+
+  private setSvgRef = (newRef: SVGGElement) => {
+    this.svgRef = newRef;
+  }
+
+  private onViewportZoom = (transform: string) => {
+    if (this.svgRef) {
+      this.svgRef.style.transform = transform;
+    }
+  }
 }
 
-export default Simulation;
+export default SimulationViewport;

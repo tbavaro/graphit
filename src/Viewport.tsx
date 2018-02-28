@@ -7,7 +7,7 @@ import './Viewport.css';
 interface Props {
   autoTransformedChildren?: any;
   manuallyTransformedChildren?: any;
-  onZoom?: (ev: D3Zoom.D3ZoomEvent<any, any>) => void;
+  onZoom?: (transform: string) => void;
 }
 
 class Viewport extends React.Component<Props, object> {
@@ -23,16 +23,16 @@ class Viewport extends React.Component<Props, object> {
       .scaleExtent([0.3, 3])
       .on("zoom", this.zoomed);
 
-    D3Selection.select(this.outerRef).call(zoom);
+    D3Selection.select(this.outerRef).call(zoom).on("dblclick.zoom", null);
   }
 
   render() {
     return (
       <div className="Viewport" ref={this.setOuterRef}>
+        {this.props.manuallyTransformedChildren}
         <div className="Viewport-contents" ref={this.setInnerRef}>
           {this.props.autoTransformedChildren}
         </div>
-        {this.props.manuallyTransformedChildren}
       </div>
     );
   }
@@ -47,14 +47,15 @@ class Viewport extends React.Component<Props, object> {
 
   private zoomed = () => {
     var ev = D3.event as D3.D3ZoomEvent<any, any>;
+    var t = ev.transform;
+    var transformString = "translate(" + t.x + "px, " + t.y + "px) scale(" + t.k + ")";
 
     if (this.innerRef) {
-      var t = ev.transform;
-      this.innerRef.style.transform = "translate(" + t.x + "px, " + t.y + "px) scale(" + t.k + ")";
+      this.innerRef.style.transform = transformString;
     }
 
     if (this.props.onZoom) {
-      this.props.onZoom(ev);
+      this.props.onZoom(transformString);
     }
   }
 }

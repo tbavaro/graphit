@@ -2,11 +2,12 @@
   position: relative;
   background-color: white;
   flex-grow: 1;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .Viewport-contents {
   position: relative;
   top: 0;
   left: 0;
+  transform-origin: 0 0 0;
 }

@@ -1,6 +1,5 @@
 import * as React from 'react';
-import Simulation from './Simulation';
-import Viewport from './Viewport';
+import SimulationViewport from './SimulationViewport';
 import './App.css';
 import PropertiesView from './PropertiesView';
 import MyNodeDatum from './MyNodeDatum';
@@ -86,9 +85,8 @@ class App extends React.Component<object, State> {
     var appContents: JSX.Element | JSX.Element[] = [];
 
     if (document) {
-      var simulation = <Simulation document={document} />;
       appContents = [
-        <Viewport key="viewport2" autoTransformedChildren={simulation}/>,
+        <SimulationViewport key="viewport" document={document} />,
         <PropertiesView key="properties"/>
       ];
     } else {
