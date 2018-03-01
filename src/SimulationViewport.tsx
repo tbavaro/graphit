@@ -12,6 +12,7 @@ interface Props {
   document: GraphDocument;
 }
 
+// TODO separate this out
 class FPSView {
   private element?: HTMLDivElement;
   private ticksSinceUpdate: number;

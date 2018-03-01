@@ -2,9 +2,8 @@ import * as React from 'react';
 import SimulationViewport from './SimulationViewport';
 import './App.css';
 import PropertiesView from './PropertiesView';
-import MyNodeDatum from './MyNodeDatum';
-import * as D3Force from 'd3-force';
 import GraphDocument from './GraphDocument';
+import ActionManager from './ActionManager';
 
 interface State {
   document?: GraphDocument;
@@ -13,45 +12,11 @@ interface State {
 class App extends React.Component<object, State> {
   state: State = {};
 
-  createDummyDocument() {
-    var nodes: MyNodeDatum[] = [
-      {
-        label: "a",
-        isLocked: true,
-        x: 100,
-        y: 100
-      },
-      {
-        label: "b",
-        isLocked: false,
-        x: 200,
-        y: 100
-      },
-      {
-        label: "c",
-        isLocked: false,
-        x: 150,
-        y: 200
-      }
-    ];
-
-    var links: D3Force.SimulationLinkDatum<MyNodeDatum>[] = [
-      {
-        source: 0,
-        target: 1
-      },
-      {
-        source: 1,
-        target: 2
-      },
-      {
-        source: 2,
-        target: 0
-      }
-    ];
-
-    return new GraphDocument(nodes, links);
-  }
+  actionManager: ActionManager = {
+    onClickSaveDocument: () => {
+      alert("save document!");
+    }
+  };
 
   loadDataFromUrl(url: string) {
     this.setState({
@@ -61,12 +26,8 @@ class App extends React.Component<object, State> {
     var req = new XMLHttpRequest();
     req.open("get", url);
     req.onload = (evt => {
-      var doc = GraphDocument.load(req.responseText);
-      doc.nodes.forEach((node) => {
-        node.label = node.label.replace(/ /g, "\n");
-      });
       this.setState({
-        document: doc
+        document: GraphDocument.load(req.responseText)
       });
     });
     req.onerror = (evt => {
@@ -87,7 +48,7 @@ class App extends React.Component<object, State> {
     if (document) {
       appContents = [
         <SimulationViewport key="viewport" document={document} />,
-        <PropertiesView key="properties"/>
+        <PropertiesView key="properties" actionManager={this.actionManager}/>
       ];
     } else {
       appContents = (

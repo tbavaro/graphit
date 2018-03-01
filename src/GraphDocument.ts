@@ -33,6 +33,7 @@ class GraphDocument {
     var nodeMap = new Map<String, MyNodeDatum>();
     var nodes: MyNodeDatum[] = serializedNodes.map((sn: SerializedNode) => {
       var node: MyNodeDatum = {
+        id: sn.id,
         label: sn.label,
         isLocked: false
       };
@@ -52,6 +53,29 @@ class GraphDocument {
   constructor(nodes?: MyNodeDatum[], links?: D3Force.SimulationLinkDatum<MyNodeDatum>[]) {
     this.nodes = nodes || [];
     this.links = links || [];
+  }
+
+  save(): string {
+    var data: SerializedGraphDocument = {
+      nodes: this.nodes.map(this.serializeNode),
+      links: this.links.map(this.serializeLink)
+    };
+
+    return JSON.stringify(data);
+  }
+
+  private serializeNode = (node: MyNodeDatum): SerializedNode => {
+    return {
+      id: node.id,
+      label: node.label
+    };
+  }
+
+  private serializeLink = (link: MyLinkDatum): SerializedLink => {
+    return {
+      source: (link.source as MyNodeDatum).id,
+      target: (link.target as MyNodeDatum).id
+    };
   }
 }
 
