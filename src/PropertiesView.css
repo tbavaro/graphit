@@ -18,6 +18,5 @@
 }
 
 .PropertiesView.collapsed::before {
-  align-content: center;
   content: "<";
 }

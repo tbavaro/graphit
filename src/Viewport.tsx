@@ -1,30 +1,39 @@
 import * as React from 'react';
 import * as D3 from "d3";
-import * as D3Selection from "d3-selection";
-import * as D3Zoom from "d3-zoom";
 import './Viewport.css';
 
-interface Props {
+interface Props<DragSubject> {
   autoTransformedChildren?: any;
   manuallyTransformedChildren?: any;
   onZoom?: (transform: string) => void;
-  innerRef?: (ref: HTMLDivElement) => void;
+
+  // drag
+  dragBehavior?: D3.DragBehavior<any, any, DragSubject>;
+  onDrag?: (targetSubject: DragSubject, x: number, y: number, isEnd: boolean) => void;
 }
 
-class Viewport extends React.Component<Props, object> {
+class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> {
   outerRef?: HTMLDivElement;
   innerRef?: HTMLDivElement;
+
+  currentScale = 1;
 
   componentDidMount() {
     if (!this.outerRef) {
       throw new Error("ref not set");
     }
 
-    var zoom = D3Zoom.zoom()
+    var zoom = D3.zoom()
       .scaleExtent([0.3, 3])
       .on("zoom", this.zoomed);
 
-    D3Selection.select(this.outerRef).call(zoom).on("dblclick.zoom", null);
+    D3.select(this.outerRef).call(zoom).on("dblclick.zoom", null);
+
+    this.configureDrag();
+  }
+
+  componentDidUpdate(prevProps: Readonly<Props<DragSubject>>) {
+    this.configureDrag();
   }
 
   render() {
@@ -44,14 +53,14 @@ class Viewport extends React.Component<Props, object> {
 
   private setInnerRef = (newRef: HTMLDivElement) => {
     this.innerRef = newRef;
-    if (this.props.innerRef) {
-      this.props.innerRef(newRef);
-    }
   }
 
   private zoomed = () => {
     var ev = D3.event as D3.D3ZoomEvent<any, any>;
     var t = ev.transform;
+
+    this.currentScale = t.k;
+
     var transformString = "translate(" + t.x + "px, " + t.y + "px) scale(" + t.k + ")";
 
     if (this.innerRef) {
@@ -61,6 +70,38 @@ class Viewport extends React.Component<Props, object> {
     if (this.props.onZoom) {
       this.props.onZoom(transformString);
     }
+  }
+
+  private assertInnerRef(): HTMLDivElement {
+    if (!this.innerRef) {
+      throw new Error("innerRef not set");
+    }
+
+    return this.innerRef;
+  }
+
+  private configureDrag() {
+    var drag = this.props.dragBehavior;
+    if (drag) {
+      drag.container(this.assertInnerRef());
+      drag.on("drag", this.onDragMove);
+      drag.on("end", this.onDragEnd);
+    }
+  }
+
+  private onDragEvent = (isEnd: boolean) => {
+    var ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
+    if (this.props.onDrag) {
+      this.props.onDrag(ev.subject, ev.x / this.currentScale, ev.y / this.currentScale, isEnd);
+    }
+  }
+
+  private onDragMove = () => {
+    this.onDragEvent(/*isEnd=*/false);
+  }
+
+  private onDragEnd = () => {
+    this.onDragEvent(/*isEnd=*/true);
   }
 }
 
