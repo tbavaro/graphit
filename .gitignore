@@ -8,6 +8,8 @@
 
 # production
 /build
+/deployed-build
+/deployed-build-next
 
 # misc
 .DS_Store
