@@ -14,7 +14,9 @@ class App extends React.Component<object, State> {
 
   actionManager: ActionManager = {
     onClickSaveDocument: () => {
-      alert("save document!");
+      if (this.state.document) {
+        alert(this.state.document.save());
+      }
     }
   };
 

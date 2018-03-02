@@ -61,7 +61,7 @@ class GraphDocument {
       links: this.links.map(this.serializeLink)
     };
 
-    return JSON.stringify(data);
+    return JSON.stringify(data, null, 2);
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {

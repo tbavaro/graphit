@@ -20,15 +20,25 @@ class PropertiesView extends React.PureComponent<Props, State> {
 
   render() {
     var className = "PropertiesView " + (this.state.isExpanded ? "expanded" : "collapsed");
-
     return (
       <div className={className}>
-        <div className="PropertiesView-expandButton">{this.state.isExpanded ? "\u00bb" : "\u00ab"}</div>
+        <div
+          className="PropertiesView-expandButton button"
+          onClick={this.toggleIsExpanded}
+        >
+          {this.state.isExpanded ? "\u00bb" : "\u00ab"}
+        </div>
         <div className="PropertiesView-contents">
-          Properties contents
+          <div className="PropertiesView-actionButton button" onClick={this.props.actionManager.onClickSaveDocument}>
+            Save
+          </div>
         </div>
       </div>
     );
+  }
+
+  private toggleIsExpanded = () => {
+    this.setState({ isExpanded: !this.state.isExpanded });
   }
 }
 

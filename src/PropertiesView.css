@@ -1,32 +1,24 @@
 .PropertiesView {
-  display: relative;
-  flex-grow: 0;
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  flex: none;
   border-left: 1px solid black;
 }
 
-.PropertiesView.expanded {
-  flex-basis: 20em;
-  flex-grow: 0;
-  flex-shrink: 0;
-  background-color: #ddddee;
-}
-
-.PropertiesView.collapsed {
-  flex-basis: 1em;
-  background-color: black;
-}
-
-.PropertiesView.expanded .PropertiesView-expandButton {
-  display: none;
-}
-
 .PropertiesView-expandButton {
+  background-color: black;
+  color: darkgray;
+}
+
+.PropertiesView.collapsed .PropertiesView-expandButton {
   text-align: center;
   width: 1em;
   height: 100%;
-  cursor: pointer;
-  color: darkgray;
+}
+
+.PropertiesView.expanded .PropertiesView-expandButton {
+  padding-left: 19em;
+  text-align: center;
 }
 
 .PropertiesView-expandButton:hover {
@@ -36,4 +28,31 @@
 
 .PropertiesView.collapsed .PropertiesView-contents {
   display: none;
+}
+
+.PropertiesView-contents {
+  width: 20em;
+  flex: auto;
+  background-color: #ddddee;
+  padding: 0.5em;
+  box-sizing: border-box;
+  overflow-y: scroll;
+}
+
+.PropertiesView-actionButton {
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: 0.25em;
+  text-align: center;
+  font-weight: bold;
+  background-color: #666677;
+  color: white;
+}
+
+.PropertiesView-actionButton:hover {
+  background-color: #777788;
+}
+
+.PropertiesView-actionButton:active {
+  background-color: #555566;
 }

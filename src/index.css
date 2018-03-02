@@ -5,3 +5,8 @@ body {
   background-color: white;
   overflow: hidden;
 }
+
+.button {
+  cursor: pointer;
+  user-select: none;
+}
