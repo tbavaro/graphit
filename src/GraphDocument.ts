@@ -9,6 +9,9 @@ interface SerializedGraphDocument {
 interface SerializedNode {
   id: string;
   label: string;
+  isLocked?: boolean;
+  x?: number;
+  y?: number;
 }
 
 interface SerializedLink {
@@ -17,6 +20,20 @@ interface SerializedLink {
 }
 
 type MyLinkDatum = D3Force.SimulationLinkDatum<MyNodeDatum>;
+
+function readNullableValue<T>(value: T | undefined | null): T | undefined {
+  return (value === null) ? undefined : value;
+}
+
+function removeNullsAndUndefineds<T>(object: T): T {
+  for (var propName in object) {
+    if (object[propName] === null || object[propName] === undefined) {
+      delete object[propName];
+    }
+  }
+
+  return object;
+}
 
 class GraphDocument {
   nodes: MyNodeDatum[];
@@ -35,7 +52,9 @@ class GraphDocument {
       var node: MyNodeDatum = {
         id: sn.id,
         label: sn.label,
-        isLocked: false
+        isLocked: readNullableValue(sn.isLocked) || false,
+        x: readNullableValue(sn.x),
+        y: readNullableValue(sn.y),
       };
       nodeMap.set(sn.id, node);
       return node;
@@ -65,17 +84,20 @@ class GraphDocument {
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {
-    return {
+    return removeNullsAndUndefineds({
       id: node.id,
-      label: node.label
-    };
+      label: node.label,
+      isLocked: node.isLocked,
+      x: node.x,
+      y: node.y
+    });
   }
 
   private serializeLink = (link: MyLinkDatum): SerializedLink => {
-    return {
+    return removeNullsAndUndefineds({
       source: (link.source as MyNodeDatum).id,
       target: (link.target as MyNodeDatum).id
-    };
+    });
   }
 }
 
