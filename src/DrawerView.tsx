@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as classNames from "classnames";
 import './DrawerView.css';
 
 /**
@@ -8,8 +9,9 @@ import './DrawerView.css';
  */
 
 interface Props {
-  children: any;
+  children?: any;
   contentsClassName: string;
+  isLeftDrawer?: boolean;
 }
 
 interface State {
@@ -22,14 +24,19 @@ class DrawerView extends React.Component<Props, State> {
   };
 
   render() {
-    var className = "DrawerView " + (this.state.isExpanded ? "expanded" : "collapsed");
+    var className = classNames([
+      "DrawerView",
+      this.props.isLeftDrawer ? "isLeftDrawer" : null,
+      this.state.isExpanded ? "expanded" : "collapsed"
+    ]);
+    var showLeftArrow = this.state.isExpanded !== (this.props.isLeftDrawer || false);
     return (
       <div className={className}>
         <div
           className="DrawerView-expandButton button"
           onClick={this.toggleIsExpanded}
         >
-          {this.state.isExpanded ? "\u00bb" : "\u00ab"}
+          {showLeftArrow ? "\u00bb" : "\u00ab"}
         </div>
         <div className={"DrawerView-contents " + this.props.contentsClassName}>
           {this.props.children}

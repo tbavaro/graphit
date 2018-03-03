@@ -1,6 +1,7 @@
 import * as React from 'react';
 import SimulationViewport from './SimulationViewport';
 import './App.css';
+import FilesDrawerView from './FilesDrawerView';
 import PropertiesView from './PropertiesView';
 import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
@@ -67,6 +68,7 @@ class App extends React.Component<object, State> {
       <div className="App">
         <div className="App-topbar">Datastore status: {this.state.datastoreStatus}</div>
         <div className="App-body">
+          <FilesDrawerView />
           {viewportView}
           <PropertiesView actionManager={this.actionManager}/>
         </div>
