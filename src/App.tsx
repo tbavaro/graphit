@@ -4,13 +4,19 @@ import './App.css';
 import PropertiesView from './PropertiesView';
 import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
+import { Datastore, DatastoreStatus } from "./Datastore";
 
 interface State {
   document?: GraphDocument;
+  datastoreStatus: DatastoreStatus;
 }
 
 class App extends React.Component<object, State> {
-  state: State = {};
+  datastore = new Datastore();
+
+  state: State = {
+    datastoreStatus: this.datastore.status()
+  };
 
   actionManager: ActionManager = {
     onClickSaveDocument: () => {
@@ -24,7 +30,6 @@ class App extends React.Component<object, State> {
     this.setState({
       document: undefined
     });
-
     var req = new XMLHttpRequest();
     req.open("get", url);
     req.onload = (evt => {
@@ -42,30 +47,37 @@ class App extends React.Component<object, State> {
     this.loadDataFromUrl("data.json");
   }
 
+  componentWillMount() {
+    this.datastore.onStatusChanged = this.onDatastoreStatusChanged;
+    this.onDatastoreStatusChanged(this.datastore.status());
+  }
+
   render() {
-    var document = this.state.document;
+    var viewportView: any;
 
-    var appContents: JSX.Element | JSX.Element[] = [];
-
-    if (document) {
-      appContents = [
-        <SimulationViewport key="viewport" document={document} />,
-        <PropertiesView key="properties" actionManager={this.actionManager}/>
-      ];
+    if (this.state.document) {
+      viewportView =
+        <SimulationViewport document={this.state.document} />;
     } else {
-      appContents = (
-        <div className="App-loading">
-          <div className="App-loading-text">
-            Loading...
-          </div>
-        </div>
-      );
+      // TODO this is a hack to show the empty viewport
+      viewportView = <div className="Viewport">Loading...</div>;
     }
+
     return (
       <div className="App">
-        {appContents}
+        <div className="App-topbar">Datastore status: {this.state.datastoreStatus}</div>
+        <div className="App-body">
+          {viewportView}
+          <PropertiesView actionManager={this.actionManager}/>
+        </div>
       </div>
     );
+  }
+
+  private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
+    this.setState({
+      datastoreStatus: newStatus
+    });
   }
 }
 
