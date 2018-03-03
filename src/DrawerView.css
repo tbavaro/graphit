@@ -1,0 +1,39 @@
+.DrawerView {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  border-left: 1px solid black;
+}
+
+.DrawerView-expandButton {
+  background-color: black;
+  color: darkgray;
+}
+
+.DrawerView.collapsed .DrawerView-expandButton {
+  text-align: center;
+  width: 1em;
+  height: 100%;
+}
+
+.DrawerView.expanded .DrawerView-expandButton {
+  padding-left: 100%;
+  margin-left: -1em;
+  text-align: center;
+}
+
+.DrawerView-expandButton:hover {
+  background-color: #222222;
+  color: white;
+}
+
+.DrawerView.collapsed .DrawerView-contents {
+  display: none;
+}
+
+.DrawerView-contents {
+  flex: auto;
+  padding: 0.5em;
+  box-sizing: border-box;
+  overflow-y: scroll;
+}

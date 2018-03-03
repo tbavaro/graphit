@@ -1,42 +1,6 @@
-.PropertiesView {
-  display: flex;
-  flex-direction: column;
-  flex: none;
-  border-left: 1px solid black;
-}
-
-.PropertiesView-expandButton {
-  background-color: black;
-  color: darkgray;
-}
-
-.PropertiesView.collapsed .PropertiesView-expandButton {
-  text-align: center;
-  width: 1em;
-  height: 100%;
-}
-
-.PropertiesView.expanded .PropertiesView-expandButton {
-  padding-left: 19em;
-  text-align: center;
-}
-
-.PropertiesView-expandButton:hover {
-  background-color: #222222;
-  color: white;
-}
-
-.PropertiesView.collapsed .PropertiesView-contents {
-  display: none;
-}
-
 .PropertiesView-contents {
-  width: 20em;
-  flex: auto;
-  background-color: #ddddee;
-  padding: 0.5em;
-  box-sizing: border-box;
-  overflow-y: scroll;
+  width: 10em;
+  background-color: #444455;
 }
 
 .PropertiesView-actionButton {
