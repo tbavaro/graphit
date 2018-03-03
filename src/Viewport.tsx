@@ -9,7 +9,7 @@ interface Props<DragSubject> {
 
   // drag
   dragBehavior?: D3.DragBehavior<any, any, DragSubject>;
-  onDrag?: (targetSubject: DragSubject, x: number, y: number, isEnd: boolean) => void;
+  onDrag?: (targetSubject: DragSubject, dx: number, dy: number, isEnd: boolean) => void;
 }
 
 class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> {
@@ -92,7 +92,7 @@ class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> 
   private onDragEvent = (isEnd: boolean) => {
     var ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
     if (this.props.onDrag) {
-      this.props.onDrag(ev.subject, ev.x / this.currentScale, ev.y / this.currentScale, isEnd);
+      this.props.onDrag(ev.subject, ev.dx / this.currentScale, ev.dy / this.currentScale, isEnd);
     }
   }
 
