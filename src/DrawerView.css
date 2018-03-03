@@ -1,7 +1,16 @@
 .DrawerView {
-  display: flex;
+  position: absolute;
+  height: 100%;
   flex-direction: column;
-  flex: none;
+  overflow: hidden;
+}
+
+.DrawerView.isLeftDrawer {
+  left: 0;
+}
+
+.DrawerView:not(.isLeftDrawer) {
+  right: 0;
 }
 
 .DrawerView:not(.isLeftDrawer) {
@@ -47,4 +56,5 @@
   padding: 0.5em;
   box-sizing: border-box;
   overflow-y: scroll;
+  height: 100%;
 }

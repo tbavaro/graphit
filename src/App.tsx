@@ -60,18 +60,14 @@ class App extends React.Component<object, State> {
       viewportView =
         <SimulationViewport document={this.state.document} />;
     } else {
-      // TODO this is a hack to show the empty viewport
-      viewportView = <div className="Viewport">Loading...</div>;
+      viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
     }
 
     return (
       <div className="App">
-        <div className="App-topbar">Datastore status: {this.state.datastoreStatus}</div>
-        <div className="App-body">
-          <FilesDrawerView />
-          {viewportView}
-          <PropertiesView actionManager={this.actionManager}/>
-        </div>
+        {viewportView}
+        <FilesDrawerView />
+        <PropertiesView actionManager={this.actionManager}/>
       </div>
     );
   }
