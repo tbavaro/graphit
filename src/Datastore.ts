@@ -98,11 +98,19 @@ export class Datastore {
       return;
     }
 
+    var extension = ".graphit.json";
+
     gapi.client.files.list({
-      pageSize: 10,
-      fields: "nextPageToken, files(id, name)"
+      pageSize: 1000,
+      fields: "nextPageToken, files(id, name)",
+      q: "name contains \"" + extension + "\""
     }).then((response) => {
-      var result = (response.result.files || []).map(f => f.name || "");
+      var result = (response.result.files || []).filter(f => {
+        return f.name && f.name.endsWith(extension);
+      }).map(f => {
+        var name = f.name || "";
+        return name.substring(0, name.length - extension.length);
+      });
       callback(result);
     });
   }
