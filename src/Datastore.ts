@@ -71,6 +71,14 @@ export class Datastore {
     }
   }
 
+  currentUserEmail(): Maybe<String> {
+    if (this._status === DatastoreStatus.SignedIn) {
+      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
+    } else {
+      return undefined;
+    }
+  }
+
   private updateIsSignedIn = (newValue: boolean) => {
     var newStatus = (newValue ? DatastoreStatus.SignedIn : DatastoreStatus.SignedOut);
     if (this._status !== newStatus) {

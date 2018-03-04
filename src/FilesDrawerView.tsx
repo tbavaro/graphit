@@ -43,6 +43,8 @@ class FilesDrawerView extends React.PureComponent<Props, object> {
 
   private renderSignedInContents() {
     return [
+      <div key="label:signed-in-as">Signed in as {this.props.datastore.currentUserEmail() || "<none>"}</div>,
+      <p key="p"/>,
       this.renderButton("Sign out", this.onClickSignOut, "button:sign-out")
     ];
   }
