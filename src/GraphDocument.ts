@@ -54,8 +54,14 @@ class GraphDocument {
         label: sn.label,
         isLocked: readNullableValue(sn.isLocked) || false,
         x: readNullableValue(sn.x),
-        y: readNullableValue(sn.y),
+        y: readNullableValue(sn.y)
       };
+
+      if (node.isLocked) {
+        node.fx = node.x;
+        node.fy = node.y;
+      }
+
       nodeMap.set(sn.id, node);
       return node;
     });

@@ -15,20 +15,20 @@ interface Props<DragSubject> {
 class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> {
   outerRef?: HTMLDivElement;
   innerRef?: HTMLDivElement;
+  zoom = D3.zoom();
 
   currentScale = 1;
 
   componentDidMount() {
-    if (!this.outerRef) {
-      throw new Error("ref not set");
+    if (!this.innerRef || !this.outerRef) {
+      throw new Error("refs not set");
     }
 
-    var zoom = D3.zoom()
-      .scaleExtent([0.3, 3])
-      .on("zoom", this.zoomed);
+    this.zoom.scaleExtent([0.3, 3]).on("zoom", this.zoomed);
 
-    D3.select(this.outerRef).call(zoom).on("dblclick.zoom", null);
+    D3.select(this.outerRef).call(this.zoom).on("dblclick.zoom", null);
 
+    this.setCenterPoint(0, 0);
     this.configureDrag();
   }
 
@@ -102,6 +102,14 @@ class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> 
 
   private onDragEnd = () => {
     this.onDragEvent(/*isEnd=*/true);
+  }
+
+  private setCenterPoint(x: number, y: number) {
+    if (!this.outerRef) {
+      throw new Error("refs not set");
+    }
+
+    this.zoom.translateTo(D3.select(this.outerRef), x, y);
   }
 }
 

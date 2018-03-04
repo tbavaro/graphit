@@ -2,7 +2,10 @@
   "nodes": [
     {
       "id": "3",
-      "label": "Dustin (Moskov) Moskovitz"
+      "label": "Dustin (Moskov) Moskovitz",
+      "x": 0,
+      "y": 0,
+      "isLocked": true
     },
     {
       "id": "4",

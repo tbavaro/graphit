@@ -65,11 +65,7 @@ class SimulationViewport extends React.Component<Props, object> {
   renderNodes = true;
   renderLinks = true;
 
-  simulation =
-    D3Force.forceSimulation(this.props.document.nodes)
-      .force("charge", D3Force.forceManyBody().strength(-500).distanceMax(300))
-      .force("links", D3Force.forceLink(this.props.document.links).distance(100))
-      .on("tick", () => this.onSimulationTick());
+  simulation = D3.forceSimulation();
 
   drag = D3.drag<any, any, number>();
     // .on("drag", this.onDragMove);
@@ -99,18 +95,13 @@ class SimulationViewport extends React.Component<Props, object> {
     }
   };
 
-  componentWillReceiveProps(nextProps: Readonly<Props>) {
-    // TODO this is kind of a hack that modifies them in-place
-    nextProps.document.nodes.forEach((node: MyNodeDatum) => {
-      if (node.isLocked) {
-        node.fx = node.x;
-        node.fy = node.y;
-      }
-    });
-  }
-
   componentDidMount() {
     this.fpsView = new FPSView();
+
+    this.simulation = D3Force.forceSimulation(this.props.document.nodes)
+      .force("charge", D3Force.forceManyBody().strength(-500).distanceMax(300))
+      .force("links", D3Force.forceLink(this.props.document.links).distance(100))
+      .on("tick", () => this.onSimulationTick());
   }
 
   componentWillUnmount() {
