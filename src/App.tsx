@@ -66,7 +66,7 @@ class App extends React.Component<object, State> {
     return (
       <div className="App">
         {viewportView}
-        <FilesDrawerView />
+        <FilesDrawerView datastore={this.datastore} datastoreStatus={this.state.datastoreStatus}/>
         <PropertiesView actionManager={this.actionManager}/>
       </div>
     );

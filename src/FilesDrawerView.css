@@ -1,4 +1,23 @@
 .FilesDrawerView-contents {
   width: 20em;
   background-color: #444455;
+  color: white;
+}
+
+.FilesDrawerView-button {
+  border: 1px solid gray;
+  border-radius: 3px;
+  padding: 0.25em;
+  text-align: center;
+  font-weight: bold;
+  background-color: #666677;
+  color: white;
+}
+
+.FilesDrawerView-button:hover {
+  background-color: #777788;
+}
+
+.FilesDrawerView-button:active {
+  background-color: #555566;
 }
