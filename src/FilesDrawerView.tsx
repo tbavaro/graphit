@@ -13,7 +13,42 @@ interface Props {
   // actionManager: MyActions;
 }
 
-class FilesDrawerView extends React.PureComponent<Props, object> {
+interface State {
+  isLoadingFiles: boolean;
+  files?: string[];
+}
+
+class FilesDrawerView extends React.PureComponent<Props, State> {
+  state: State = {
+    isLoadingFiles: false
+  };
+
+  componentWillReceiveProps(newProps: Props) {
+    var isNewDatastore = (newProps.datastore !== this.props.datastore);
+    var isSignedIn = (newProps.datastoreStatus === DatastoreStatus.SignedIn);
+    var wasSignedIn = (this.props.datastoreStatus === DatastoreStatus.SignedIn);
+
+    if (isNewDatastore) {
+      this.setState({
+        isLoadingFiles: false,
+        files: undefined
+      });
+    }
+
+    if (isNewDatastore || (isSignedIn && !wasSignedIn)) {
+      // TODO see if we need to worry about these overlapping
+      this.setState({
+        isLoadingFiles: true
+      });
+      newProps.datastore.listFilesAsync((files) => {
+        this.setState({
+          isLoadingFiles: false,
+          files: files
+        });
+      });
+    }
+  }
+
   render() {
     var contents: any;
 
@@ -42,11 +77,28 @@ class FilesDrawerView extends React.PureComponent<Props, object> {
   }
 
   private renderSignedInContents() {
-    return [
-      <div key="label:signed-in-as">Signed in as {this.props.datastore.currentUserEmail() || "<none>"}</div>,
-      <p key="p"/>,
-      this.renderButton("Sign out", this.onClickSignOut, "button:sign-out")
-    ];
+    var files = this.state.files || [];
+
+    var filesElements: any;
+    if (this.state.isLoadingFiles) {
+      filesElements = <div>(Loading...)</div>;
+    } else if (files.length === 0) {
+      filesElements = <div>(No files)</div>;
+    } else {
+      filesElements = files.map((item, index) => (<li key={"file." + index}>{item}</li>));
+    }
+
+    return (
+      <React.Fragment>
+        <div>Signed in as {this.props.datastore.currentUserEmail() || "<none>"}</div>
+        <p/>
+        {this.renderButton("Sign out", this.onClickSignOut)}
+        <p/>
+        <ul className="FilesDrawerView-filesList">
+          {filesElements}
+        </ul>
+      </React.Fragment>
+    );
   }
 
   private renderSignedOutContents() {

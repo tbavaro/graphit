@@ -1,4 +1,6 @@
-/// <reference types="@types/gapi"/>
+//// <reference path="../node_modules/@types/gapi/index.d.ts"/>
+/// <reference path="../node_modules/@types/gapi.client/index.d.ts"/>
+/// <reference path="../node_modules/@types/gapi.client.drive/index.d.ts"/>
 
 // import GraphDocument from './GraphDocument';
 
@@ -22,21 +24,32 @@ export class Datastore {
 
   constructor() {
     var initClient = () => {
-      console.log("init client");
-      gapi.client.init({
+      return gapi.client.init({
         apiKey: API_KEY,
         clientId: CLIENT_ID,
         discoveryDocs: DISCOVERY_DOCS,
         scope: SCOPES
-      }).then(() => {
-        // listen for sign-in state changes
-        gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateIsSignedIn);
-
-        // handle the initial sign-in state
-        this.updateIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
       });
     };
-    gapi.load("client:auth2", initClient);
+
+    var initDrive = () => {
+      return gapi.client.load("drive", "v3");
+    };
+
+    var finishInitialization = () => {
+      // hack because the typings seem to be wrong
+      (<any> (gapi.client)).files = (<any> (gapi.client)).drive.files;
+
+      // listen for sign-in state changes
+      gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateIsSignedIn);
+
+      // handle the initial sign-in state
+      this.updateIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
+    };
+
+    gapi.load("client:auth2", () => {
+      initClient().then(initDrive).then(finishInitialization);
+    });
   }
 
   // load(): Maybe<string> {
@@ -66,17 +79,36 @@ export class Datastore {
   }
 
   signOut() {
-    if (this._status === DatastoreStatus.SignedIn) {
+    if (this.isSignedIn()) {
       gapi.auth2.getAuthInstance().signOut();
     }
   }
 
   currentUserEmail(): Maybe<String> {
-    if (this._status === DatastoreStatus.SignedIn) {
+    if (this.isSignedIn()) {
       return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
     } else {
       return undefined;
     }
+  }
+
+  listFilesAsync(callback: (files: string[]) => void) {
+    if (!this.isSignedIn()) {
+      callback([]);
+      return;
+    }
+
+    gapi.client.files.list({
+      pageSize: 10,
+      fields: "nextPageToken, files(id, name)"
+    }).then((response) => {
+      var result = (response.result.files || []).map(f => f.name || "");
+      callback(result);
+    });
+  }
+
+  private isSignedIn() {
+    return (this._status === DatastoreStatus.SignedIn);
   }
 
   private updateIsSignedIn = (newValue: boolean) => {
