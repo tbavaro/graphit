@@ -4,10 +4,12 @@
 
 // import GraphDocument from './GraphDocument';
 
+import * as Request from "request-promise-native";
+
 const API_KEY = "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w";
 const CLIENT_ID = "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleusercontent.com";
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/drive';
 
 type Maybe<T> = T | undefined;
 
@@ -27,6 +29,8 @@ export class Datastore {
 
   private _status = DatastoreStatus.Initializing;
   private _cachedGraphitRoot?: string | null;
+  private _accessToken?: string;
+  private _reloadAccessTokenTimeoutId?: NodeJS.Timer;
 
   constructor() {
     var initClient = () => {
@@ -135,6 +139,19 @@ export class Datastore {
       });
   }
 
+  loadFile(fileId: string): PromiseLike<string> {
+    if (!this.isSignedIn()) {
+      return Promise.reject(new Error("not logged in"));
+    }
+
+    var url = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
+    return Request.get(url, {
+      headers: {
+        "Authorization": "Bearer " + this._accessToken
+      }
+    });
+  }
+
   private isSignedIn() {
     return (this._status === DatastoreStatus.SignedIn);
   }
@@ -142,12 +159,46 @@ export class Datastore {
   private updateIsSignedIn = (newValue: boolean) => {
     var newStatus = (newValue ? DatastoreStatus.SignedIn : DatastoreStatus.SignedOut);
     if (this._status !== newStatus) {
+      // clear caches and reload access token timer
       this._cachedGraphitRoot = undefined;
+      this._accessToken = undefined;
+      if (this._reloadAccessTokenTimeoutId) {
+        clearTimeout(this._reloadAccessTokenTimeoutId);
+        this._reloadAccessTokenTimeoutId = undefined;
+      }
+
+      // if newly signed in...
+      if (newStatus === DatastoreStatus.SignedIn) {
+        this._accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+        this.scheduleAuthReload();
+      }
+
+      // make it official
       this._status = newStatus;
       if (this.onStatusChanged) {
         this.onStatusChanged(newStatus);
       }
     }
+  }
+
+  private doAuthReload = () => {
+    if (this.isSignedIn()) {
+      gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse().then((response) => {
+        this._accessToken = response.access_token;
+        this.scheduleAuthReload();
+      });
+    }
+  }
+
+  private scheduleAuthReload = () => {
+    if (this._reloadAccessTokenTimeoutId) {
+      clearTimeout(this._reloadAccessTokenTimeoutId);
+      this._reloadAccessTokenTimeoutId = undefined;
+    }
+
+    var secondsToExpire = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
+    var secondsToWaitBeforeReload = Math.max(1, secondsToExpire - 120);
+    this._reloadAccessTokenTimeoutId = setTimeout(this.doAuthReload, secondsToWaitBeforeReload * 1000);
   }
 
   private findSingleResult(query: string): PromiseLike<gapi.client.drive.File | null> {

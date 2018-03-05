@@ -73,6 +73,12 @@ class App extends React.Component<object, State> {
   }
 
   private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
+    // if (newStatus === DatastoreStatus.SignedIn) {
+    //   this.datastore.loadFile("1wte8NcVEc-jwneg_3gHN5MdYgEbEo5nF").then((val) => {
+    //     // alert("loaded:\n" + val);
+    //   });
+    // }
+
     this.setState({
       datastoreStatus: newStatus
     });
