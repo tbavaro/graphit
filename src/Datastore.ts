@@ -117,10 +117,15 @@ export class Datastore {
 
     return this.findOrCreateGraphitRoot()
       .then((rootId) => {
+        var query = [
+          'name contains "' + extension + '\"',
+          '"' + rootId + '" in parents',
+          'trashed=false'
+        ].join(" and ");
         return gapi.client.files.list({
           pageSize: 1000,
           fields: "nextPageToken, files(id, name)",
-          q: "name contains \"" + extension + "\" and \"" + rootId + "\" in parents",
+          q: query,
           orderBy: "name"
         }).then((response) => {
           return (response.result.files || []).filter(f => {
@@ -230,7 +235,8 @@ export class Datastore {
     var query = [
       'name="graphit"',
       '"root" in parents',
-      'mimeType="application/vnd.google-apps.folder"'
+      'mimeType="application/vnd.google-apps.folder"',
+      'trashed=false'
     ].join(" and ");
     return this.findSingleResult(query).then((file) => {
       this._cachedGraphitRoot = (file === null ? null : (file.id || null));
