@@ -11,6 +11,8 @@ const CLIENT_ID = "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleuser
 const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const SCOPES = 'https://www.googleapis.com/auth/drive';
 
+const EXTENSION = ".graphit.json";
+
 type Maybe<T> = T | undefined;
 
 export enum DatastoreStatus {
@@ -113,12 +115,10 @@ export class Datastore {
       return Promise.resolve([]);
     }
 
-    var extension = ".graphit.json";
-
     return this.findOrCreateGraphitRoot()
       .then((rootId) => {
         var query = [
-          'name contains "' + extension + '\"',
+          'name contains "' + EXTENSION + '\"',
           '"' + rootId + '" in parents',
           'trashed=false'
         ].join(" and ");
@@ -129,7 +129,7 @@ export class Datastore {
           orderBy: "name"
         }).then((response) => {
           return (response.result.files || []).filter(f => {
-            return f.name && f.name.endsWith(extension);
+            return f.name && f.name.endsWith(EXTENSION);
           }).map(f => {
             if (!f.name || !f.id) {
               throw new Error("name or id missing");
@@ -137,7 +137,7 @@ export class Datastore {
 
             return {
               id: f.id,
-              name: f.name.substring(0, f.name.length - extension.length)
+              name: f.name.substring(0, f.name.length - EXTENSION.length)
             };
           });
         });
@@ -155,6 +155,53 @@ export class Datastore {
         "Authorization": "Bearer " + this._accessToken
       }
     });
+  }
+
+  saveFileAs(name: string, data: string): PromiseLike<void> {
+    if (!this.isSignedIn()) {
+      return Promise.reject(new Error("not logged in"));
+    }
+
+    return this.findOrCreateGraphitRoot()
+      .then((rootId) => {
+        var uri = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+        var metadata: gapi.client.drive.File = {
+          name: name + EXTENSION,
+          parents: [rootId]
+        };
+        return Request({
+          uri: uri,
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + this._accessToken
+          },
+          multipart: {
+            data: [
+              {
+                "content-type": "application/json",
+                body: JSON.stringify(metadata)
+              },
+              {
+                "content-type": "application/json",
+                body: data
+              }
+            ]
+          }
+        }).then(() => {
+          // TODO get the id
+        }) as PromiseLike<void>;
+      });
+  }
+
+  updateFile(fileId: string, data: string): PromiseLike<void> {
+    var uri = "https://www.googleapis.com/upload/drive/v3/files/" + fileId;
+    return Request.patch({
+      uri: uri,
+      headers: {
+        "Authorization": "Bearer " + this._accessToken
+      },
+      body: data
+    }) as PromiseLike<void>;
   }
 
   private isSignedIn() {

@@ -10,6 +10,7 @@ import * as QueryString from "query-string";
 
 interface State {
   document?: GraphDocument;
+  loadedDocumentId?: string;
   datastoreStatus: DatastoreStatus;
 }
 
@@ -26,7 +27,20 @@ class App extends React.Component<object, State> {
   actionManager: ActionManager = {
     onClickSaveDocument: () => {
       if (this.state.document) {
-        alert(this.state.document.save());
+        if (!this.state.loadedDocumentId) {
+          alert("can't save document without id (yet)");
+          return;
+        }
+
+        var data = this.state.document.save();
+        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
+          () => {
+            alert("saved successfully!");
+          },
+          (reason) => {
+            alert("save failed!\n" + reason);
+          }
+        );
       }
     }
   };
@@ -79,14 +93,17 @@ class App extends React.Component<object, State> {
       return;
     }
 
+    this.loadDocument(undefined, undefined);
+
     this.datastore.loadFile(id).then((data) => {
-      this.loadDocument(GraphDocument.load(data));
+      this.loadDocument(GraphDocument.load(data), id);
     });
   }
 
-  private loadDocument = (document: GraphDocument) => {
+  private loadDocument = (document?: GraphDocument, documentId?: string) => {
     this.pendingDocumentLoadId = undefined;
     this.setState({
+      loadedDocumentId: documentId,
       document: document
     });
   }
