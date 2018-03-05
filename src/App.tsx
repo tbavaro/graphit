@@ -6,6 +6,7 @@ import PropertiesView from './PropertiesView';
 import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
+import * as QueryString from "query-string";
 
 interface State {
   document?: GraphDocument;
@@ -19,6 +20,9 @@ class App extends React.Component<object, State> {
     datastoreStatus: this.datastore.status()
   };
 
+  pendingDocumentLoadId?: string;
+  expandLeftDrawerOnLoad: boolean = false;
+
   actionManager: ActionManager = {
     onClickSaveDocument: () => {
       if (this.state.document) {
@@ -27,30 +31,18 @@ class App extends React.Component<object, State> {
     }
   };
 
-  loadDataFromUrl(url: string) {
-    this.setState({
-      document: undefined
-    });
-    var req = new XMLHttpRequest();
-    req.open("get", url);
-    req.onload = (evt => {
-      this.setState({
-        document: GraphDocument.load(req.responseText)
-      });
-    });
-    req.onerror = (evt => {
-      alert("error: " + req.status);
-    });
-    req.send();
-  }
-
-  componentDidMount() {
-    this.loadDataFromUrl("data.json");
-  }
-
   componentWillMount() {
     this.datastore.onStatusChanged = this.onDatastoreStatusChanged;
     this.onDatastoreStatusChanged(this.datastore.status());
+
+    var queryParams = QueryString.parse(location.search);
+    var documentId: string | null = queryParams.doc || null;
+    if (documentId) {
+      this.loadDocumentById(documentId);
+    } else {
+      this.expandLeftDrawerOnLoad = true;
+      this.loadNewDocument();
+    }
   }
 
   render() {
@@ -66,22 +58,49 @@ class App extends React.Component<object, State> {
     return (
       <div className="App">
         {viewportView}
-        <FilesDrawerView datastore={this.datastore} datastoreStatus={this.state.datastoreStatus}/>
+        <FilesDrawerView
+          datastore={this.datastore}
+          datastoreStatus={this.state.datastoreStatus}
+          isExpandedByDefault={this.expandLeftDrawerOnLoad}
+        />
         <PropertiesView actionManager={this.actionManager}/>
       </div>
     );
   }
 
-  private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
-    // if (newStatus === DatastoreStatus.SignedIn) {
-    //   this.datastore.loadFile("1wte8NcVEc-jwneg_3gHN5MdYgEbEo5nF").then((val) => {
-    //     // alert("loaded:\n" + val);
-    //   });
-    // }
+  private loadNewDocument = () => {
+    this.loadDocument(new GraphDocument());
+  }
 
-    this.setState({
-      datastoreStatus: newStatus
+  private loadDocumentById = (id: string) => {
+    // if the datastore isn't ready yet, don't try to load it yet
+    if (this.state.datastoreStatus !== DatastoreStatus.SignedIn) {
+      this.pendingDocumentLoadId = id;
+      return;
+    }
+
+    this.datastore.loadFile(id).then((data) => {
+      this.loadDocument(GraphDocument.load(data));
     });
+  }
+
+  private loadDocument = (document: GraphDocument) => {
+    this.pendingDocumentLoadId = undefined;
+    this.setState({
+      document: document
+    });
+  }
+
+  private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
+    if (this.state.datastoreStatus !== newStatus) {
+      this.setState({
+        datastoreStatus: newStatus
+      });
+
+      if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
+        this.loadDocumentById(this.pendingDocumentLoadId);
+      }
+    }
   }
 }
 

@@ -12,6 +12,7 @@ interface Props {
   children?: any;
   contentsClassName: string;
   isLeftDrawer?: boolean;
+  isExpandedByDefault?: boolean;
 }
 
 interface State {
@@ -20,7 +21,7 @@ interface State {
 
 class DrawerView extends React.Component<Props, State> {
   state: State = {
-    isExpanded: false
+    isExpanded: this.props.isExpandedByDefault || false
   };
 
   render() {

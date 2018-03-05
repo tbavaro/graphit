@@ -10,6 +10,7 @@ import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
 interface Props {
   datastore: Datastore;
   datastoreStatus: DatastoreStatus;
+  isExpandedByDefault?: boolean;
   // actionManager: MyActions;
 }
 
@@ -66,7 +67,11 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
     }
 
     return (
-      <DrawerView contentsClassName="FilesDrawerView-contents" isLeftDrawer={true}>
+      <DrawerView
+        contentsClassName="FilesDrawerView-contents"
+        isLeftDrawer={true}
+        isExpandedByDefault={this.props.isExpandedByDefault}
+      >
         {contents}
       </DrawerView>
     );
