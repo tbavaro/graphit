@@ -116,7 +116,8 @@ export class Datastore {
         return gapi.client.files.list({
           pageSize: 1000,
           fields: "nextPageToken, files(id, name)",
-          q: "name contains \"" + extension + "\" and \"" + rootId + "\" in parents"
+          q: "name contains \"" + extension + "\" and \"" + rootId + "\" in parents",
+          orderBy: "name"
         }).then((response) => {
           return (response.result.files || []).filter(f => {
             return f.name && f.name.endsWith(extension);

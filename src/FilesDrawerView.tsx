@@ -85,7 +85,7 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
     } else if (files.length === 0) {
       filesElements = <div>(No files)</div>;
     } else {
-      filesElements = files.map((item) => (<li key={"file:" + item.id}>{item.name}</li>));
+      filesElements = files.map(this.renderDocumentListItem);
     }
 
     return (
@@ -98,6 +98,14 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
           {filesElements}
         </ul>
       </React.Fragment>
+    );
+  }
+
+  private renderDocumentListItem = (file: DatastoreFileResult) => {
+    return (
+      <a key={"file:" + file.id} href={"?doc=" + file.id}>
+        {file.name}
+      </a>
     );
   }
 

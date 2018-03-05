@@ -4,6 +4,7 @@ body {
   font-family: sans-serif;
   background-color: white;
   overflow: hidden;
+  user-select: none;
 }
 
 .button {
