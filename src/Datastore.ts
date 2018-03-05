@@ -17,10 +17,16 @@ export enum DatastoreStatus {
   SignedIn
 }
 
+export interface DatastoreFileResult {
+  id: string;
+  name: string;
+}
+
 export class Datastore {
   onStatusChanged?: (newStatus: DatastoreStatus) => void;
 
   private _status = DatastoreStatus.Initializing;
+  private _cachedGraphitRoot?: string | null;
 
   constructor() {
     var initClient = () => {
@@ -36,9 +42,12 @@ export class Datastore {
       return gapi.client.load("drive", "v3");
     };
 
-    var finishInitialization = () => {
+    var doHack = () => {
       // hack because the typings seem to be wrong
       (<any> (gapi.client)).files = (<any> (gapi.client)).drive.files;
+    };
+
+    var finishInitialization = () => {
 
       // listen for sign-in state changes
       gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateIsSignedIn);
@@ -48,7 +57,10 @@ export class Datastore {
     };
 
     gapi.load("client:auth2", () => {
-      initClient().then(initDrive).then(finishInitialization);
+      initClient()
+        .then(initDrive)
+        .then(doHack)
+        .then(finishInitialization);
     });
   }
 
@@ -92,27 +104,34 @@ export class Datastore {
     }
   }
 
-  listFilesAsync(callback: (files: string[]) => void) {
+  listFiles(): PromiseLike<DatastoreFileResult[]> {
     if (!this.isSignedIn()) {
-      callback([]);
-      return;
+      return Promise.resolve([]);
     }
 
     var extension = ".graphit.json";
 
-    gapi.client.files.list({
-      pageSize: 1000,
-      fields: "nextPageToken, files(id, name)",
-      q: "name contains \"" + extension + "\""
-    }).then((response) => {
-      var result = (response.result.files || []).filter(f => {
-        return f.name && f.name.endsWith(extension);
-      }).map(f => {
-        var name = f.name || "";
-        return name.substring(0, name.length - extension.length);
+    return this.findOrCreateGraphitRoot()
+      .then((rootId) => {
+        return gapi.client.files.list({
+          pageSize: 1000,
+          fields: "nextPageToken, files(id, name)",
+          q: "name contains \"" + extension + "\" and \"" + rootId + "\" in parents"
+        }).then((response) => {
+          return (response.result.files || []).filter(f => {
+            return f.name && f.name.endsWith(extension);
+          }).map(f => {
+            if (!f.name || !f.id) {
+              throw new Error("name or id missing");
+            }
+
+            return {
+              id: f.id,
+              name: f.name.substring(0, f.name.length - extension.length)
+            };
+          });
+        });
       });
-      callback(result);
-    });
   }
 
   private isSignedIn() {
@@ -122,10 +141,61 @@ export class Datastore {
   private updateIsSignedIn = (newValue: boolean) => {
     var newStatus = (newValue ? DatastoreStatus.SignedIn : DatastoreStatus.SignedOut);
     if (this._status !== newStatus) {
+      this._cachedGraphitRoot = undefined;
       this._status = newStatus;
       if (this.onStatusChanged) {
         this.onStatusChanged(newStatus);
       }
     }
+  }
+
+  private findSingleResult(query: string): PromiseLike<gapi.client.drive.File | null> {
+    if (!this.isSignedIn()) {
+      return Promise.resolve(null);
+    }
+
+    return gapi.client.files.list({
+      pageSize: 2,
+      fields: "files(id, name)",
+      q: query
+    }).then((response): gapi.client.drive.File | null => {
+      if (response.result.incompleteSearch || (response.result.files && response.result.files.length > 1)) {
+        throw new Error("found more than one result for query: " + query);
+      } else if (!response.result.files || response.result.files.length === 0) {
+        // no results
+        return null;
+      } else {
+        return response.result.files[0];
+      }
+    });
+  }
+
+  private findGraphitRoot = (): PromiseLike<string | null> => {
+    if (this._cachedGraphitRoot) {
+      return Promise.resolve(this._cachedGraphitRoot);
+    }
+
+    var query = [
+      'name="graphit"',
+      '"root" in parents',
+      'mimeType="application/vnd.google-apps.folder"'
+    ].join(" and ");
+    return this.findSingleResult(query).then((file) => {
+      this._cachedGraphitRoot = (file === null ? null : (file.id || null));
+      return this._cachedGraphitRoot;
+    });
+  }
+
+  private findOrCreateGraphitRoot = (): PromiseLike<string> => {
+    if (!this.isSignedIn()) {
+      return Promise.reject(new Error("not signed in"));
+    }
+
+    return this.findGraphitRoot().then((idOrNull: string | null) => {
+      if (idOrNull === null) {
+        throw new Error("create root not implemented yet");
+      }
+      return idOrNull;
+    });
   }
 }

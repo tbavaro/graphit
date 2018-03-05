@@ -1,7 +1,7 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
 import DrawerView from './DrawerView';
-import { Datastore, DatastoreStatus } from "./Datastore";
+import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
 
 // interface MyActions {
 //   onClickSaveDocument: () => void;
@@ -15,7 +15,7 @@ interface Props {
 
 interface State {
   isLoadingFiles: boolean;
-  files?: string[];
+  files?: DatastoreFileResult[];
 }
 
 class FilesDrawerView extends React.PureComponent<Props, State> {
@@ -40,7 +40,7 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
       this.setState({
         isLoadingFiles: true
       });
-      newProps.datastore.listFilesAsync((files) => {
+      newProps.datastore.listFiles().then((files) => {
         this.setState({
           isLoadingFiles: false,
           files: files
@@ -85,7 +85,7 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
     } else if (files.length === 0) {
       filesElements = <div>(No files)</div>;
     } else {
-      filesElements = files.map((item, index) => (<li key={"file." + index}>{item}</li>));
+      filesElements = files.map((item) => (<li key={"file:" + item.id}>{item.name}</li>));
     }
 
     return (
