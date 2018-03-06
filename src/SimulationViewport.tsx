@@ -130,6 +130,7 @@ class SimulationViewport extends React.Component<Props, State> {
           <svg
             key="linkLines"
             className="SimulationViewport-linkLines"
+            onClick={this.deselectAll}
           >
             <g ref={this.setSvgRef}>
               {linkLines}
@@ -239,6 +240,12 @@ class SimulationViewport extends React.Component<Props, State> {
     }
 
     this.onDrag(index, 0, 0, false);
+  }
+
+  private deselectAll = () => {
+    this.setState({
+      selectedNodes: new Set()
+    });
   }
 }
 
