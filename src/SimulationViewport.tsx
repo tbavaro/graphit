@@ -197,16 +197,17 @@ class SimulationViewport extends React.Component<Props, State> {
   }
 
   private onDrag = (id: number, dx: number, dy: number, isEnd: boolean) => {
-    var node = this.props.document.nodes[id];
-    node.x = (node.x || 0) + dx;
-    node.y = (node.y || 0) + dy;
-    if (isEnd && !node.isLocked) {
-      node.fx = undefined;
-      node.fy = undefined;
-    } else {
-      node.fx = node.x;
-      node.fy = node.y;
-    }
+    this.state.selectedNodes.forEach((node) => {
+      node.x = (node.x || 0) + dx;
+      node.y = (node.y || 0) + dy;
+      if (isEnd && !node.isLocked) {
+        node.fx = undefined;
+        node.fy = undefined;
+      } else {
+        node.fx = node.x;
+        node.fy = node.y;
+      }
+    });
 
     if (dx !== 0 || dy !== 0) {
       this.restartSimulation();
@@ -236,6 +237,8 @@ class SimulationViewport extends React.Component<Props, State> {
         selectedNodes: newSelectedNodes
       });
     }
+
+    this.onDrag(index, 0, 0, false);
   }
 }
 
