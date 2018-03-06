@@ -13,7 +13,7 @@ interface Props {
 }
 
 interface State {
-  selectedNodeIds: Set<string>;
+  selectedNodes: Set<MyNodeDatum>;
 }
 
 // TODO separate this out
@@ -63,7 +63,7 @@ class FPSView {
 
 class SimulationViewport extends React.Component<Props, State> {
   state: State = {
-    selectedNodeIds: new Set()
+    selectedNodes: new Set()
   };
 
   fpsView?: FPSView;
@@ -161,7 +161,7 @@ class SimulationViewport extends React.Component<Props, State> {
         isLocked={node.isLocked}
         x={node.x || 0}
         y={node.y || 0}
-        isSelected={this.state.selectedNodeIds.has(node.id)}
+        isSelected={this.state.selectedNodes.has(node)}
         dragBehavior={this.drag}
       />
     );
@@ -216,24 +216,24 @@ class SimulationViewport extends React.Component<Props, State> {
   private onDragStart = (index: number, metaKey: boolean) => {
     var node = this.props.document.nodes[index];
 
-    var ids: Set<string> | undefined;
+    var newSelectedNodes: Set<MyNodeDatum> | undefined;
     if (!metaKey) {
       // if the node is already selected, don't do anything else
-      if (!this.state.selectedNodeIds.has(node.id)) {
-        ids = new Set([node.id]);
+      if (!this.state.selectedNodes.has(node)) {
+        newSelectedNodes = new Set([node]);
       }
     } else {
-      ids = new Set(this.state.selectedNodeIds);
-      if (ids.has(node.id) && ids.size > 1) {
-        ids.delete(node.id);
+      newSelectedNodes = new Set(this.state.selectedNodes);
+      if (newSelectedNodes.has(node) && newSelectedNodes.size > 1) {
+        newSelectedNodes.delete(node);
       } else {
-        ids.add(node.id);
+        newSelectedNodes.add(node);
       }
     }
 
-    if (ids) {
+    if (newSelectedNodes) {
       this.setState({
-        selectedNodeIds: ids
+        selectedNodes: newSelectedNodes
       });
     }
   }
