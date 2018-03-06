@@ -6,7 +6,7 @@ import NodeView from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import GraphDocument from './GraphDocument';
-import Viewport from './Viewport';
+import * as Viewport from './Viewport';
 
 interface Props {
   document: GraphDocument;
@@ -117,7 +117,7 @@ class SimulationViewport extends React.Component<Props, object> {
     var nodeViews = (!this.renderNodes ? "" : this.props.document.nodes.map(this.renderNode));
 
     return (
-      <Viewport
+      <Viewport.Viewport
         manuallyTransformedChildren={
           <svg
             key="linkLines"
@@ -132,6 +132,7 @@ class SimulationViewport extends React.Component<Props, object> {
         onZoom={this.onViewportZoom}
         dragBehavior={this.drag}
         onDrag={this.onDrag}
+        initialZoomState={this.props.document.zoomState}
       />
     );
   }
@@ -175,7 +176,11 @@ class SimulationViewport extends React.Component<Props, object> {
     this.svgRef = newRef;
   }
 
-  private onViewportZoom = (transform: string) => {
+  private onViewportZoom = (zoomState: Viewport.ZoomState, transform: string) => {
+    this.props.document.zoomState.centerX = zoomState.centerX;
+    this.props.document.zoomState.centerY = zoomState.centerY;
+    this.props.document.zoomState.scale = zoomState.scale;
+
     if (this.svgRef) {
       this.svgRef.style.transform = transform;
     }

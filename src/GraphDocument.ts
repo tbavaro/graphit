@@ -4,7 +4,10 @@ import MyNodeDatum from './MyNodeDatum';
 interface SerializedGraphDocument {
   nodes: SerializedNode[];
   links: SerializedLink[];
+  zoomState?: SerializedZoomState;
 }
+
+type SerializedZoomState = Partial<ZoomState>;
 
 interface SerializedNode {
   id: string;
@@ -35,9 +38,40 @@ function removeNullsAndUndefineds<T>(object: T): T {
   return object;
 }
 
+export interface ZoomState {
+  centerX: number;
+  centerY: number;
+  scale: number;
+}
+
+function defaultZoomState() {
+  return {
+    centerX: 0,
+    centerY: 0,
+    scale: 1
+  };
+}
+
+function deserializeZoomState(data?: SerializedZoomState): ZoomState {
+  var result = defaultZoomState();
+  if (data) {
+    if (data.centerX !== undefined) {
+      result.centerX = data.centerX;
+    }
+    if (data.centerY !== undefined) {
+      result.centerY = data.centerY;
+    }
+    if (data.scale !== undefined) {
+      result.scale = data.scale;
+    }
+  }
+  return result;
+}
+
 class GraphDocument {
   nodes: MyNodeDatum[];
   links: MyLinkDatum[];
+  zoomState: ZoomState;
 
   static load(jsonData: string) {
     var data = JSON.parse(jsonData) as SerializedGraphDocument;
@@ -71,19 +105,22 @@ class GraphDocument {
         target: nodeMap.get(sl.target) as MyNodeDatum
       };
     });
+    var zoomState = deserializeZoomState(data.zoomState);
 
-    return new GraphDocument(nodes, links);
+    return new GraphDocument(nodes, links, zoomState);
   }
 
-  constructor(nodes?: MyNodeDatum[], links?: D3Force.SimulationLinkDatum<MyNodeDatum>[]) {
+  constructor(nodes?: MyNodeDatum[], links?: D3Force.SimulationLinkDatum<MyNodeDatum>[], zoomState?: ZoomState) {
     this.nodes = nodes || [];
     this.links = links || [];
+    this.zoomState = zoomState || defaultZoomState();
   }
 
   save(): string {
     var data: SerializedGraphDocument = {
       nodes: this.nodes.map(this.serializeNode),
-      links: this.links.map(this.serializeLink)
+      links: this.links.map(this.serializeLink),
+      zoomState: this.zoomState
     };
 
     return JSON.stringify(data, null, 2);
