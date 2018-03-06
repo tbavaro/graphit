@@ -1,6 +1,8 @@
+@import "./_colors.scss";
+
 .FilesDrawerView-contents {
   width: 20em;
-  background-color: #444455;
+  background-color: $leftDrawerBackgroundColor;
   color: white;
 }
 
@@ -25,7 +27,7 @@
 .FilesDrawerView-filesList {
   border: 1px solid black;
   border-radius: 3px;
-  background-color: #222233;
+  background-color: $leftDrawerListBackgroundColor;
   padding: 0.3em;
 }
 

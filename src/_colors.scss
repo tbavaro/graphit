@@ -1,0 +1,17 @@
+// hsl + some "v" adjustment
+@function hslv($h, $s, $l, $v) {
+  @return hsl($h, $s, $l + $v);
+}
+
+$documentBackgroundColor: white;
+
+////////////////////////////////////////////////////////////////////////////////
+// LEFT DRAWER
+////////////////////////////////////////////////////////////////////////////////
+
+@function leftDrawerBackgroundColor($v: 0) {
+  @return hslv(220, 20%, 20%, $v);
+}
+
+$leftDrawerBackgroundColor: leftDrawerBackgroundColor();
+$leftDrawerListBackgroundColor: leftDrawerBackgroundColor(-10%);
