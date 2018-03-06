@@ -14,6 +14,7 @@ interface Props {
   isLocked: boolean;
   x: number;
   y: number;
+  isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
 }
 
@@ -49,10 +50,14 @@ class NodeView extends React.PureComponent<Props, object> {
     return (
       <div
         ref={this.setRef}
-        className={"NodeView" + (this.props.isLocked ? " locked" : "")}
+        className={"NodeView" + (this.props.isLocked ? " locked" : "") + (this.props.isSelected ? " selected" : "")}
         style={style}
       >
-        <div className="NodeView-content" onDoubleClick={this.onDoubleClick}>{this.props.label}</div>
+        <div
+          className="NodeView-content"
+          onDoubleClick={this.onDoubleClick}
+          children={this.props.label}
+        />
       </div>
     );
   }

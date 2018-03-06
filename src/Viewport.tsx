@@ -18,6 +18,7 @@ interface Props<DragSubject> {
   // drag
   dragBehavior?: D3.DragBehavior<any, any, DragSubject>;
   onDrag?: (targetSubject: DragSubject, dx: number, dy: number, isEnd: boolean) => void;
+  onDragStart?: (targetSubject: DragSubject, metaKey: boolean) => void;
 }
 
 export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> {
@@ -39,8 +40,6 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     this.zoom.scaleExtent([0.1, 3]).on("zoom", this.zoomed);
 
     D3.select(this.outerRef).call(this.zoom).on("dblclick.zoom", null);
-
-    alert(JSON.stringify(this.zoomState));
 
     this.setCenterPoint(this.zoomState.centerX, this.zoomState.centerY, this.zoomState.scale);
     this.configureDrag();
@@ -108,6 +107,7 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     var drag = this.props.dragBehavior;
     if (drag) {
       drag.container(this.assertInnerRef());
+      drag.on("start", this.onDragStart);
       drag.on("drag", this.onDragMove);
       drag.on("end", this.onDragEnd);
     }
@@ -118,6 +118,13 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     if (this.props.onDrag) {
       var scale = this.zoomState.scale;
       this.props.onDrag(ev.subject, ev.dx / scale, ev.dy / scale, isEnd);
+    }
+  }
+
+  private onDragStart = () => {
+    var ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
+    if (this.props.onDragStart) {
+      this.props.onDragStart(ev.subject, ev.sourceEvent.metaKey);
     }
   }
 

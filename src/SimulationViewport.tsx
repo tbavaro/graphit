@@ -12,6 +12,10 @@ interface Props {
   document: GraphDocument;
 }
 
+interface State {
+  selectedNodeIds: Set<string>;
+}
+
 // TODO separate this out
 class FPSView {
   private element?: HTMLDivElement;
@@ -57,7 +61,11 @@ class FPSView {
   }
 }
 
-class SimulationViewport extends React.Component<Props, object> {
+class SimulationViewport extends React.Component<Props, State> {
+  state: State = {
+    selectedNodeIds: new Set()
+  };
+
   fpsView?: FPSView;
 
   svgRef?: SVGGElement;
@@ -132,6 +140,7 @@ class SimulationViewport extends React.Component<Props, object> {
         onZoom={this.onViewportZoom}
         dragBehavior={this.drag}
         onDrag={this.onDrag}
+        onDragStart={this.onDragStart}
         initialZoomState={this.props.document.zoomState}
       />
     );
@@ -152,6 +161,7 @@ class SimulationViewport extends React.Component<Props, object> {
         isLocked={node.isLocked}
         x={node.x || 0}
         y={node.y || 0}
+        isSelected={this.state.selectedNodeIds.has(node.id)}
         dragBehavior={this.drag}
       />
     );
@@ -200,6 +210,31 @@ class SimulationViewport extends React.Component<Props, object> {
 
     if (dx !== 0 || dy !== 0) {
       this.restartSimulation();
+    }
+  }
+
+  private onDragStart = (index: number, metaKey: boolean) => {
+    var node = this.props.document.nodes[index];
+
+    var ids: Set<string> | undefined;
+    if (!metaKey) {
+      // if the node is already selected, don't do anything else
+      if (!this.state.selectedNodeIds.has(node.id)) {
+        ids = new Set([node.id]);
+      }
+    } else {
+      ids = new Set(this.state.selectedNodeIds);
+      if (ids.has(node.id) && ids.size > 1) {
+        ids.delete(node.id);
+      } else {
+        ids.add(node.id);
+      }
+    }
+
+    if (ids) {
+      this.setState({
+        selectedNodeIds: ids
+      });
     }
   }
 }

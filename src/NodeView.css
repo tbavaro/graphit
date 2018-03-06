@@ -21,3 +21,10 @@
 .NodeView.locked .NodeView-content {
   background-color: black;
 }
+
+.NodeView.selected .NodeView-content {
+  background-color: green;
+  border: 3px solid lightgreen;
+  z-index: 100;
+  /* box-shadow: 0px 0px 15px 5px green; */
+}
