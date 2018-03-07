@@ -2,6 +2,7 @@ import * as React from 'react';
 import './FilesDrawerView.css';
 import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
 import * as TemporaryNavDrawer from './TemporaryNavDrawer';
+import * as MaterialList from "./MaterialList";
 
 interface MyActions {
   onClickSaveDocument: () => void;
@@ -65,6 +66,26 @@ class FilesDrawerView extends React.Component<Props, State> {
       default:
         contents = this.renderInitializingContents();
     }
+
+    contents = (
+      <MaterialList.Component
+        items={[
+          {
+            id: "1",
+            label: "first",
+            href: "http://google.com"
+          },
+          {
+            id: "2",
+            label: "second"
+          },
+          {
+            id: "3",
+            label: "third"
+          }
+        ]}
+      />
+    );
 
     return (
       <TemporaryNavDrawer.TemporaryNavDrawer
