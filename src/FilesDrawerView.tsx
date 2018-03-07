@@ -67,26 +67,6 @@ class FilesDrawerView extends React.Component<Props, State> {
         contents = this.renderInitializingContents();
     }
 
-    contents = (
-      <MaterialList.Component
-        items={[
-          {
-            id: "1",
-            label: "first",
-            href: "http://google.com"
-          },
-          {
-            id: "2",
-            label: "second"
-          },
-          {
-            id: "3",
-            label: "third"
-          }
-        ]}
-      />
-    );
-
     return (
       <TemporaryNavDrawer.TemporaryNavDrawer
         // contentsClassName="FilesDrawerView-contents"
@@ -110,7 +90,17 @@ class FilesDrawerView extends React.Component<Props, State> {
     } else if (files.length === 0) {
       filesElements = <div>(No files)</div>;
     } else {
-      filesElements = files.map(this.renderDocumentListItem);
+      filesElements = (
+        <MaterialList.Component
+          items={files.map((file) => {
+            return {
+              id: file.id,
+              label: file.name,
+              href: "?doc=" + file.id
+            };
+          })}
+        />
+      );
     }
 
     return (
@@ -119,20 +109,10 @@ class FilesDrawerView extends React.Component<Props, State> {
         <p/>
         {this.renderButton("Sign out", this.onClickSignOut)}
         <p/>
-        <ul className="FilesDrawerView-filesList">
-          {filesElements}
-        </ul>
+        {filesElements}
         <p/>
         {this.renderButton("Save", this.onClickSave)}
       </React.Fragment>
-    );
-  }
-
-  private renderDocumentListItem = (file: DatastoreFileResult) => {
-    return (
-      <a key={"file:" + file.id} href={"?doc=" + file.id}>
-        {file.name}
-      </a>
     );
   }
 
