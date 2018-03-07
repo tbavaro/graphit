@@ -1,6 +1,5 @@
 import * as React from 'react';
 import './TemporaryNavDrawer.css';
-import { MDCTemporaryDrawer } from  "@material/drawer";
 
 export interface Props {
   isOpen: boolean;
@@ -8,14 +7,15 @@ export interface Props {
 
 export class TemporaryNavDrawer extends React.Component<Props, object> {
   private ref?: HTMLDivElement;
-  private mdcRef?: MDCTemporaryDrawer;
+  private mdcRef?: any;
 
   componentDidMount() {
     if (!this.ref) {
       throw new Error("ref not set");
     }
 
-    this.mdcRef = MDCTemporaryDrawer.attachTo(this.ref);
+    var mdc = ((window as any).mdc);
+    this.mdcRef = mdc.drawer.MDCTemporaryDrawer.attachTo(this.ref);
     this.mdcRef.open = this.props.isOpen;
   }
 

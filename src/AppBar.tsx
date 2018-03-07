@@ -1,5 +1,4 @@
 import * as React from "react";
-import mdc from "./mdc";
 import "./AppBar.css";
 
 interface Props {
@@ -15,7 +14,8 @@ class AppBar extends React.PureComponent<Props, object> {
       throw new Error("ref not set");
     }
 
-    mdc.MDCTopAppBar.attachTo(this.ref);
+    var mdc = ((window as any).mdc);
+    mdc.topAppBar.MDCTopAppBar.attachTo(this.ref);
     this.ref.addEventListener("MDCTopAppBar:nav", this.onClickNavButton);
   }
 
