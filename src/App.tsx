@@ -3,12 +3,10 @@ import SimulationViewport from './SimulationViewport';
 import './App.css';
 import AppBar from './AppBar';
 import FilesDrawerView from './FilesDrawerView';
-import PropertiesView from './PropertiesView';
 import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
 import * as QueryString from "query-string";
-import TemporaryNavDrawer from './TemporaryNavDrawer';
 
 interface State {
   document?: GraphDocument;
@@ -26,7 +24,6 @@ class App extends React.Component<object, State> {
   };
 
   pendingDocumentLoadId?: string;
-  expandLeftDrawerOnLoad: boolean = false;
 
   actionManager: ActionManager = {
     onClickSaveDocument: () => {
@@ -58,7 +55,9 @@ class App extends React.Component<object, State> {
     if (documentId) {
       this.loadDocumentById(documentId);
     } else {
-      this.expandLeftDrawerOnLoad = true;
+      this.setState({
+        leftNavOpen: true
+      });
       this.loadNewDocument();
     }
   }
@@ -76,16 +75,13 @@ class App extends React.Component<object, State> {
     return (
       <div className="App">
         <AppBar title="Untitled" onClickNavButton={this.openLeftNav}/>
-        <TemporaryNavDrawer isOpen={this.state.leftNavOpen}/>
+        <FilesDrawerView
+          actionManager={this.actionManager}
+          datastore={this.datastore}
+          datastoreStatus={this.state.datastoreStatus}
+          isOpen={this.state.leftNavOpen}
+        />
         {viewportView}
-        <div style={{display: "none"}}>
-          <FilesDrawerView
-              datastore={this.datastore}
-              datastoreStatus={this.state.datastoreStatus}
-              isExpandedByDefault={this.expandLeftDrawerOnLoad}
-          />
-          <PropertiesView actionManager={this.actionManager}/>
-        </div>
       </div>
     );
   }

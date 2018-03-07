@@ -1,17 +1,17 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
-import DrawerView from './DrawerView';
 import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
+import * as TemporaryNavDrawer from './TemporaryNavDrawer';
 
-// interface MyActions {
-//   onClickSaveDocument: () => void;
-// }
+interface MyActions {
+  onClickSaveDocument: () => void;
+}
 
-interface Props {
+interface Props extends TemporaryNavDrawer.Props {
+  actionManager: MyActions;
   datastore: Datastore;
   datastoreStatus: DatastoreStatus;
   isExpandedByDefault?: boolean;
-  // actionManager: MyActions;
 }
 
 interface State {
@@ -19,7 +19,7 @@ interface State {
   files?: DatastoreFileResult[];
 }
 
-class FilesDrawerView extends React.PureComponent<Props, State> {
+class FilesDrawerView extends React.Component<Props, State> {
   state: State = {
     isLoadingFiles: false
   };
@@ -67,13 +67,12 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
     }
 
     return (
-      <DrawerView
-        contentsClassName="FilesDrawerView-contents"
-        isLeftDrawer={true}
-        isExpandedByDefault={this.props.isExpandedByDefault}
-      >
-        {contents}
-      </DrawerView>
+      <TemporaryNavDrawer.TemporaryNavDrawer
+        // contentsClassName="FilesDrawerView-contents"
+        // isLeftDrawer={true}
+        isOpen={this.props.isOpen}
+        children={contents}
+      />
     );
   }
 
@@ -102,6 +101,8 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
         <ul className="FilesDrawerView-filesList">
           {filesElements}
         </ul>
+        <p/>
+        {this.renderButton("Save", this.onClickSave)}
       </React.Fragment>
     );
   }
@@ -132,6 +133,12 @@ class FilesDrawerView extends React.PureComponent<Props, State> {
 
   private onClickSignOut = () => {
     this.props.datastore.signOut();
+  }
+
+  private onClickSave = () => {
+    if (this.props.actionManager) {
+      this.props.actionManager.onClickSaveDocument();
+    }
   }
 }
 
