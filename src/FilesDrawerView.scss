@@ -1,4 +1,4 @@
-@import "./_colors.scss";
+@import "_all";
 
 .FilesDrawerView-contents {
   width: 20em;
@@ -7,13 +7,11 @@
 }
 
 .FilesDrawerView-button {
-  border: 1px solid gray;
   border-radius: 3px;
-  padding: 0.25em;
+  padding: $paddingButton;
   text-align: center;
-  font-weight: bold;
-  background-color: #666677;
-  color: white;
+  background-color: $leftDrawerButtonColor;
+  color: $leftDrawerButtonTextColor;
 }
 
 .FilesDrawerView-button:hover {
