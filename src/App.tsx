@@ -1,24 +1,28 @@
 import * as React from 'react';
 import SimulationViewport from './SimulationViewport';
 import './App.css';
+import AppBar from './AppBar';
 import FilesDrawerView from './FilesDrawerView';
 import PropertiesView from './PropertiesView';
 import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
 import * as QueryString from "query-string";
+import TemporaryNavDrawer from './TemporaryNavDrawer';
 
 interface State {
   document?: GraphDocument;
   loadedDocumentId?: string;
   datastoreStatus: DatastoreStatus;
+  leftNavOpen: boolean;
 }
 
 class App extends React.Component<object, State> {
   datastore = new Datastore();
 
   state: State = {
-    datastoreStatus: this.datastore.status()
+    datastoreStatus: this.datastore.status(),
+    leftNavOpen: false
   };
 
   pendingDocumentLoadId?: string;
@@ -71,13 +75,17 @@ class App extends React.Component<object, State> {
 
     return (
       <div className="App">
+        <AppBar title="Untitled" onClickNavButton={this.openLeftNav}/>
+        <TemporaryNavDrawer isOpen={this.state.leftNavOpen}/>
         {viewportView}
-        <FilesDrawerView
-          datastore={this.datastore}
-          datastoreStatus={this.state.datastoreStatus}
-          isExpandedByDefault={this.expandLeftDrawerOnLoad}
-        />
-        <PropertiesView actionManager={this.actionManager}/>
+        <div style={{display: "none"}}>
+          <FilesDrawerView
+              datastore={this.datastore}
+              datastoreStatus={this.state.datastoreStatus}
+              isExpandedByDefault={this.expandLeftDrawerOnLoad}
+          />
+          <PropertiesView actionManager={this.actionManager}/>
+        </div>
       </div>
     );
   }
@@ -118,6 +126,12 @@ class App extends React.Component<object, State> {
         this.loadDocumentById(this.pendingDocumentLoadId);
       }
     }
+  }
+
+  private openLeftNav = () => {
+    this.setState({
+      leftNavOpen: true
+    });
   }
 }
 
