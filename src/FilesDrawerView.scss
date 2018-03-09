@@ -1,3 +1,4 @@
+@import "@material/list/mdc-list.scss";
 @import "_all";
 
 .FilesDrawerView-contents {
@@ -43,4 +44,10 @@
 
 .FilesDrawerView-filesList a:active {
   background-color: black;
+}
+
+.FilesDrawerView-avatarList {
+  @include mdc-list-item-graphic-ink-color(white);
+  @include mdc-list-item-graphic-fill-color(text-icon-on-background);
+  width: 100%;
 }

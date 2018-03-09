@@ -3,6 +3,7 @@ import './TemporaryNavDrawer.css';
 
 export interface Props {
   isOpen: boolean;
+  headerChildren?: any;
 }
 
 export class TemporaryNavDrawer extends React.Component<Props, object> {
@@ -29,7 +30,9 @@ export class TemporaryNavDrawer extends React.Component<Props, object> {
     return (
       <aside className="mdc-drawer mdc-drawer--temporary mdc-typography" ref={this.setRef}>
         <nav className="mdc-drawer__drawer">
-          <header className="mdc-drawer__toolbar-spacer"/>
+          <header className="mdc-drawer__toolbar-spacer">
+            {this.props.headerChildren}
+          </header>
           <nav id="icon-with-text-demo" className="mdc-drawer__content mdc-list">
             {this.props.children}
           </nav>

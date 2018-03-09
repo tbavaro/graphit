@@ -102,12 +102,16 @@ export class Datastore {
     }
   }
 
-  currentUserEmail(): Maybe<String> {
-    if (this.isSignedIn()) {
-      return gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getEmail();
-    } else {
-      return undefined;
-    }
+  currentUserName(): Maybe<string> {
+    return this.maybeGetProfileData(p => p.getName());
+  }
+
+  currentUserEmail(): Maybe<string> {
+    return this.maybeGetProfileData(p => p.getEmail());
+  }
+
+  currentUserImageUrl(): Maybe<string> {
+    return this.maybeGetProfileData(p => p.getImageUrl());
   }
 
   listFiles(): PromiseLike<DatastoreFileResult[]> {
@@ -302,5 +306,13 @@ export class Datastore {
       }
       return idOrNull;
     });
+  }
+
+  private maybeGetProfileData<T>(func: (profile: gapi.auth2.BasicProfile) => T): Maybe<T> {
+    if (this.isSignedIn()) {
+      return func(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile());
+    } else {
+      return undefined;
+    }
   }
 }

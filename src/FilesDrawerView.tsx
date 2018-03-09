@@ -52,10 +52,31 @@ class FilesDrawerView extends React.Component<Props, State> {
   }
 
   render() {
+    var headerContents: any;
     var contents: any;
 
     switch (this.props.datastoreStatus) {
       case DatastoreStatus.SignedIn:
+        var headerClassName = [
+          "mdc-list",
+          "mdc-list--dense",
+          "mdc-list--avatar-list",
+          "mdc-list--non-interactive",
+          "FilesDrawerView-avatarList"
+        ].join(" ");
+        headerContents = (
+          <ul className={headerClassName}>
+            <li className="mdc-list-item">
+              <img
+                className="mdc-list-item__graphic"
+                src={this.props.datastore.currentUserImageUrl() || ""}
+                width="56"
+                height="56"
+              />
+              {this.props.datastore.currentUserName()}
+            </li>
+          </ul>
+        );
         contents = this.renderSignedInContents();
         break;
 
@@ -73,6 +94,7 @@ class FilesDrawerView extends React.Component<Props, State> {
         // isLeftDrawer={true}
         isOpen={this.props.isOpen}
         children={contents}
+        headerChildren={headerContents}
       />
     );
   }
