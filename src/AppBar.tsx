@@ -27,8 +27,24 @@ class AppBar extends React.PureComponent<Props, object> {
             <a href="#" className="material-icons mdc-top-app-bar__navigation-icon">menu</a>
             <span className="mdc-top-app-bar__title">{this.props.title}</span>
           </section>
+          <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
+            {this.renderButton("save", "Save document", /*isDisabled=*/true)}
+            {this.renderButton("mode_edit", "Edit properties")}
+            {this.renderButton("more_vert", "Bookmark this page")}
+          </section>
         </div>
       </div>
+    );
+  }
+
+  private renderButton = (iconName: string, ariaLabel: string, isDisabled?: boolean) => {
+    return (
+      <a
+        href={isDisabled ? undefined : "#"}
+        className={"AppBar-iconButton material-icons mdc-top-app-bar__action-item" + (isDisabled ? " disabled" : "")}
+        aria-label={ariaLabel}
+        children={iconName}
+      />
     );
   }
 

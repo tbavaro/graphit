@@ -3,3 +3,8 @@
 .AppBar {
   @include mdc-top-app-bar-fill-color-accessible(royalblue);
 }
+
+.AppBar-iconButton.disabled {
+  color: gray;
+  pointer-events: none;
+}
