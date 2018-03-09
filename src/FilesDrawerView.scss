@@ -1,3 +1,4 @@
+@import "@material/button/mdc-button.scss";
 @import "@material/list/mdc-list.scss";
 @import "_all";
 
@@ -50,4 +51,21 @@
   @include mdc-list-item-graphic-ink-color(white);
   @include mdc-list-item-graphic-fill-color(text-icon-on-background);
   width: 100%;
+}
+
+.FilesDrawerView-avatarList-name {
+  flex: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.FilesDrawerView-avatarList-expandButton {
+  @include mdc-button-ink-color(grey);
+  @include mdc-states-hover-opacity(0);
+  @include mdc-states-focus-opacity(0);
+  flex: none;
+  min-width: 0;
+  padding: 0 4px;
+  width: 26px;
 }

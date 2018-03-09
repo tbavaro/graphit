@@ -64,6 +64,7 @@ class App extends React.Component<object, State> {
 
   render() {
     var viewportView: any;
+    var title: string = "GraphIt";
 
     if (this.state.document) {
       viewportView =
@@ -74,9 +75,12 @@ class App extends React.Component<object, State> {
 
     return (
       <div className="App">
-        <AppBar title="Untitled" onClickNavButton={this.openLeftNav}/>
-        <FilesDrawerView
+        <AppBar
+          title={title}
+          onClickNavButton={this.openLeftNav}
           actionManager={this.actionManager}
+        />
+        <FilesDrawerView
           datastore={this.datastore}
           datastoreStatus={this.state.datastoreStatus}
           isOpen={this.state.leftNavOpen}

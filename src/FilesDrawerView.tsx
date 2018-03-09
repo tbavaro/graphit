@@ -4,12 +4,7 @@ import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
 import * as TemporaryNavDrawer from './TemporaryNavDrawer';
 import * as MaterialList from "./MaterialList";
 
-interface MyActions {
-  onClickSaveDocument: () => void;
-}
-
 interface Props extends TemporaryNavDrawer.Props {
-  actionManager: MyActions;
   datastore: Datastore;
   datastoreStatus: DatastoreStatus;
   isExpandedByDefault?: boolean;
@@ -73,7 +68,15 @@ class FilesDrawerView extends React.Component<Props, State> {
                 width="56"
                 height="56"
               />
-              {this.props.datastore.currentUserName()}
+              <span className="FilesDrawerView-avatarList-name">
+                {this.props.datastore.currentUserName()}
+              </span>
+              <button
+                className="FilesDrawerView-avatarList-expandButton mdc-button mdc-button--dense"
+                onClick={this.onClickSignOut}
+              >
+                <i className="material-icons mdc-button__icon">expand_more</i>
+              </button>
             </li>
           </ul>
         );
@@ -106,13 +109,12 @@ class FilesDrawerView extends React.Component<Props, State> {
   private renderSignedInContents() {
     var files = this.state.files || [];
 
-    var filesElements: any;
     if (this.state.isLoadingFiles) {
-      filesElements = <div>(Loading...)</div>;
+      return <div>(Loading...)</div>;
     } else if (files.length === 0) {
-      filesElements = <div>(No files)</div>;
+      return <div>(No files)</div>;
     } else {
-      filesElements = (
+      return (
         <MaterialList.Component
           items={files.map((file) => {
             return {
@@ -124,18 +126,6 @@ class FilesDrawerView extends React.Component<Props, State> {
         />
       );
     }
-
-    return (
-      <React.Fragment>
-        <div>Signed in as {this.props.datastore.currentUserEmail() || "<none>"}</div>
-        <p/>
-        {this.renderButton("Sign out", this.onClickSignOut)}
-        <p/>
-        {filesElements}
-        <p/>
-        {this.renderButton("Save", this.onClickSave)}
-      </React.Fragment>
-    );
   }
 
   private renderSignedOutContents() {
@@ -156,12 +146,6 @@ class FilesDrawerView extends React.Component<Props, State> {
 
   private onClickSignOut = () => {
     this.props.datastore.signOut();
-  }
-
-  private onClickSave = () => {
-    if (this.props.actionManager) {
-      this.props.actionManager.onClickSaveDocument();
-    }
   }
 }
 

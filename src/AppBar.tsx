@@ -1,7 +1,12 @@
 import * as React from "react";
 import "./AppBar.css";
 
+interface MyActions {
+  onClickSaveDocument: () => void;
+}
+
 interface Props {
+  actionManager: MyActions;
   title: string;
   onClickNavButton?: () => void;
 }
@@ -28,7 +33,7 @@ class AppBar extends React.PureComponent<Props, object> {
             <span className="mdc-top-app-bar__title">{this.props.title}</span>
           </section>
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
-            {this.renderButton("save", "Save document", /*isDisabled=*/true)}
+            {this.renderButton("save", "Save document", this.props.actionManager.onClickSaveDocument)}
             {this.renderButton("mode_edit", "Edit properties")}
             {this.renderButton("more_vert", "Bookmark this page")}
           </section>
@@ -37,12 +42,13 @@ class AppBar extends React.PureComponent<Props, object> {
     );
   }
 
-  private renderButton = (iconName: string, ariaLabel: string, isDisabled?: boolean) => {
+  private renderButton = (iconName: string, ariaLabel: string, onClick?: () => void, isDisabled?: boolean) => {
     return (
       <a
         href={isDisabled ? undefined : "#"}
         className={"AppBar-iconButton material-icons mdc-top-app-bar__action-item" + (isDisabled ? " disabled" : "")}
         aria-label={ariaLabel}
+        onClick={onClick}
         children={iconName}
       />
     );
