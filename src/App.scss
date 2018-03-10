@@ -9,6 +9,11 @@
   flex-direction: column;
 }
 
+.App-content {
+  flex: auto;
+  display: flex;
+}
+
 .App-loading {
   background-color: white;
   flex: auto;

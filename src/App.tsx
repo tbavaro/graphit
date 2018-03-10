@@ -7,12 +7,14 @@ import GraphDocument from './GraphDocument';
 import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
 import * as QueryString from "query-string";
+import PropertiesView from './PropertiesView';
 
 interface State {
   document?: GraphDocument;
   loadedDocumentId?: string;
   datastoreStatus: DatastoreStatus;
   leftNavOpen: boolean;
+  propertiesViewOpen: boolean;
 }
 
 class App extends React.Component<object, State> {
@@ -20,7 +22,8 @@ class App extends React.Component<object, State> {
 
   state: State = {
     datastoreStatus: this.datastore.status(),
-    leftNavOpen: false
+    leftNavOpen: false,
+    propertiesViewOpen: false
   };
 
   pendingDocumentLoadId?: string;
@@ -43,6 +46,18 @@ class App extends React.Component<object, State> {
           }
         );
       }
+    },
+
+    closePropertiesView: () => {
+      this.setState({
+        propertiesViewOpen: false
+      });
+    },
+
+    togglePropertiesView: () => {
+      this.setState({
+        propertiesViewOpen: !this.state.propertiesViewOpen
+      });
     }
   };
 
@@ -87,7 +102,10 @@ class App extends React.Component<object, State> {
           datastoreStatus={this.state.datastoreStatus}
           isOpen={this.state.leftNavOpen}
         />
-        {viewportView}
+        <div className="App-content">
+          {viewportView}
+          <PropertiesView actionManager={this.actionManager} isOpen={this.state.propertiesViewOpen}/>
+        </div>
       </div>
     );
   }

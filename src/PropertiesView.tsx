@@ -1,19 +1,28 @@
 import * as React from 'react';
 import './PropertiesView.css';
-import DrawerView from './DrawerView';
 
 interface MyActions {
-  /* */
+  closePropertiesView: () => void;
 }
 
 interface Props {
   actionManager: MyActions;
+  isOpen: boolean;
 }
 
 class PropertiesView extends React.PureComponent<Props, object> {
   render() {
     return (
-      <DrawerView contentsClassName="PropertiesView-contents" />
+      <div className={"PropertiesView" + (this.props.isOpen ? " open" : "")}>
+        <div className="PropertiesView-header">
+          Properties
+          <div
+            className="PropertiesView-header-closeButton material-icons"
+            onClick={this.props.actionManager.closePropertiesView}
+            children="close"
+          />
+        </div>
+      </div>
     );
   }
 }

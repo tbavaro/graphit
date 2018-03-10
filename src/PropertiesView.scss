@@ -1,22 +1,38 @@
-.PropertiesView-contents {
-  width: 10em;
-  background-color: #444455;
+@import "@material/drawer/temporary/mdc-temporary-drawer.scss";
+
+$propertiesViewHeaderHeight: 15px;
+
+.PropertiesView {
+  @include mdc-rtl-reflexive-box(border, left, 1px solid #e4e4e4);
+
+  background-color: white;
+  flex: none;
+  width: 300px;
+
+  display: none;
+  flex-direction: column;
+
+  &.open {
+    display: flex;
+  }
 }
 
-.PropertiesView-actionButton {
-  border: 1px solid gray;
-  border-radius: 3px;
-  padding: 0.25em;
-  text-align: center;
-  font-weight: bold;
-  background-color: #666677;
+.PropertiesView-header {
+  @include mdc-typography(body2);
+
+  flex: none;
+  height: $propertiesViewHeaderHeight;
+  line-height: $propertiesViewHeaderHeight;
+  background-color: #616161;
   color: white;
+  padding: 10px 12px 10px 20px;
 }
 
-.PropertiesView-actionButton:hover {
-  background-color: #777788;
-}
-
-.PropertiesView-actionButton:active {
-  background-color: #555566;
+.PropertiesView-header-closeButton {
+  float: right;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  line-height: $propertiesViewHeaderHeight;
+  cursor: pointer;
 }

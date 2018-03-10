@@ -3,6 +3,7 @@ import "./AppBar.css";
 
 interface MyActions {
   onClickSaveDocument: () => void;
+  togglePropertiesView: () => void;
 }
 
 interface Props {
@@ -34,8 +35,7 @@ class AppBar extends React.PureComponent<Props, object> {
           </section>
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
             {this.renderButton("save", "Save document", this.props.actionManager.onClickSaveDocument)}
-            {this.renderButton("mode_edit", "Edit properties")}
-            {this.renderButton("more_vert", "Bookmark this page")}
+            {this.renderButton("edit", "Edit", this.props.actionManager.togglePropertiesView)}
           </section>
         </div>
       </div>
