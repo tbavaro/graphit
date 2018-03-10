@@ -148,6 +148,27 @@ export class Datastore {
       });
   }
 
+  getFileName(fileId: string): PromiseLike<string> {
+    if (!this.isSignedIn()) {
+      return Promise.reject(new Error("not logged in"));
+    }
+
+    return gapi.client.files.get({
+      fileId: fileId,
+      fields: "name"
+    }).then((f) => {
+      var name = f.result.name;
+      if (name) {
+        if (name.endsWith(EXTENSION)) {
+          name = name.substring(0, name.length - EXTENSION.length);
+        }
+        return name;
+      } else {
+        return "Untitled";
+      }
+    });
+  }
+
   loadFile(fileId: string): PromiseLike<string> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));

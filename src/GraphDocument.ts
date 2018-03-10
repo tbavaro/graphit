@@ -69,11 +69,16 @@ function deserializeZoomState(data?: SerializedZoomState): ZoomState {
 }
 
 class GraphDocument {
+  name: string;
   nodes: MyNodeDatum[];
   links: MyLinkDatum[];
   zoomState: ZoomState;
 
-  static load(jsonData: string) {
+  static empty() {
+    return new GraphDocument();
+  }
+
+  static load(jsonData: string, name?: string) {
     var data = JSON.parse(jsonData) as SerializedGraphDocument;
     var serializedNodes = data.nodes;
     var serializedLinks = data.links;
@@ -107,13 +112,12 @@ class GraphDocument {
     });
     var zoomState = deserializeZoomState(data.zoomState);
 
-    return new GraphDocument(nodes, links, zoomState);
-  }
+    var document = new GraphDocument(nodes, links, zoomState);
+    if (name !== undefined) {
+      document.name = name;
+    }
 
-  constructor(nodes?: MyNodeDatum[], links?: D3Force.SimulationLinkDatum<MyNodeDatum>[], zoomState?: ZoomState) {
-    this.nodes = nodes || [];
-    this.links = links || [];
-    this.zoomState = zoomState || defaultZoomState();
+    return document;
   }
 
   save(): string {
@@ -124,6 +128,17 @@ class GraphDocument {
     };
 
     return JSON.stringify(data, null, 2);
+  }
+
+  private constructor(
+    nodes?: MyNodeDatum[],
+    links?: D3Force.SimulationLinkDatum<MyNodeDatum>[],
+    zoomState?: ZoomState
+  ) {
+    this.name = "Untitled";
+    this.nodes = nodes || [];
+    this.links = links || [];
+    this.zoomState = zoomState || defaultZoomState();
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {

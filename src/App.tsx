@@ -64,12 +64,14 @@ class App extends React.Component<object, State> {
 
   render() {
     var viewportView: any;
-    var title: string = "GraphIt";
+    var title: string;
 
     if (this.state.document) {
+      title = this.state.document.name;
       viewportView =
         <SimulationViewport document={this.state.document} />;
     } else {
+      title = "GraphIt";
       viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
     }
 
@@ -91,7 +93,7 @@ class App extends React.Component<object, State> {
   }
 
   private loadNewDocument = () => {
-    this.loadDocument(new GraphDocument());
+    this.loadDocument(GraphDocument.empty());
   }
 
   private loadDocumentById = (id: string) => {
@@ -103,8 +105,13 @@ class App extends React.Component<object, State> {
 
     this.loadDocument(undefined, undefined);
 
-    this.datastore.loadFile(id).then((data) => {
-      this.loadDocument(GraphDocument.load(data), id);
+    Promise.all([
+      this.datastore.getFileName(id),
+      this.datastore.loadFile(id)
+    ]).then(([name, data]) => {
+      var document = GraphDocument.load(data);
+      document.name = name;
+      this.loadDocument(document, id);
     });
   }
 
