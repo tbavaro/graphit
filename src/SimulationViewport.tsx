@@ -10,6 +10,7 @@ import * as Viewport from './Viewport';
 
 interface Props {
   document: GraphDocument;
+  simulationForceCharge: number;
 }
 
 interface State {
@@ -61,6 +62,12 @@ class FPSView {
   }
 }
 
+function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
+  simulation
+    .force("charge", D3Force.forceManyBody().strength(-1 * props.simulationForceCharge).distanceMax(300))
+    .force("links", D3Force.forceLink(props.document.links).distance(100));
+}
+
 class SimulationViewport extends React.Component<Props, State> {
   state: State = {
     selectedNodes: new Set()
@@ -107,9 +114,9 @@ class SimulationViewport extends React.Component<Props, State> {
     this.fpsView = new FPSView();
 
     this.simulation = D3Force.forceSimulation(this.props.document.nodes)
-      .force("charge", D3Force.forceManyBody().strength(-500).distanceMax(300))
-      .force("links", D3Force.forceLink(this.props.document.links).distance(100))
       .on("tick", () => this.onSimulationTick());
+
+    updateForces(this.simulation, this.props);
   }
 
   componentWillUnmount() {
@@ -118,6 +125,11 @@ class SimulationViewport extends React.Component<Props, State> {
       this.fpsView.destroy();
       this.fpsView = undefined;
     }
+  }
+
+  componentWillReceiveProps(newProps: Props) {
+    updateForces(this.simulation, newProps);
+    this.restartSimulation();
   }
 
   render() {

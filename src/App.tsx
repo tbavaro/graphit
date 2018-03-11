@@ -15,6 +15,9 @@ interface State {
   datastoreStatus: DatastoreStatus;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
+
+  // TODO move to document
+  simulationForceCharge: number;
 }
 
 class App extends React.Component<object, State> {
@@ -23,7 +26,8 @@ class App extends React.Component<object, State> {
   state: State = {
     datastoreStatus: this.datastore.status(),
     leftNavOpen: false,
-    propertiesViewOpen: false
+    propertiesViewOpen: false,
+    simulationForceCharge: 500
   };
 
   pendingDocumentLoadId?: string;
@@ -83,8 +87,12 @@ class App extends React.Component<object, State> {
 
     if (this.state.document) {
       title = this.state.document.name;
-      viewportView =
-        <SimulationViewport document={this.state.document} />;
+      viewportView = (
+        <SimulationViewport
+          document={this.state.document}
+          simulationForceCharge={this.state.simulationForceCharge}
+        />
+      );
     } else {
       title = "GraphIt";
       viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
@@ -101,10 +109,16 @@ class App extends React.Component<object, State> {
           datastore={this.datastore}
           datastoreStatus={this.state.datastoreStatus}
           isOpen={this.state.leftNavOpen}
+          onClosed={this.closeLeftNav}
         />
         <div className="App-content">
           {viewportView}
-          <PropertiesView actionManager={this.actionManager} isOpen={this.state.propertiesViewOpen}/>
+          <PropertiesView
+            actionManager={this.actionManager}
+            isOpen={this.state.propertiesViewOpen}
+            simulationForceCharge={this.state.simulationForceCharge}
+            onSimulationForceChargeChange={this.updateSimulationForceCharge}
+          />
         </div>
       </div>
     );
@@ -156,6 +170,18 @@ class App extends React.Component<object, State> {
   private openLeftNav = () => {
     this.setState({
       leftNavOpen: true
+    });
+  }
+
+  private closeLeftNav = () => {
+    this.setState({
+      leftNavOpen: false
+    });
+  }
+
+  private updateSimulationForceCharge = (newValue: number) => {
+    this.setState({
+      simulationForceCharge: newValue
     });
   }
 }

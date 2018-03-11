@@ -4,6 +4,7 @@ import './TemporaryNavDrawer.css';
 export interface Props {
   isOpen: boolean;
   headerChildren?: any;
+  onClosed?: () => void;
 }
 
 export class TemporaryNavDrawer extends React.Component<Props, object> {
@@ -18,6 +19,11 @@ export class TemporaryNavDrawer extends React.Component<Props, object> {
     var mdc = ((window as any).mdc);
     this.mdcRef = mdc.drawer.MDCTemporaryDrawer.attachTo(this.ref);
     this.mdcRef.open = this.props.isOpen;
+    this.mdcRef.listen("MDCTemporaryDrawer:close", () => {
+      if (this.props.onClosed) {
+        this.props.onClosed();
+      }
+    });
   }
 
   componentWillReceiveProps(newProps: Props) {

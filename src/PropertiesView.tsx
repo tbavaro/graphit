@@ -13,6 +13,7 @@ interface SliderPropertyProps {
   minValue: number;
   maxValue: number;
   formatter: ValueFormatter<number>;
+  onValueChange?: (newValue: number) => void;
 }
 
 interface SliderPropertyState {
@@ -52,16 +53,21 @@ class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, S
     );
   }
 
-  private onSliderValueChanged = (newValue: number) => {
+  private onSliderValueChanged = (newValue: number, isDone: boolean) => {
     this.setState({
       displayValue: newValue
     });
+    if (/* isDone && */this.props.onValueChange) {
+      this.props.onValueChange(newValue);
+    }
   }
 }
 
 interface Props {
   actionManager: MyActions;
   isOpen: boolean;
+  simulationForceCharge: number;
+  onSimulationForceChargeChange: (newValue: number) => void;
 }
 
 class PropertiesView extends React.PureComponent<Props, object> {
@@ -73,7 +79,7 @@ class PropertiesView extends React.PureComponent<Props, object> {
     return (
       <div className={"PropertiesView" + (this.props.isOpen ? " open" : "")}>
         <div className="PropertiesView-header">
-          Properties
+          Simulation Properties
           <div
             className="PropertiesView-header-closeButton material-icons"
             onClick={this.props.actionManager.closePropertiesView}
@@ -81,19 +87,20 @@ class PropertiesView extends React.PureComponent<Props, object> {
           />
         </div>
         <div className="PropertiesView-content">
-          <SliderPropertyComponent
+          {/* <SliderPropertyComponent
             label="Gravity"
             value={20}
             minValue={0}
             maxValue={100}
             formatter={ValueFormatters.roundedInt}
-          />
+          /> */}
           <SliderPropertyComponent
             label="Particle Charge"
-            value={10}
+            value={this.props.simulationForceCharge}
             minValue={0}
-            maxValue={100}
+            maxValue={10000}
             formatter={ValueFormatters.roundedInt}
+            onValueChange={this.props.onSimulationForceChargeChange}
           />
         </div>
       </div>

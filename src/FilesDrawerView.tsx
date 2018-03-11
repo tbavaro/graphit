@@ -96,6 +96,7 @@ class FilesDrawerView extends React.Component<Props, State> {
         // contentsClassName="FilesDrawerView-contents"
         // isLeftDrawer={true}
         isOpen={this.props.isOpen}
+        onClosed={this.props.onClosed}
         children={contents}
         headerChildren={headerContents}
       />
