@@ -1,0 +1,5 @@
+@import "@material/slider/mdc-slider.scss";
+
+.MaterialSlider {
+  @include mdc-slider-color-accessible(royalblue);
+}
