@@ -1,10 +1,28 @@
 import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
+import { SimpleListenable } from './Listenable';
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
   toggleIsLocked: (id: number) => void;
+}
+
+export class ListenablePosition extends SimpleListenable {
+  readonly x: number;
+  readonly y: number;
+
+  constructor(x: number, y: number) {
+    super();
+    this.x = x;
+    this.y = y;
+  }
+
+  set(x: number, y: number) {
+    (this as any).x = x;
+    (this as any).y = y;
+    this.signalUpdate();
+  }
 }
 
 interface Props {
@@ -12,13 +30,12 @@ interface Props {
   id: number;
   label: string;
   isLocked: boolean;
-  x: number;
-  y: number;
+  position: ListenablePosition;
   isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
 }
 
-class NodeView extends React.PureComponent<Props, object> {
+export class Component extends React.PureComponent<Props, object> {
   ref?: HTMLDivElement;
 
   componentDidMount() {
@@ -34,17 +51,23 @@ class NodeView extends React.PureComponent<Props, object> {
     }
   }
 
+  componentWillMount() {
+    this.updatePositionSubscription(null, this.props.position);
+  }
+
   componentWillReceiveProps(newProps: Readonly<Props>) {
     // clear old drag behavior if it's changing
     if (this.ref && this.props.dragBehavior !== newProps.dragBehavior) {
       D3.select(this.ref).on(".drag", null);
     }
+
+    this.updatePositionSubscription(this.props.position, newProps.position);
   }
 
   render() {
     var style = {
-      left: this.props.x,
-      top: this.props.y,
+      left: this.props.position.x,
+      top: this.props.position.y,
       transform: ""
     };
     return (
@@ -103,6 +126,26 @@ class NodeView extends React.PureComponent<Props, object> {
       this.props.actionManager.toggleIsLocked(this.props.id);
     }
   }
-}
 
-export default NodeView;
+  private onUpdatePosition = () => {
+    // TODO make this just move it
+    if (this.ref) {
+      this.ref.style.left = this.props.position.x + "px";
+      this.ref.style.top = this.props.position.y + "px";
+    }
+    // this.forceUpdate();
+  }
+
+  private updatePositionSubscription(
+    oldPosition: ListenablePosition | null, newPosition: ListenablePosition) {
+    if (oldPosition !== newPosition) {
+      if (oldPosition) {
+        oldPosition.removeListener(this.onUpdatePosition);
+      }
+
+      if (newPosition) {
+        newPosition.addListener(this.onUpdatePosition);
+      }
+    }
+  }
+}

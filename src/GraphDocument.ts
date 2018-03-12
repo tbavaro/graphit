@@ -1,5 +1,5 @@
 import * as D3Force from 'd3-force';
-import MyNodeDatum from './MyNodeDatum';
+import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
 
 interface SerializedGraphDocument {
   nodes: SerializedNode[];
@@ -21,8 +21,6 @@ interface SerializedLink {
   source: string;
   target: string;
 }
-
-type MyLinkDatum = D3Force.SimulationLinkDatum<MyNodeDatum>;
 
 function readNullableValue<T>(value: T | undefined | null): T | undefined {
   return (value === null) ? undefined : value;

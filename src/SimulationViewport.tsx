@@ -1,12 +1,14 @@
 import * as React from 'react';
 import * as D3 from "d3";
 import * as D3Force from 'd3-force';
-import MyNodeDatum from './MyNodeDatum';
-import NodeView from './NodeView';
+import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
+import { ListenablePosition, Component as NodeView } from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import GraphDocument from './GraphDocument';
 import * as Viewport from './Viewport';
+import { SimpleListenable, Listenable } from './Listenable';
+import SingleListenerPureComponent from './SingleListenerPureComponent';
 
 interface Props {
   document: GraphDocument;
@@ -68,6 +70,47 @@ function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
     .force("links", D3Force.forceLink(props.document.links).distance(100));
 }
 
+type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
+
+interface SVGLinesComponentProps {
+  document: GraphDocument;
+  simulationTickListener: Listenable;
+  gRef?: (newRef: SVGGElement) => void;
+  onClick?: () => void;
+}
+
+class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentProps, object> {
+  protected _listenerFieldName = "simulationTickListener";
+
+  private static renderLink(link: D3Force.SimulationLinkDatum<MyNodeDatum>, id: number) {
+    var source = link.source as MyNodeDatum;
+    var target = link.target as MyNodeDatum;
+    return (
+      <line key={"link." + id} x1={source.x} y1={source.y} x2={target.x} y2={target.y}/>
+    );
+  }
+
+  render() {
+    var linkLines = this.props.document.links.map(SVGLinesComponent.renderLink);
+
+    return (
+      <svg
+        key="linkLines"
+        className="SimulationViewport-linkLines"
+        onClick={this.props.onClick}
+      >
+        <g ref={this.props.gRef}>
+          {linkLines}
+        </g>
+      </svg>
+    );
+  }
+
+  protected onSignal() {
+    this.forceUpdate();
+  }
+}
+
 class SimulationViewport extends React.Component<Props, State> {
   state: State = {
     selectedNodes: new Set()
@@ -80,7 +123,9 @@ class SimulationViewport extends React.Component<Props, State> {
   renderNodes = true;
   renderLinks = true;
 
-  simulation = D3.forceSimulation();
+  simulation: MySimulation = D3.forceSimulation<MyNodeDatum, MyLinkDatum>();
+  simulationTickListener: Listenable = new SimpleListenable();
+  positions: ListenablePosition[] = [];
 
   drag = D3.drag<any, any, number>();
     // .on("drag", this.onDragMove);
@@ -112,10 +157,10 @@ class SimulationViewport extends React.Component<Props, State> {
 
   componentDidMount() {
     this.fpsView = new FPSView();
+  }
 
-    this.simulation = D3Force.forceSimulation(this.props.document.nodes)
-      .on("tick", () => this.onSimulationTick());
-
+  componentWillMount() {
+    this.initializeSimulation(this.props.document);
     updateForces(this.simulation, this.props);
   }
 
@@ -128,26 +173,35 @@ class SimulationViewport extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(newProps: Props) {
+    if (this.props.document !== newProps.document) {
+      this.initializeSimulation(newProps.document);
+    }
+
     updateForces(this.simulation, newProps);
     this.restartSimulation();
   }
 
   render() {
-    var linkLines = (!this.renderLinks ? "" : this.props.document.links.map(this.renderLink));
     var nodeViews = (!this.renderNodes ? "" : this.props.document.nodes.map(this.renderNode));
 
     return (
       <Viewport.Viewport
         manuallyTransformedChildren={
-          <svg
-            key="linkLines"
-            className="SimulationViewport-linkLines"
+          <SVGLinesComponent
+            document={this.props.document}
+            simulationTickListener={this.simulationTickListener}
             onClick={this.deselectAll}
-          >
-            <g ref={this.setSvgRef}>
-              {linkLines}
-            </g>
-          </svg>
+            gRef={this.setSvgRef}
+          />
+          // <svg
+          //   key="linkLines"
+          //   className="SimulationViewport-linkLines"
+          //   onClick={this.deselectAll}
+          // >
+          //   <g ref={this.setSvgRef}>
+          //     {linkLines}
+          //   </g>
+          // </svg>
         }
         autoTransformedChildren={nodeViews}
         onZoom={this.onViewportZoom}
@@ -159,37 +213,40 @@ class SimulationViewport extends React.Component<Props, State> {
     );
   }
 
+  private initializeSimulation = (document: GraphDocument) => {
+    this.positions = document.nodes.map((node) => {
+      return new ListenablePosition(node.x || 0, node.y || 0);
+    });
+    this.simulation = D3Force.forceSimulation(document.nodes)
+      .on("tick", () => this.onSimulationTick());
+  }
+
   private restartSimulation = () => {
     this.simulation.alpha(1);
     this.simulation.restart();
   }
 
-  private renderNode = (node: MyNodeDatum, id: number) => {
+  private renderNode = (node: MyNodeDatum, index: number) => {
     return (
       <NodeView
-        key={"node." + id}
+        key={"node." + index}
         actionManager={this.nodeActionManager}
-        id={id}
+        id={index}
         label={node.label}
         isLocked={node.isLocked}
-        x={node.x || 0}
-        y={node.y || 0}
+        position={this.positions[index]}
         isSelected={this.state.selectedNodes.has(node)}
         dragBehavior={this.drag}
       />
     );
   }
 
-  private renderLink = (link: D3Force.SimulationLinkDatum<MyNodeDatum>, id: number) => {
-    var source = link.source as MyNodeDatum;
-    var target = link.target as MyNodeDatum;
-    return (
-      <line key={"link." + id} x1={source.x} y1={source.y} x2={target.x} y2={target.y}/>
-    );
-  }
-
   private onSimulationTick = () => {
-    this.forceUpdate();
+    this.props.document.nodes.forEach((node, index) => {
+      this.positions[index].set(node.x || 0, node.y || 0);
+    });
+
+    this.simulationTickListener.signalUpdate();
     if (this.fpsView) {
       this.fpsView.onTick();
     }
