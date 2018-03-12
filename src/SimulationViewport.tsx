@@ -187,21 +187,16 @@ class SimulationViewport extends React.Component<Props, State> {
     return (
       <Viewport.Viewport
         manuallyTransformedChildren={
-          <SVGLinesComponent
-            document={this.props.document}
-            simulationTickListener={this.simulationTickListener}
-            onClick={this.deselectAll}
-            gRef={this.setSvgRef}
-          />
-          // <svg
-          //   key="linkLines"
-          //   className="SimulationViewport-linkLines"
-          //   onClick={this.deselectAll}
-          // >
-          //   <g ref={this.setSvgRef}>
-          //     {linkLines}
-          //   </g>
-          // </svg>
+          this.renderLinks
+            ? (
+                <SVGLinesComponent
+                  document={this.props.document}
+                  simulationTickListener={this.simulationTickListener}
+                  onClick={this.deselectAll}
+                  gRef={this.setSvgRef}
+                />
+              )
+            : ""
         }
         autoTransformedChildren={nodeViews}
         onZoom={this.onViewportZoom}
