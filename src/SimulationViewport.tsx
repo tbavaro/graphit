@@ -82,6 +82,8 @@ interface SVGLinesComponentProps {
 class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentProps, object> {
   protected _listenerFieldName = "simulationTickListener";
 
+  private _gRef?: SVGGElement;
+
   private static renderLink(link: D3Force.SimulationLinkDatum<MyNodeDatum>, id: number) {
     var source = link.source as MyNodeDatum;
     var target = link.target as MyNodeDatum;
@@ -99,7 +101,7 @@ class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentPro
         className="SimulationViewport-linkLines"
         onClick={this.props.onClick}
       >
-        <g ref={this.props.gRef}>
+        <g ref={this._setGRef}>
           {linkLines}
         </g>
       </svg>
@@ -107,7 +109,25 @@ class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentPro
   }
 
   protected onSignal() {
-    this.forceUpdate();
+    if (this._gRef) {
+      var linkElements: SVGLineElement[] = (this._gRef.children as any);
+      this.props.document.links.forEach((link, index) => {
+        var linkElement = linkElements[index];
+        var source = (link.source as MyNodeDatum);
+        var target = (link.target as MyNodeDatum);
+        linkElement.setAttribute("x1", (source.x || 0) + "px");
+        linkElement.setAttribute("y1", (source.y || 0) + "px");
+        linkElement.setAttribute("x2", (target.x || 0) + "px");
+        linkElement.setAttribute("y2", (target.y || 0) + "px");
+      });
+    }
+  }
+
+  private _setGRef = (newRef: SVGGElement) => {
+    this._gRef = newRef;
+    if (this.props.gRef) {
+      this.props.gRef(newRef);
+    }
   }
 }
 
