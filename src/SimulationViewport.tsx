@@ -5,7 +5,7 @@ import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
 import { ListenablePosition, Component as NodeView } from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
-import GraphDocument from './GraphDocument';
+import { GraphDocument } from './GraphDocument';
 import * as Viewport from './Viewport';
 import { SimpleListenable } from './Listenable';
 import SingleListenerPureComponent from './SingleListenerPureComponent';

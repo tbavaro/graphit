@@ -3,7 +3,7 @@ import SimulationViewport from './SimulationViewport';
 import './App.css';
 import AppBar from './AppBar';
 import FilesDrawerView from './FilesDrawerView';
-import GraphDocument from './GraphDocument';
+import { GraphDocument } from './GraphDocument';
 import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
 import * as QueryString from "query-string";

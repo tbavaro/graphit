@@ -1,5 +1,4 @@
 import {
-  SimpleDeserializer,
   SimplePartialDeserializer
 } from "./Deserializers";
 

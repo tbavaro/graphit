@@ -1,10 +1,14 @@
-import * as D3Force from 'd3-force';
 import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
+import { SimplePartialDeserializer, DeepPartial } from './Deserializers';
+
+export const DEFAULT_LAYOUT_TYPE = "force_simulation";
+export const DEFAULT_PARTICLE_CHARGE = 500;
 
 interface SerializedGraphDocument {
-  nodes: SerializedNode[];
-  links: SerializedLink[];
+  nodes?: SerializedNode[];
+  links?: SerializedLink[];
   zoomState?: SerializedZoomState;
+  layoutState?: DeepPartial<LayoutState>;
 }
 
 type SerializedZoomState = Partial<ZoomState>;
@@ -42,50 +46,65 @@ export interface ZoomState {
   scale: number;
 }
 
-function defaultZoomState() {
-  return {
-    centerX: 0,
-    centerY: 0,
-    scale: 1
-  };
-}
-
-function deserializeZoomState(data?: SerializedZoomState): ZoomState {
-  var result = defaultZoomState();
-  if (data) {
-    if (data.centerX !== undefined) {
-      result.centerX = data.centerX;
-    }
-    if (data.centerY !== undefined) {
-      result.centerY = data.centerY;
-    }
-    if (data.scale !== undefined) {
-      result.scale = data.scale;
-    }
+const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>(
+  () => {
+    return {
+      centerX: 0,
+      centerY: 0,
+      scale: 1
+    };
   }
-  return result;
+);
+
+export interface ForceSimulationConfig {
+  particleCharge: number;
 }
 
-class GraphDocument {
-  name: string;
-  nodes: MyNodeDatum[];
-  links: MyLinkDatum[];
-  zoomState: ZoomState;
+const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>(
+  () => {
+    return {
+      particleCharge: DEFAULT_PARTICLE_CHARGE
+    };
+  }
+);
+
+export interface LayoutState {
+  layoutType: "force_simulation";
+  forceSimulationConfig: ForceSimulationConfig;
+}
+
+const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>(
+  () => {
+    return {
+      layoutType: DEFAULT_LAYOUT_TYPE,
+      forceSimulationConfig: forceSimulationConfigDeserializer.defaultValueFactory()
+    };
+  },
+  {
+    forceSimulationConfig: forceSimulationConfigDeserializer
+  }
+);
+
+export class GraphDocument {
+  name: string = "Untitled";
+  nodes: MyNodeDatum[] = [];
+  links: MyLinkDatum[] = [];
+  zoomState: ZoomState = zoomStateDeserializer.defaultValueFactory();
+  layoutState: LayoutState = layoutStateDeserializer.defaultValueFactory();
 
   static empty() {
-    return new GraphDocument();
+    return this.load("{}");
   }
 
   static load(jsonData: string, name?: string) {
     var data = JSON.parse(jsonData) as SerializedGraphDocument;
-    var serializedNodes = data.nodes;
-    var serializedLinks = data.links;
-    if (serializedNodes === undefined || serializedLinks === undefined) {
-      throw new Error("poorly formed document: " + jsonData);
-    }
+    var serializedNodes = data.nodes || [];
+    var serializedLinks = data.links || [];
 
     var nodeMap = new Map<String, MyNodeDatum>();
-    var nodes: MyNodeDatum[] = serializedNodes.map((sn: SerializedNode) => {
+
+    var document = new GraphDocument();
+    document.nodes = serializedNodes.map((sn: SerializedNode) => {
       var node: MyNodeDatum = {
         id: sn.id,
         label: sn.label,
@@ -102,15 +121,14 @@ class GraphDocument {
       nodeMap.set(sn.id, node);
       return node;
     });
-    var links: MyLinkDatum[] = serializedLinks.map((sl: SerializedLink) => {
+    document.links = serializedLinks.map((sl: SerializedLink) => {
       return {
         source: nodeMap.get(sl.source) as MyNodeDatum,
         target: nodeMap.get(sl.target) as MyNodeDatum
       };
     });
-    var zoomState = deserializeZoomState(data.zoomState);
-
-    var document = new GraphDocument(nodes, links, zoomState);
+    document.zoomState = zoomStateDeserializer.deserialize(data.zoomState);
+    document.layoutState = layoutStateDeserializer.deserialize(data.layoutState);
     if (name !== undefined) {
       document.name = name;
     }
@@ -118,25 +136,17 @@ class GraphDocument {
     return document;
   }
 
+  private constructor() {}
+
   save(): string {
     var data: SerializedGraphDocument = {
       nodes: this.nodes.map(this.serializeNode),
       links: this.links.map(this.serializeLink),
-      zoomState: this.zoomState
+      zoomState: this.zoomState,
+      layoutState: this.layoutState
     };
 
     return JSON.stringify(data, null, 2);
-  }
-
-  private constructor(
-    nodes?: MyNodeDatum[],
-    links?: D3Force.SimulationLinkDatum<MyNodeDatum>[],
-    zoomState?: ZoomState
-  ) {
-    this.name = "Untitled";
-    this.nodes = nodes || [];
-    this.links = links || [];
-    this.zoomState = zoomState || defaultZoomState();
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {
@@ -156,5 +166,3 @@ class GraphDocument {
     });
   }
 }
-
-export default GraphDocument;
