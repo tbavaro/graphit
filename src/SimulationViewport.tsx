@@ -7,7 +7,7 @@ import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import GraphDocument from './GraphDocument';
 import * as Viewport from './Viewport';
-import { SimpleListenable, Listenable } from './Listenable';
+import { SimpleListenable } from './Listenable';
 import SingleListenerPureComponent from './SingleListenerPureComponent';
 
 interface Props {
@@ -74,7 +74,7 @@ type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
 interface SVGLinesComponentProps {
   document: GraphDocument;
-  simulationTickListener: Listenable;
+  simulationTickListener: SimpleListenable;
   gRef?: (newRef: SVGGElement) => void;
   onClick?: () => void;
 }
@@ -144,7 +144,7 @@ class SimulationViewport extends React.Component<Props, State> {
   renderLinks = true;
 
   simulation: MySimulation = D3.forceSimulation<MyNodeDatum, MyLinkDatum>();
-  simulationTickListener: Listenable = new SimpleListenable();
+  simulationTickListener = new SimpleListenable();
   positions: ListenablePosition[] = [];
 
   drag = D3.drag<any, any, number>();
@@ -261,7 +261,7 @@ class SimulationViewport extends React.Component<Props, State> {
       this.positions[index].set(node.x || 0, node.y || 0);
     });
 
-    this.simulationTickListener.signalUpdate();
+    this.simulationTickListener.triggerListeners();
     if (this.fpsView) {
       this.fpsView.onTick();
     }

@@ -21,7 +21,7 @@ export class ListenablePosition extends SimpleListenable {
   set(x: number, y: number) {
     (this as any).x = x;
     (this as any).y = y;
-    this.signalUpdate();
+    this.triggerListeners();
   }
 }
 
@@ -140,11 +140,11 @@ export class Component extends React.PureComponent<Props, object> {
     oldPosition: ListenablePosition | null, newPosition: ListenablePosition) {
     if (oldPosition !== newPosition) {
       if (oldPosition) {
-        oldPosition.removeListener(this.onUpdatePosition);
+        oldPosition.removeListener("changed", this.onUpdatePosition);
       }
 
       if (newPosition) {
-        newPosition.addListener(this.onUpdatePosition);
+        newPosition.addListener("changed", this.onUpdatePosition);
       }
     }
   }
