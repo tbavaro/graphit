@@ -2,13 +2,13 @@ import * as React from 'react';
 import * as D3 from "d3";
 import * as D3Force from 'd3-force';
 import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
-import { ListenablePosition, Component as NodeView } from './NodeView';
+import { Component as NodeView, Position } from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import { GraphDocument } from './GraphDocument';
 import * as Viewport from './Viewport';
-import { SimpleListenable } from './Listenable';
 import SingleListenerPureComponent from './SingleListenerPureComponent';
+import { ListenableSimulationWrapper } from './ListenableSimulation';
 
 interface Props {
   document: GraphDocument;
@@ -74,13 +74,14 @@ type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
 interface SVGLinesComponentProps {
   document: GraphDocument;
-  simulationTickListener: SimpleListenable;
+  simulation: ListenableSimulationWrapper;
   gRef?: (newRef: SVGGElement) => void;
   onClick?: () => void;
 }
 
 class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentProps, object> {
-  protected _listenerFieldName = "simulationTickListener";
+  protected _listenerFieldName = "simulation";
+  protected _listenerEventType = "tick";
 
   private _gRef?: SVGGElement;
 
@@ -144,8 +145,7 @@ class SimulationViewport extends React.Component<Props, State> {
   renderLinks = true;
 
   simulation: MySimulation = D3.forceSimulation<MyNodeDatum, MyLinkDatum>();
-  simulationTickListener = new SimpleListenable();
-  positions: ListenablePosition[] = [];
+  simulationWrapper = new ListenableSimulationWrapper(this.simulation);
 
   drag = D3.drag<any, any, number>();
     // .on("drag", this.onDragMove);
@@ -181,6 +181,7 @@ class SimulationViewport extends React.Component<Props, State> {
 
   componentWillMount() {
     this.initializeSimulation(this.props.document);
+    this.simulationWrapper.addListener("tick", this.onSimulationTick);
     updateForces(this.simulation, this.props);
   }
 
@@ -211,7 +212,7 @@ class SimulationViewport extends React.Component<Props, State> {
             ? (
                 <SVGLinesComponent
                   document={this.props.document}
-                  simulationTickListener={this.simulationTickListener}
+                  simulation={this.simulationWrapper}
                   onClick={this.deselectAll}
                   gRef={this.setSvgRef}
                 />
@@ -229,11 +230,7 @@ class SimulationViewport extends React.Component<Props, State> {
   }
 
   private initializeSimulation = (document: GraphDocument) => {
-    this.positions = document.nodes.map((node) => {
-      return new ListenablePosition(node.x || 0, node.y || 0);
-    });
-    this.simulation = D3Force.forceSimulation(document.nodes)
-      .on("tick", () => this.onSimulationTick());
+    this.simulation.nodes(document.nodes);
   }
 
   private restartSimulation = () => {
@@ -249,7 +246,8 @@ class SimulationViewport extends React.Component<Props, State> {
         id={index}
         label={node.label}
         isLocked={node.isLocked}
-        position={this.positions[index]}
+        position={node as Position}
+        simulation={this.simulationWrapper}
         isSelected={this.state.selectedNodes.has(node)}
         dragBehavior={this.drag}
       />
@@ -257,11 +255,6 @@ class SimulationViewport extends React.Component<Props, State> {
   }
 
   private onSimulationTick = () => {
-    this.props.document.nodes.forEach((node, index) => {
-      this.positions[index].set(node.x || 0, node.y || 0);
-    });
-
-    this.simulationTickListener.triggerListeners();
     if (this.fpsView) {
       this.fpsView.onTick();
     }
