@@ -2,6 +2,7 @@ import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
 import { SimpleListenable } from './Listenable';
+import SingleListenerPureComponent from './SingleListenerPureComponent';
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
@@ -35,10 +36,16 @@ interface Props {
   dragBehavior?: D3.DragBehavior<any, number, any>;
 }
 
-export class Component extends React.PureComponent<Props, object> {
+export class Component extends SingleListenerPureComponent<Props, object> {
+  protected readonly _listenerFieldName = "position";
+
   ref?: HTMLDivElement;
 
   componentDidMount() {
+    if (super.componentDidMount) {
+      super.componentDidMount();
+    }
+
     if (!this.ref) {
       throw new Error("ref not set");
     }
@@ -51,17 +58,13 @@ export class Component extends React.PureComponent<Props, object> {
     }
   }
 
-  componentWillMount() {
-    this.updatePositionSubscription(null, this.props.position);
-  }
-
   componentWillReceiveProps(newProps: Readonly<Props>) {
     // clear old drag behavior if it's changing
     if (this.ref && this.props.dragBehavior !== newProps.dragBehavior) {
       D3.select(this.ref).on(".drag", null);
     }
 
-    this.updatePositionSubscription(this.props.position, newProps.position);
+    super.componentWillReceiveProps(newProps);
   }
 
   render() {
@@ -127,25 +130,10 @@ export class Component extends React.PureComponent<Props, object> {
     }
   }
 
-  private onUpdatePosition = () => {
-    // TODO make this just move it
+  protected onSignal() {
     if (this.ref) {
       this.ref.style.left = this.props.position.x + "px";
       this.ref.style.top = this.props.position.y + "px";
-    }
-    // this.forceUpdate();
-  }
-
-  private updatePositionSubscription(
-    oldPosition: ListenablePosition | null, newPosition: ListenablePosition) {
-    if (oldPosition !== newPosition) {
-      if (oldPosition) {
-        oldPosition.removeListener("changed", this.onUpdatePosition);
-      }
-
-      if (newPosition) {
-        newPosition.addListener("changed", this.onUpdatePosition);
-      }
     }
   }
 }
