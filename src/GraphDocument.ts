@@ -7,11 +7,9 @@ export const DEFAULT_PARTICLE_CHARGE = 500;
 interface SerializedGraphDocument {
   nodes?: SerializedNode[];
   links?: SerializedLink[];
-  zoomState?: SerializedZoomState;
+  zoomState?: DeepPartial<ZoomState>;
   layoutState?: DeepPartial<LayoutState>;
 }
-
-type SerializedZoomState = Partial<ZoomState>;
 
 interface SerializedNode {
   id: string;
@@ -26,10 +24,6 @@ interface SerializedLink {
   target: string;
 }
 
-function readNullableValue<T>(value: T | undefined | null): T | undefined {
-  return (value === null) ? undefined : value;
-}
-
 function removeNullsAndUndefineds<T>(object: T): T {
   for (var propName in object) {
     if (object[propName] === null || object[propName] === undefined) {
@@ -39,6 +33,16 @@ function removeNullsAndUndefineds<T>(object: T): T {
 
   return object;
 }
+
+const nodeDeserializer = new SimplePartialDeserializer<MyNodeDatum>(
+  () => {
+    return {
+      id: "",
+      label: "",
+      isLocked: false
+    };
+  }
+);
 
 export interface ZoomState {
   centerX: number;
@@ -105,13 +109,7 @@ export class GraphDocument {
 
     var document = new GraphDocument();
     document.nodes = serializedNodes.map((sn: SerializedNode) => {
-      var node: MyNodeDatum = {
-        id: sn.id,
-        label: sn.label,
-        isLocked: readNullableValue(sn.isLocked) || false,
-        x: readNullableValue(sn.x),
-        y: readNullableValue(sn.y)
-      };
+      var node = nodeDeserializer.deserialize(sn);
 
       if (node.isLocked) {
         node.fx = node.x;

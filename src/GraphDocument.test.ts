@@ -53,3 +53,23 @@ it("test load basic data only", () => {
   expect(document.name).toEqual("Untitled");
   expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
+
+it("test load name", () => {
+  var document = GraphDocument.load("{}", "my name");
+  expect(document.name).toEqual("my name");
+});
+
+it("test load full data", () => {
+  var documentJSON = JSON.stringify({
+    nodes: [],
+    links: [],
+    layoutState: {
+      layoutType: "other_layout_type"
+    }
+  });
+
+  var document = GraphDocument.load(documentJSON);
+
+  expect(document.name).toEqual("Untitled");
+  expect(document.layoutState.layoutType).toEqual("other_layout_type");
+});
