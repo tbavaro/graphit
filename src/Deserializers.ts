@@ -8,19 +8,19 @@ export interface Deserializer<SERIALIZED_T, T> {
 
 export class SimpleDeserializer<SERIALIZED_T, T> {
   readonly specialFieldDeserializers: {
-    [P in keyof SERIALIZED_T]?: Deserializer<SERIALIZED_T[P], any /* T[P] */>;
+    [P in keyof SERIALIZED_T & keyof T]?: Deserializer<SERIALIZED_T[P], T[P]>;
   };
 
   readonly defaultValueFactory: () => T;
 
-  constructor(
-    defaultValueFactory: () => T,
+  constructor(attrs: {
+    defaultValueFactory: () => T;
     specialFieldDeserializers?: {
-      [P in keyof SERIALIZED_T]?: Deserializer<SERIALIZED_T[P], any /* T[P] */>;
-    }
-  ) {
-    this.defaultValueFactory = defaultValueFactory;
-    this.specialFieldDeserializers = specialFieldDeserializers || {};
+      [P in keyof SERIALIZED_T & keyof T]?: Deserializer<SERIALIZED_T[P], T[P]>;
+    };
+  }) {
+    this.defaultValueFactory = attrs.defaultValueFactory;
+    this.specialFieldDeserializers = attrs.specialFieldDeserializers || {};
   }
 
   deserialize(data: SERIALIZED_T | undefined): T {

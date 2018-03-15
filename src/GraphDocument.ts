@@ -34,15 +34,15 @@ function removeNullsAndUndefineds<T>(object: T): T {
   return object;
 }
 
-const nodeDeserializer = new SimplePartialDeserializer<MyNodeDatum>(
-  () => {
+const nodeDeserializer = new SimplePartialDeserializer<MyNodeDatum>({
+  defaultValueFactory: () => {
     return {
       id: "",
       label: "",
       isLocked: false
     };
   }
-);
+});
 
 export interface ZoomState {
   centerX: number;
@@ -50,44 +50,44 @@ export interface ZoomState {
   scale: number;
 }
 
-const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>(
-  () => {
+const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>({
+  defaultValueFactory: () => {
     return {
       centerX: 0,
       centerY: 0,
       scale: 1
     };
   }
-);
+});
 
 export interface ForceSimulationConfig {
   particleCharge: number;
 }
 
-const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>(
-  () => {
+const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>({
+  defaultValueFactory: () => {
     return {
       particleCharge: DEFAULT_PARTICLE_CHARGE
     };
   }
-);
+});
 
 export interface LayoutState {
   layoutType: "force_simulation";
   forceSimulationConfig: ForceSimulationConfig;
 }
 
-const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>(
-  () => {
+const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>({
+  defaultValueFactory: () => {
     return {
       layoutType: DEFAULT_LAYOUT_TYPE,
       forceSimulationConfig: forceSimulationConfigDeserializer.defaultValueFactory()
     };
   },
-  {
+  specialFieldDeserializers: {
     forceSimulationConfig: forceSimulationConfigDeserializer
   }
-);
+});
 
 export class GraphDocument {
   name: string = "Untitled";

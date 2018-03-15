@@ -12,24 +12,26 @@ interface Bar {
   y: number;
 }
 
-const barDeserializer = new SimplePartialDeserializer<Bar>(() => {
-  return {
-    x: "default x",
-    y: 456
-  };
+const barDeserializer = new SimplePartialDeserializer<Bar>({
+  defaultValueFactory: () => {
+    return {
+      x: "default x",
+      y: 456
+    };
+  }
 });
 
-const fooDeserializer = new SimplePartialDeserializer<Foo>(
-  () => {
+const fooDeserializer = new SimplePartialDeserializer<Foo>({
+  defaultValueFactory: () => {
     return {
       a: 123,
       b: barDeserializer.defaultValueFactory()
     };
   },
-  {
+  specialFieldDeserializers: {
     b: barDeserializer
   }
-);
+});
 
 it("test undefined", () => {
   var result = fooDeserializer.deserialize(undefined);
