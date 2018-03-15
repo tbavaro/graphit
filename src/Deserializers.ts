@@ -12,21 +12,40 @@ export class SimpleDeserializer<SERIALIZED_T, T> {
   };
 
   readonly defaultValueFactory: () => T;
+  readonly fieldWhitelist?: Set<keyof SERIALIZED_T>;
+  readonly fieldBlacklist: Set<string>;
 
   constructor(attrs: {
     defaultValueFactory: () => T;
     specialFieldDeserializers?: {
       [P in keyof SERIALIZED_T & keyof T]?: Deserializer<SERIALIZED_T[P], T[P]>;
     };
+    fieldWhitelist?: (keyof SERIALIZED_T)[],
+    fieldBlacklist?: string[]
   }) {
     this.defaultValueFactory = attrs.defaultValueFactory;
     this.specialFieldDeserializers = attrs.specialFieldDeserializers || {};
+    if (attrs.fieldWhitelist !== undefined) {
+      this.fieldWhitelist = new Set(attrs.fieldWhitelist);
+      if (attrs.fieldBlacklist !== undefined) {
+        throw new Error("it doesn't make sense to specify a blacklist and a whitelist");
+      }
+    }
+    this.fieldBlacklist = new Set(attrs.fieldBlacklist || []);
   }
 
   deserialize(data: SERIALIZED_T | undefined): T {
     var result = this.defaultValueFactory();
     if (data !== undefined) {
       for (let key of Object.keys(data)) {
+        // if this isn't whitelisted, or it's blacklisted, skip it
+        if (
+          (this.fieldWhitelist !== undefined && !this.fieldWhitelist.has(key as any)) ||
+          this.fieldBlacklist.has(key)
+        ) {
+          continue;
+        }
+
         const value = data[key];
         if (key in this.specialFieldDeserializers) {
           result[key] = this.specialFieldDeserializers[key].deserialize(value);
