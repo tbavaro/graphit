@@ -7,12 +7,13 @@ import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import { GraphDocument } from './GraphDocument';
 import * as Viewport from './Viewport';
-import SingleListenerPureComponent from './SingleListenerPureComponent';
+import SingleListenerPureComponent, { ListenerPureComponent } from './SingleListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
+import { SimpleListenable } from './Listenable';
 
 interface Props {
   document: GraphDocument;
-  simulationForceCharge: number;
+  simulationConfigListener: SimpleListenable;
 }
 
 interface State {
@@ -65,8 +66,9 @@ class FPSView {
 }
 
 function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
+  const forceSimulationConfig = props.document.layoutState.forceSimulationConfig;
   simulation
-    .force("charge", D3Force.forceManyBody().strength(-1 * props.simulationForceCharge).distanceMax(300))
+    .force("charge", D3Force.forceManyBody().strength(-1 * forceSimulationConfig.particleCharge).distanceMax(300))
     .force("links", D3Force.forceLink(props.document.links).distance(100));
 }
 
@@ -132,10 +134,21 @@ class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentPro
   }
 }
 
-class SimulationViewport extends React.Component<Props, State> {
+class SimulationViewport extends ListenerPureComponent<Props, State> {
   state: State = {
     selectedNodes: new Set()
   };
+
+  bindings = [
+    {
+      propertyName: "simulationConfigListener",
+      eventType: "changed",
+      callback: () => {
+        updateForces(this.simulation, this.props);
+        this.restartSimulation();
+      }
+    }
+  ];
 
   fpsView?: FPSView;
 
@@ -176,16 +189,21 @@ class SimulationViewport extends React.Component<Props, State> {
   };
 
   componentDidMount() {
+    if (super.componentDidMount) {
+      super.componentDidMount();
+    }
     this.fpsView = new FPSView();
   }
 
   componentWillMount() {
+    super.componentWillMount();
     this.initializeSimulation(this.props.document);
     this.simulationWrapper.addListener("tick", this.onSimulationTick);
     updateForces(this.simulation, this.props);
   }
 
   componentWillUnmount() {
+    super.componentWillUnmount();
     this.simulation.stop();
     if (this.fpsView) {
       this.fpsView.destroy();
@@ -194,6 +212,7 @@ class SimulationViewport extends React.Component<Props, State> {
   }
 
   componentWillReceiveProps(newProps: Props) {
+    super.componentWillReceiveProps(newProps);
     if (this.props.document !== newProps.document) {
       this.initializeSimulation(newProps.document);
     }

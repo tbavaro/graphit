@@ -8,6 +8,7 @@ import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./Datastore";
 import * as QueryString from "query-string";
 import PropertiesView from './PropertiesView';
+import { SimpleListenable } from './Listenable';
 
 interface State {
   document?: GraphDocument;
@@ -15,19 +16,17 @@ interface State {
   datastoreStatus: DatastoreStatus;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
-
-  // TODO move to document
-  simulationForceCharge: number;
 }
 
 class App extends React.Component<object, State> {
   datastore = new Datastore();
 
+  simulationConfigListener = new SimpleListenable();
+
   state: State = {
     datastoreStatus: this.datastore.status(),
     leftNavOpen: false,
-    propertiesViewOpen: false,
-    simulationForceCharge: 500
+    propertiesViewOpen: false
   };
 
   pendingDocumentLoadId?: string;
@@ -83,6 +82,7 @@ class App extends React.Component<object, State> {
 
   render() {
     var viewportView: any;
+    var propertiesView: any = undefined;
     var title: string;
 
     if (this.state.document) {
@@ -90,7 +90,15 @@ class App extends React.Component<object, State> {
       viewportView = (
         <SimulationViewport
           document={this.state.document}
-          simulationForceCharge={this.state.simulationForceCharge}
+          simulationConfigListener={this.simulationConfigListener}
+        />
+      );
+      propertiesView = (
+        <PropertiesView
+          actionManager={this.actionManager}
+          isOpen={this.state.propertiesViewOpen}
+          document={this.state.document}
+          simulationConfigListener={this.simulationConfigListener}
         />
       );
     } else {
@@ -113,12 +121,7 @@ class App extends React.Component<object, State> {
         />
         <div className="App-content">
           {viewportView}
-          <PropertiesView
-            actionManager={this.actionManager}
-            isOpen={this.state.propertiesViewOpen}
-            simulationForceCharge={this.state.simulationForceCharge}
-            onSimulationForceChargeChange={this.updateSimulationForceCharge}
-          />
+          {propertiesView}
         </div>
       </div>
     );
@@ -176,12 +179,6 @@ class App extends React.Component<object, State> {
   private closeLeftNav = () => {
     this.setState({
       leftNavOpen: false
-    });
-  }
-
-  private updateSimulationForceCharge = (newValue: number) => {
-    this.setState({
-      simulationForceCharge: newValue
     });
   }
 }

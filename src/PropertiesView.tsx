@@ -2,6 +2,8 @@ import * as React from 'react';
 import './PropertiesView.css';
 import * as MaterialSlider from "./MaterialSlider";
 import { ValueFormatter, ValueFormatters } from "./ValueFormatters";
+import { GraphDocument } from './GraphDocument';
+import { SimpleListenable } from './Listenable';
 
 interface MyActions {
   closePropertiesView: () => void;
@@ -66,8 +68,8 @@ class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, S
 interface Props {
   actionManager: MyActions;
   isOpen: boolean;
-  simulationForceCharge: number;
-  onSimulationForceChargeChange: (newValue: number) => void;
+  document: GraphDocument;
+  simulationConfigListener: SimpleListenable;
 }
 
 class PropertiesView extends React.PureComponent<Props, object> {
@@ -96,15 +98,20 @@ class PropertiesView extends React.PureComponent<Props, object> {
           /> */}
           <SliderPropertyComponent
             label="Particle Charge"
-            value={this.props.simulationForceCharge}
+            value={this.props.document.layoutState.forceSimulationConfig.particleCharge}
             minValue={0}
             maxValue={10000}
             formatter={ValueFormatters.roundedInt}
-            onValueChange={this.props.onSimulationForceChargeChange}
+            onValueChange={this.onChangeParticleCharge}
           />
         </div>
       </div>
     );
+  }
+
+  private onChangeParticleCharge = (newValue: number) => {
+    this.props.document.layoutState.forceSimulationConfig.particleCharge = newValue;
+    this.props.simulationConfigListener.triggerListeners();
   }
 }
 
