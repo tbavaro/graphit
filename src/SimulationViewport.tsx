@@ -220,10 +220,9 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
     super.componentWillReceiveProps(newProps);
     if (this.props.document !== newProps.document) {
       this.initializeSimulation(newProps.document);
+      updateForces(this.simulation, newProps);
+      this.restartSimulation();
     }
-
-    updateForces(this.simulation, newProps);
-    this.restartSimulation();
   }
 
   render() {

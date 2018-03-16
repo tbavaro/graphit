@@ -110,8 +110,11 @@ class PropertiesView extends React.PureComponent<Props, object> {
   }
 
   private onChangeParticleCharge = (newValue: number) => {
-    this.props.document.layoutState.forceSimulationConfig.particleCharge = newValue;
-    this.props.simulationConfigListener.triggerListeners();
+    var forceSimulationConfig = this.props.document.layoutState.forceSimulationConfig;
+    if (forceSimulationConfig.particleCharge !== newValue) {
+      forceSimulationConfig.particleCharge = newValue;
+      this.props.simulationConfigListener.triggerListeners();
+    }
   }
 }
 
