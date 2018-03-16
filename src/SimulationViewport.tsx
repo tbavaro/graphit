@@ -7,7 +7,7 @@ import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import { GraphDocument } from './GraphDocument';
 import * as Viewport from './Viewport';
-import SingleListenerPureComponent, { ListenerPureComponent } from './SingleListenerPureComponent';
+import { ListenerPureComponent, ListenerBinding } from './SingleListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
 import { SimpleListenable } from './Listenable';
 
@@ -81,9 +81,14 @@ interface SVGLinesComponentProps {
   onClick?: () => void;
 }
 
-class SVGLinesComponent extends SingleListenerPureComponent<SVGLinesComponentProps, object> {
-  protected _listenerFieldName = "simulation";
-  protected _listenerEventType = "tick";
+class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, object> {
+  protected readonly bindings: ListenerBinding<SVGLinesComponentProps>[] = [
+    {
+      propertyName: "simulation",
+      eventType: "tick",
+      callback: () => this.onSignal()
+    }
+  ];
 
   private _gRef?: SVGGElement;
 
@@ -139,7 +144,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
     selectedNodes: new Set()
   };
 
-  bindings = [
+  bindings: ListenerBinding<Props>[] = [
     {
       propertyName: "simulationConfigListener",
       eventType: "changed",

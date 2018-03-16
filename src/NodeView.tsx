@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
-import SingleListenerPureComponent from './SingleListenerPureComponent';
+import  { ListenerPureComponent, ListenerBinding } from './SingleListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
 
 export interface NodeActionManager {
@@ -25,9 +25,14 @@ interface Props {
   dragBehavior?: D3.DragBehavior<any, number, any>;
 }
 
-export class Component extends SingleListenerPureComponent<Props, object> {
-  protected readonly _listenerFieldName = "simulation";
-  protected readonly _listenerEventType = "tick";
+export class Component extends ListenerPureComponent<Props, object> {
+  protected readonly bindings: ListenerBinding<Props>[] = [
+    {
+      propertyName: "simulation",
+      eventType: "tick",
+      callback: () => this.onSignal()
+    }
+  ];
 
   ref?: HTMLDivElement;
 
