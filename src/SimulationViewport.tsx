@@ -7,7 +7,7 @@ import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import { GraphDocument } from './GraphDocument';
 import * as Viewport from './Viewport';
-import { ListenerPureComponent, ListenerBinding } from './SingleListenerPureComponent';
+import { ListenerPureComponent, ListenerBinding } from './ListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
 import { SimpleListenable } from './Listenable';
 

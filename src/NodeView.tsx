@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
-import  { ListenerPureComponent, ListenerBinding } from './SingleListenerPureComponent';
+import  { ListenerPureComponent, ListenerBinding } from './ListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
 
 export interface NodeActionManager {
