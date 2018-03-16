@@ -68,8 +68,13 @@ class FPSView {
 function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
   const forceSimulationConfig = props.document.layoutState.forceSimulationConfig;
   simulation
-    .force("charge", D3Force.forceManyBody().strength(-1 * forceSimulationConfig.particleCharge).distanceMax(300))
-    .force("links", D3Force.forceLink(props.document.links).distance(100));
+    .force(
+      "charge",
+      D3Force.forceManyBody()
+        .strength(-1 * forceSimulationConfig.particleCharge)
+        .distanceMax(forceSimulationConfig.chargeDistanceMax)
+    )
+    .force("links", D3Force.forceLink(props.document.links).distance(forceSimulationConfig.linkDistance));
 }
 
 type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;

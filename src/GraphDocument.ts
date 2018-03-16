@@ -3,6 +3,8 @@ import { SimplePartialDeserializer, DeepPartial } from './Deserializers';
 
 export const DEFAULT_LAYOUT_TYPE = "force_simulation";
 export const DEFAULT_PARTICLE_CHARGE = 500;
+export const DEFAULT_CHARGE_DISTANCE_MAX = 300;
+export const DEFAULT_LINK_DISTANCE = 100;
 
 interface SerializedGraphDocument {
   nodes?: SerializedNode[];
@@ -62,12 +64,16 @@ const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>({
 
 export interface ForceSimulationConfig {
   particleCharge: number;
+  chargeDistanceMax: number;
+  linkDistance: number;
 }
 
 const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>({
   defaultValueFactory: () => {
     return {
-      particleCharge: DEFAULT_PARTICLE_CHARGE
+      particleCharge: DEFAULT_PARTICLE_CHARGE,
+      chargeDistanceMax: DEFAULT_CHARGE_DISTANCE_MAX,
+      linkDistance: DEFAULT_LINK_DISTANCE
     };
   }
 });

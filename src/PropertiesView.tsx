@@ -73,6 +73,29 @@ interface Props {
 }
 
 class PropertiesView extends React.PureComponent<Props, object> {
+  private _getForceSimulationConfig = () => this.props.document.layoutState.forceSimulationConfig;
+
+  private _controlRenderers = [
+    this.configSlider({
+      label: "Particle Charge",
+      getParentObject: this._getForceSimulationConfig,
+      fieldName: "particleCharge",
+      maxValue: 10000
+    }),
+    this.configSlider({
+      label: "Charge Distance Max",
+      getParentObject: this._getForceSimulationConfig,
+      fieldName: "chargeDistanceMax",
+      maxValue: 10000
+    }),
+    this.configSlider({
+      label: "Link Distance",
+      getParentObject: this._getForceSimulationConfig,
+      fieldName: "linkDistance",
+      maxValue: 1000
+    })
+  ];
+
   render() {
     if (!this.props.isOpen) {
       return "";
@@ -89,32 +112,39 @@ class PropertiesView extends React.PureComponent<Props, object> {
           />
         </div>
         <div className="PropertiesView-content">
-          {/* <SliderPropertyComponent
-            label="Gravity"
-            value={20}
-            minValue={0}
-            maxValue={100}
-            formatter={ValueFormatters.roundedInt}
-          /> */}
-          <SliderPropertyComponent
-            label="Particle Charge"
-            value={this.props.document.layoutState.forceSimulationConfig.particleCharge}
-            minValue={0}
-            maxValue={10000}
-            formatter={ValueFormatters.roundedInt}
-            onValueChange={this.onChangeParticleCharge}
-          />
+          {this._controlRenderers.map((renderer, index) => renderer.render(index))}
         </div>
       </div>
     );
   }
 
-  private onChangeParticleCharge = (newValue: number) => {
-    var forceSimulationConfig = this.props.document.layoutState.forceSimulationConfig;
-    if (forceSimulationConfig.particleCharge !== newValue) {
-      forceSimulationConfig.particleCharge = newValue;
+  private configSlider<FieldName extends string, Parent extends { [F in FieldName]: number }>(attrs: {
+    label: string,
+    getParentObject: () => Parent,
+    fieldName: FieldName,
+    minValue?: number,
+    maxValue: number
+  }) {
+    var onValueChange = (newValue: number) => {
+      attrs.getParentObject()[attrs.fieldName] = newValue;
       this.props.simulationConfigListener.triggerListeners();
-    }
+    };
+    return {
+      render: (index: number) => {
+        return (
+          <SliderPropertyComponent
+            key={"slider:" + index}
+            label={attrs.label}
+            value={attrs.getParentObject()[attrs.fieldName]}
+            minValue={attrs.minValue || 0}
+            maxValue={attrs.maxValue}
+            formatter={ValueFormatters.roundedInt}
+            onValueChange={onValueChange}
+
+          />
+        );
+      }
+    };
   }
 }
 
