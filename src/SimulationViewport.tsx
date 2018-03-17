@@ -86,7 +86,57 @@ interface SVGLinesComponentProps {
   onClick?: () => void;
 }
 
+abstract class LinkRenderer {
+  renderDefs(): any {
+    return undefined;
+  }
+
+  abstract renderLinks(links: MyLinkDatum[]): any;
+  abstract updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[]): void;
+}
+
+class BasicLinkRenderer implements LinkRenderer {
+  renderDefs(): any {
+    return undefined;
+
+    // <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
+    // <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+    // </marker>
+  }
+
+  renderLinks(links: MyLinkDatum[]) {
+    return links.map((link, index) => {
+      var source = link.source as MyNodeDatum;
+      var target = link.target as MyNodeDatum;
+      return (
+        <line
+          key={"link." + index}
+          x1={source.x}
+          y1={source.y}
+          x2={target.x}
+          y2={target.y}
+        />
+      );
+    });
+  }
+
+  updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[]) {
+    var linkElements: SVGLineElement[] = (parentElement.children as any);
+    links.forEach((link, index) => {
+      var linkElement = linkElements[index];
+      var source = (link.source as MyNodeDatum);
+      var target = (link.target as MyNodeDatum);
+      linkElement.setAttribute("x1", (source.x || 0) + "px");
+      linkElement.setAttribute("y1", (source.y || 0) + "px");
+      linkElement.setAttribute("x2", (target.x || 0) + "px");
+      linkElement.setAttribute("y2", (target.y || 0) + "px");
+    });
+  }
+}
+
 class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, object> {
+  linkRenderer: LinkRenderer = new BasicLinkRenderer();
+
   protected readonly bindings: ListenerBinding<SVGLinesComponentProps>[] = [
     {
       propertyName: "simulation",
@@ -97,25 +147,18 @@ class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, ob
 
   private _gRef?: SVGGElement;
 
-  private static renderLink(link: D3Force.SimulationLinkDatum<MyNodeDatum>, id: number) {
-    var source = link.source as MyNodeDatum;
-    var target = link.target as MyNodeDatum;
-    return (
-      <line key={"link." + id} x1={source.x} y1={source.y} x2={target.x} y2={target.y}/>
-    );
-  }
-
   render() {
-    var linkLines = this.props.document.links.map(SVGLinesComponent.renderLink);
-
     return (
       <svg
         key="linkLines"
         className="SimulationViewport-linkLines"
         onClick={this.props.onClick}
       >
+        <defs>
+          {this.linkRenderer.renderDefs()}
+        </defs>
         <g ref={this._setGRef}>
-          {linkLines}
+          {this.linkRenderer.renderLinks(this.props.document.links)}
         </g>
       </svg>
     );
@@ -123,16 +166,7 @@ class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, ob
 
   protected onSignal() {
     if (this._gRef) {
-      var linkElements: SVGLineElement[] = (this._gRef.children as any);
-      this.props.document.links.forEach((link, index) => {
-        var linkElement = linkElements[index];
-        var source = (link.source as MyNodeDatum);
-        var target = (link.target as MyNodeDatum);
-        linkElement.setAttribute("x1", (source.x || 0) + "px");
-        linkElement.setAttribute("y1", (source.y || 0) + "px");
-        linkElement.setAttribute("x2", (target.x || 0) + "px");
-        linkElement.setAttribute("y2", (target.y || 0) + "px");
-      });
+      this.linkRenderer.updateLinkElements(this._gRef, this.props.document.links);
     }
   }
 
