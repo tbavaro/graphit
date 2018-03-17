@@ -1,3 +1,6 @@
+@import "@material/typography/mdc-typography.scss";
+@import "_all";
+
 .NodeView {
   position: absolute;
   width: 1px;
@@ -6,20 +9,25 @@
 }
 
 .NodeView-content {
+  @include mdc-typography(body2);
+  line-height: 1.1;
+  font-weight: 550;
+
   position: absolute;
-  background-color: #666666;
-  color: white;
-  border: 1px solid black;
-  border-radius: 5px;
-  padding: 5px;
+  background-color: $normalNodeBackgroundColor;
+  color: $nodeTextColor;
+  border: 1px solid white;
+  // border-radius: 1px;
+  padding: $paddingNode;
   transform: translate(-50%, -50%);
   cursor: pointer;
   user-select: none;
   text-align: center;
+  // box-shadow: 1px 1px lightgray;
 }
 
 .NodeView.locked .NodeView-content {
-  background-color: black;
+  background-color: $lockedNodeBackgroundColor;
 }
 
 .NodeView.selected .NodeView-content {

@@ -3,6 +3,10 @@
   @return hsl($h, $s, $l + $v);
 }
 
+@function between($min, $max, $v) {
+  @return max($min, min($max, $v));
+}
+
 $documentBackgroundColor: white;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -23,3 +27,16 @@ $leftDrawerButtonTextColor: white;
 ////////////////////////////////////////////////////////////////////////////////
 
 $propertiesDrawerBackgroundColor: white ;
+
+////////////////////////////////////////////////////////////////////////////////
+// GRAPH (nodes, links, etc)
+////////////////////////////////////////////////////////////////////////////////
+
+$nodeTextColor: white;
+
+@function nodeBackgroundColor($deltaL: 0) {
+  @return hsl(20, 80%, between(0%, 100%, 60% + $deltaL));
+}
+
+$normalNodeBackgroundColor: nodeBackgroundColor(+0%);
+$lockedNodeBackgroundColor: nodeBackgroundColor(-40%);
