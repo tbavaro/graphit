@@ -1,14 +1,8 @@
-/// <reference path="../../node_modules/@types/gapi.client/index.d.ts"/>
-/// <reference path="../../node_modules/@types/gapi.client.drive/index.d.ts"/>
-
 import * as Request from "request-promise-native";
-
-const API_KEY = "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w";
-const CLIENT_ID = "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleusercontent.com";
-const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
-const SCOPES = 'https://www.googleapis.com/auth/drive';
+import GoogleApi from "../google/GoogleApi";
 
 const EXTENSION = ".graphit.json";
+const gapi = GoogleApi.gapiRaw;
 
 type Maybe<T> = T | undefined;
 
@@ -32,14 +26,7 @@ export class Datastore {
   private _reloadAccessTokenTimeoutId?: NodeJS.Timer;
 
   constructor() {
-    var initClient = () => {
-      return gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
-        scope: SCOPES
-      });
-    };
+    var initClient = GoogleApi.clientSingleton;
 
     var initDrive = () => {
       return gapi.client.load("drive", "v3");
