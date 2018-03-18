@@ -1,8 +1,7 @@
 import * as Request from "request-promise-native";
-import GoogleApi from "../google/GoogleApi";
+import * as GoogleApi from "../google/GoogleApi";
 
 const EXTENSION = ".graphit.json";
-const gapi = GoogleApi.gapiRaw;
 
 type Maybe<T> = T | undefined;
 
@@ -24,43 +23,19 @@ export class Datastore {
   private _cachedGraphitRoot?: string | null;
   private _accessToken?: string;
   private _reloadAccessTokenTimeoutId?: NodeJS.Timer;
+  private _files?: GoogleApi.DriveFilesResource;
 
   constructor() {
-    var initClient = GoogleApi.clientSingleton;
-
-    var initDrive = () => {
-      return gapi.client.load("drive", "v3");
-    };
-
-    var doHack = () => {
-      // hack because the typings seem to be wrong
-      (<any> (gapi.client)).files = (<any> (gapi.client)).drive.files;
-    };
-
-    var finishInitialization = () => {
+    GoogleApi.filesSingleton().then((files) => {
+      this._files = files;
 
       // listen for sign-in state changes
-      gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateIsSignedIn);
+      GoogleApi.getAuthInstance().isSignedIn.listen(this.updateIsSignedIn);
 
       // handle the initial sign-in state
-      this.updateIsSignedIn(gapi.auth2.getAuthInstance().isSignedIn.get());
-    };
-
-    gapi.load("client:auth2", () => {
-      initClient()
-        .then(initDrive)
-        .then(doHack)
-        .then(finishInitialization);
+      this.updateIsSignedIn(GoogleApi.getAuthInstance().isSignedIn.get());
     });
   }
-
-  // load(): Maybe<string> {
-  //   return undefined;
-  // }
-
-  // save(document: string) {
-  //   return "hello";
-  // }
 
   loadString(key: string): Maybe<string> {
     return undefined;
@@ -76,13 +51,13 @@ export class Datastore {
 
   signIn() {
     if (this._status === DatastoreStatus.SignedOut) {
-      gapi.auth2.getAuthInstance().signIn();
+      GoogleApi.getAuthInstance().signIn();
     }
   }
 
   signOut() {
     if (this.isSignedIn()) {
-      gapi.auth2.getAuthInstance().signOut();
+      GoogleApi.getAuthInstance().signOut();
     }
   }
 
@@ -110,7 +85,7 @@ export class Datastore {
           '"' + rootId + '" in parents',
           'trashed=false'
         ].join(" and ");
-        return gapi.client.files.list({
+        return this.filesResource().list({
           pageSize: 1000,
           fields: "nextPageToken, files(id, name)",
           q: query,
@@ -137,7 +112,7 @@ export class Datastore {
       return Promise.reject(new Error("not logged in"));
     }
 
-    return gapi.client.files.get({
+    return this.filesResource().get({
       fileId: fileId,
       fields: "name"
     }).then((f) => {
@@ -174,7 +149,7 @@ export class Datastore {
     return this.findOrCreateGraphitRoot()
       .then((rootId) => {
         var uri = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-        var metadata: gapi.client.drive.File = {
+        var metadata: GoogleApi.DriveFile = {
           name: name + EXTENSION,
           parents: [rootId]
         };
@@ -213,6 +188,13 @@ export class Datastore {
     }) as PromiseLike<void>;
   }
 
+  private filesResource() {
+    if (!this._files) {
+      throw new Error("gapi files not initialized");
+    }
+    return this._files;
+  }
+
   private isSignedIn() {
     return (this._status === DatastoreStatus.SignedIn);
   }
@@ -230,7 +212,7 @@ export class Datastore {
 
       // if newly signed in...
       if (newStatus === DatastoreStatus.SignedIn) {
-        this._accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+        this._accessToken = GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().access_token;
         this.scheduleAuthReload();
       }
 
@@ -244,7 +226,7 @@ export class Datastore {
 
   private doAuthReload = () => {
     if (this.isSignedIn()) {
-      gapi.auth2.getAuthInstance().currentUser.get().reloadAuthResponse().then((response) => {
+      GoogleApi.getAuthInstance().currentUser.get().reloadAuthResponse().then((response) => {
         this._accessToken = response.access_token;
         this.scheduleAuthReload();
       });
@@ -257,21 +239,21 @@ export class Datastore {
       this._reloadAccessTokenTimeoutId = undefined;
     }
 
-    var secondsToExpire = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
+    var secondsToExpire = GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
     var secondsToWaitBeforeReload = Math.max(1, secondsToExpire - 120);
     this._reloadAccessTokenTimeoutId = setTimeout(this.doAuthReload, secondsToWaitBeforeReload * 1000);
   }
 
-  private findSingleResult(query: string): PromiseLike<gapi.client.drive.File | null> {
+  private findSingleResult(query: string): PromiseLike<GoogleApi.DriveFile | null> {
     if (!this.isSignedIn()) {
       return Promise.resolve(null);
     }
 
-    return gapi.client.files.list({
+    return this.filesResource().list({
       pageSize: 2,
       fields: "files(id, name)",
       q: query
-    }).then((response): gapi.client.drive.File | null => {
+    }).then((response): GoogleApi.DriveFile | null => {
       if (response.result.incompleteSearch || (response.result.files && response.result.files.length > 1)) {
         throw new Error("found more than one result for query: " + query);
       } else if (!response.result.files || response.result.files.length === 0) {
@@ -313,9 +295,9 @@ export class Datastore {
     });
   }
 
-  private maybeGetProfileData<T>(func: (profile: gapi.auth2.BasicProfile) => T): Maybe<T> {
+  private maybeGetProfileData<T>(func: (profile: GoogleApi.BasicProfile) => T): Maybe<T> {
     if (this.isSignedIn()) {
-      return func(gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile());
+      return func(GoogleApi.getAuthInstance().currentUser.get().getBasicProfile());
     } else {
       return undefined;
     }

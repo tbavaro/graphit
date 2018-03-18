@@ -8,25 +8,69 @@ const config = {
   SCOPES: "https://www.googleapis.com/auth/drive"
 };
 
-var clientSingletonPromise: Promise<void> | undefined;
+const DEFAULT_TIMEOUT_MS = 15000;
 
-function clientSingleton(): Promise<void> {
-  if (!clientSingletonPromise) {
-    clientSingletonPromise = gapi.client.init({
+function createSingletonWithPromise<T>(func: () => Promise<T>): () => Promise<T> {
+  var singletonPromise: Promise<T> | undefined;
+  return () => {
+    if (!singletonPromise) {
+      singletonPromise = func();
+    }
+    return singletonPromise;
+  };
+}
+
+const loadApiSingleton = (apiName: string, extraCallback?: () => void): () => Promise<void> => {
+  return createSingletonWithPromise(() => {
+    var promise = new Promise<void>((resolve, reject) => {
+      gapi.load(apiName, {
+        timeout: DEFAULT_TIMEOUT_MS,
+        callback: resolve,
+        onerror: () => reject("gapi failed to load api: " + apiName),
+        ontimeout: () => reject("gapi timed out loading api: " + apiName)
+      });
+    });
+    if (extraCallback) {
+      promise = promise.then(extraCallback);
+    }
+    return promise;
+  });
+};
+
+var authIsLoaded = false;
+
+const loadClientAuth2ApiSingleton = loadApiSingleton("client:auth2", () => authIsLoaded = true);
+
+export const clientSingleton = createSingletonWithPromise(() => {
+  return loadClientAuth2ApiSingleton().then(() => {
+    gapi.client.init({
       apiKey: config.API_KEY,
       clientId: config.CLIENT_ID,
       discoveryDocs: config.DISCOVERY_DOCS,
       scope: config.SCOPES
     });
-    return clientSingletonPromise;
-  } else {
-    return clientSingletonPromise;
+  });
+});
+
+export const filesSingleton = createSingletonWithPromise(() => {
+  return (
+    clientSingleton()
+      .then(() => gapi.client.load("drive", "v3"))
+      .then(() => {
+        // hack because the typings seem to be wrong
+        (<any> (gapi.client)).files = (<any> (gapi.client)).drive.files;
+        return gapi.client.files;
+      })
+  );
+});
+
+export function getAuthInstance() {
+  if (!authIsLoaded) {
+    throw new Error("gapi auth2 api not yet loaded");
   }
+  return gapi.auth2.getAuthInstance();
 }
 
-const GoogleApi = {
-  clientSingleton: clientSingleton,
-  gapiRaw: gapi
-};
-
-export default GoogleApi;
+export type BasicProfile = gapi.auth2.BasicProfile;
+export type DriveFile = gapi.client.drive.File;
+export type DriveFilesResource = gapi.client.drive.FilesResource;
