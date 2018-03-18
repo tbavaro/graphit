@@ -10,6 +10,11 @@
   stroke-width: 2px;
 }
 
+.SimulationViewport-linkLines marker#arrow {
+  stroke-width: 0;
+  fill: $linkColor;
+}
+
 .SimulationViewport-FPSView {
   position: absolute;
   z-index: 1000;

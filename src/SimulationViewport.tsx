@@ -91,19 +91,15 @@ abstract class LinkRenderer {
     return undefined;
   }
 
+  parentStyle(): React.CSSProperties {
+    return {};
+  }
+
   abstract renderLinks(links: MyLinkDatum[]): any;
   abstract updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[]): void;
 }
 
-class BasicLinkRenderer implements LinkRenderer {
-  renderDefs(): any {
-    return undefined;
-
-    // <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto" markerUnits="strokeWidth">
-    // <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
-    // </marker>
-  }
-
+class BasicLinkRenderer extends LinkRenderer {
   renderLinks(links: MyLinkDatum[]) {
     return links.map((link, index) => {
       var source = link.source as MyNodeDatum;
@@ -134,8 +130,69 @@ class BasicLinkRenderer implements LinkRenderer {
   }
 }
 
+class MiddleArrowDirectedLinkRenderer extends LinkRenderer {
+  renderDefs(): any {
+    return (
+      <marker
+        id="arrow"
+        viewBox="0 -5 10 10"
+        refX="5"
+        markerWidth="10"
+        markerHeight="10"
+        orient="auto"
+      >
+        <path d="M 0 -5 L 10 0 L 0 5"/>
+      </marker>
+    );
+  }
+
+  parentStyle() {
+    return {
+      markerMid: "url(#arrow)"
+    };
+  }
+
+  static pathFor(link: MyLinkDatum): string {
+    var source = link.source as MyNodeDatum;
+    var target = link.target as MyNodeDatum;
+    var x0 = source.x || 0;
+    var y0 = source.y || 0;
+    var x2 = target.x || 0;
+    var y2 = target.y || 0;
+    var x1 = (x0 + x2) / 2;
+    var y1 = (y0 + y2) / 2;
+    return [
+      "M", x0, y0,
+      "L", x1, y1,
+      "L", x2, y2
+    ].join(" ");
+  }
+
+  renderLinks(links: MyLinkDatum[]) {
+    return links.map((link, index) => {
+      return (
+        <path
+          key={"link." + index}
+          d={MiddleArrowDirectedLinkRenderer.pathFor(link)}
+        />
+      );
+    });
+  }
+
+  updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[]) {
+    var linkElements: SVGLineElement[] = (parentElement.children as any);
+    links.forEach((link, index) => {
+      linkElements[index].setAttribute("d", MiddleArrowDirectedLinkRenderer.pathFor(link));
+    });
+  }
+}
+
 class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, object> {
-  linkRenderer: LinkRenderer = new BasicLinkRenderer();
+  linkRenderer: LinkRenderer = (
+    false
+      ? new BasicLinkRenderer()
+      : new MiddleArrowDirectedLinkRenderer()
+  );
 
   protected readonly bindings: ListenerBinding<SVGLinesComponentProps>[] = [
     {
@@ -157,7 +214,7 @@ class SVGLinesComponent extends ListenerPureComponent<SVGLinesComponentProps, ob
         <defs>
           {this.linkRenderer.renderDefs()}
         </defs>
-        <g ref={this._setGRef}>
+        <g ref={this._setGRef} style={this.linkRenderer.parentStyle()}>
           {this.linkRenderer.renderLinks(this.props.document.links)}
         </g>
       </svg>
