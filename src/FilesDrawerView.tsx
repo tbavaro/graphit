@@ -1,8 +1,8 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
-import { Datastore, DatastoreStatus, DatastoreFileResult } from "./Datastore";
-import * as TemporaryNavDrawer from './TemporaryNavDrawer';
-import * as MaterialList from "./MaterialList";
+import { Datastore, DatastoreStatus, DatastoreFileResult } from "./data/Datastore";
+import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
+import * as MaterialList from "./ui-helpers/MaterialList";
 
 interface Props extends TemporaryNavDrawer.Props {
   datastore: Datastore;

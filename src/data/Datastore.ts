@@ -1,8 +1,5 @@
-//// <reference path="../node_modules/@types/gapi/index.d.ts"/>
-/// <reference path="../node_modules/@types/gapi.client/index.d.ts"/>
-/// <reference path="../node_modules/@types/gapi.client.drive/index.d.ts"/>
-
-// import GraphDocument from './GraphDocument';
+/// <reference path="../../node_modules/@types/gapi.client/index.d.ts"/>
+/// <reference path="../../node_modules/@types/gapi.client.drive/index.d.ts"/>
 
 import * as Request from "request-promise-native";
 

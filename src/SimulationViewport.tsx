@@ -1,15 +1,15 @@
 import * as React from 'react';
 import * as D3 from "d3";
 import * as D3Force from 'd3-force';
-import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
+import { MyLinkDatum, MyNodeDatum } from './data/MyNodeDatum';
 import { Component as NodeView, Position } from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
-import { GraphDocument } from './GraphDocument';
-import * as Viewport from './Viewport';
-import { ListenerPureComponent, ListenerBinding } from './ListenerPureComponent';
+import { GraphDocument } from './data/GraphDocument';
+import * as Viewport from './ui-helpers/Viewport';
+import { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
-import { SimpleListenable } from './Listenable';
+import { SimpleListenable } from './data/Listenable';
 import * as LinkRenderers from './LinkRenderers';
 
 interface Props {

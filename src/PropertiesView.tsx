@@ -1,9 +1,9 @@
 import * as React from 'react';
 import './PropertiesView.css';
-import * as MaterialSlider from "./MaterialSlider";
+import * as MaterialSlider from "./ui-helpers/MaterialSlider";
 import { ValueFormatter, ValueFormatters } from "./ValueFormatters";
-import { GraphDocument } from './GraphDocument';
-import { SimpleListenable } from './Listenable';
+import { GraphDocument } from './data/GraphDocument';
+import { SimpleListenable } from './data/Listenable';
 
 interface MyActions {
   closePropertiesView: () => void;

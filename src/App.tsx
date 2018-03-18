@@ -1,14 +1,14 @@
 import * as React from 'react';
 import SimulationViewport from './SimulationViewport';
 import './App.css';
-import AppBar from './AppBar';
+import AppBar from './ui-helpers/AppBar';
 import FilesDrawerView from './FilesDrawerView';
-import { GraphDocument } from './GraphDocument';
+import { GraphDocument } from './data/GraphDocument';
 import ActionManager from './ActionManager';
-import { Datastore, DatastoreStatus } from "./Datastore";
+import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as QueryString from "query-string";
 import PropertiesView from './PropertiesView';
-import { SimpleListenable } from './Listenable';
+import { SimpleListenable } from './data/Listenable';
 
 interface State {
   document?: GraphDocument;
