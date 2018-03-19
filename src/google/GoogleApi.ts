@@ -1,8 +1,9 @@
 /// <reference path="../../node_modules/@types/gapi.client/index.d.ts"/>
 /// <reference path="../../node_modules/@types/gapi.client.drive/index.d.ts"/>
+/// <reference path="../../node_modules/@types/google.picker/index.d.ts"/>
 
-const config = {
-  API_KEY:  "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w",
+export const config = {
+  API_KEY: "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w",
   CLIENT_ID: "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleusercontent.com",
   DISCOVERY_DOCS: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
   SCOPES: "https://www.googleapis.com/auth/drive"
@@ -40,6 +41,14 @@ const loadApiSingleton = (apiName: string, extraCallback?: () => void): () => Pr
 var authIsLoaded = false;
 
 const loadClientAuth2ApiSingleton = loadApiSingleton("client:auth2", () => authIsLoaded = true);
+const loadPickerApiSingleton = loadApiSingleton("picker");
+
+// the @types seem to be wrong here
+type ExtraClientTypes = {
+  drive: {
+    files: typeof gapi.client.files;
+  };
+};
 
 export const clientSingleton = createSingletonWithPromise(() => {
   return loadClientAuth2ApiSingleton().then(() => {
@@ -49,19 +58,35 @@ export const clientSingleton = createSingletonWithPromise(() => {
       discoveryDocs: config.DISCOVERY_DOCS,
       scope: config.SCOPES
     });
+  }).then(() => {
+    return gapi.client as (ExtraClientTypes & typeof gapi.client);
   });
 });
 
 export const filesSingleton = createSingletonWithPromise(() => {
   return (
     clientSingleton()
-      .then(() => gapi.client.load("drive", "v3"))
-      .then(() => {
-        // hack because the typings seem to be wrong
-        (<any> (gapi.client)).files = (<any> (gapi.client)).drive.files;
-        return gapi.client.files;
+      .then((Client) => {
+        return gapi.client.load("drive", "v3").then(() => {
+          return Client.drive.files;
+        });
       })
   );
+});
+
+// the @types seem to be wrong here
+type ExtraPickerTypes = {
+  DocsView: {
+    new (): google.picker.DocsView & {
+      setMimeTypes(mimeTypes: string): void;
+    };
+  };
+};
+
+export const pickerSingleton = createSingletonWithPromise(() => {
+  return loadPickerApiSingleton().then(() => {
+    return google.picker as (ExtraPickerTypes & typeof google.picker);
+  });
 });
 
 export function getAuthInstance() {

@@ -9,6 +9,7 @@ import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as QueryString from "query-string";
 import PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
+import GooglePickerHelper from './google/GooglePickerHelper';
 
 interface State {
   document?: GraphDocument;
@@ -166,6 +167,14 @@ class App extends React.Component<object, State> {
 
       if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
         this.loadDocumentById(this.pendingDocumentLoadId);
+      }
+
+      if (newStatus === DatastoreStatus.SignedIn) {
+        new GooglePickerHelper().createPicker().then((data) => {
+          console.log("data", data);
+        }).catch((error) => {
+          console.log("error", error);
+        });
       }
     }
   }
