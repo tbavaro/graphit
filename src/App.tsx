@@ -9,6 +9,7 @@ import * as QueryString from "query-string";
 import * as PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
 import GooglePickerHelper from './google/GooglePickerHelper';
+import * as LocalFiles from './localfiles/LocalFiles';
 
 type AllActions =
   AppBar.Actions &
@@ -68,7 +69,8 @@ class App extends React.Component<object, State> {
       });
     },
 
-    openFile: () => this.openFile()
+    openFilePicker: () => this.openFile(),
+    importUploadedFile: () => this.importUploadedFile()
   };
 
   componentWillMount() {
@@ -197,6 +199,14 @@ class App extends React.Component<object, State> {
         this.loadDocumentById(fileResult.id);
         this.closeLeftNav();
       }
+    });
+  }
+
+  private importUploadedFile() {
+    LocalFiles.openLocalFile((result: LocalFiles.FileResult) => {
+      var document = GraphDocument.load(result.data, result.name);
+      this.loadDocument(document, /*documentId=*/undefined);
+      this.closeLeftNav();
     });
   }
 }

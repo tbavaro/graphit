@@ -5,7 +5,8 @@ import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 import * as MaterialList from "./ui-helpers/MaterialList";
 
 export interface Actions {
-  openFile: () => void;
+  openFilePicker: () => void;
+  importUploadedFile: () => void;
 }
 
 interface Props extends TemporaryNavDrawer.Props {
@@ -125,16 +126,21 @@ export class Component extends React.Component<Props, State> {
           <MaterialList.Component
             items={[
               {
-                id: "~open",
+                key: "action:open",
                 label: "Open...",
-                onClick: this.props.actionManager.openFile
+                onClick: this.props.actionManager.openFilePicker
+              },
+              {
+                key: "action:import_upload",
+                label: "Import file...",
+                onClick: this.props.actionManager.importUploadedFile
               }
             ]}
           />
           <MaterialList.Component
             items={files.map((file) => {
               return {
-                id: file.id,
+                key: "file:" + file.id,
                 label: file.name,
                 href: "?doc=" + file.id
               };

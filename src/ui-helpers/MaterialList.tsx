@@ -2,7 +2,7 @@ import * as React from "react";
 import "./MaterialList.css";
 
 export interface ItemProps {
-  id: string;
+  key: string;
   label: string;
   href?: string;
   onClick?: () => void;
@@ -25,7 +25,7 @@ export class Component extends React.PureComponent<Props, object> {
     var result = (
       <li
         className="mdc-list-item"
-        key={"item:" + itemProps.id}
+        key={itemProps.key}
         onClick={itemProps.onClick}
         children={itemProps.label}
       />

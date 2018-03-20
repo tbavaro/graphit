@@ -8,6 +8,14 @@ export interface ZoomState {
   scale: number;
 }
 
+function defaultZoomState(): ZoomState {
+  return {
+    centerX: 0,
+    centerY: 0,
+    scale: 1
+  };
+}
+
 interface Props<DragSubject> {
   initialZoomState?: ZoomState;
 
@@ -26,11 +34,7 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
   innerRef?: HTMLDivElement;
   zoom = D3.zoom();
 
-  zoomState: ZoomState = this.props.initialZoomState || {
-      centerX: 0,
-      centerY: 0,
-      scale: 1
-  };
+  zoomState: ZoomState = this.props.initialZoomState || defaultZoomState();
 
   componentDidMount() {
     if (!this.innerRef || !this.outerRef) {
@@ -40,17 +44,19 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     this.zoom.scaleExtent([0.1, 3]).on("zoom", this.zoomed);
 
     D3.select(this.outerRef).call(this.zoom).on("dblclick.zoom", null);
+    this.setZoomState(this.props.initialZoomState || defaultZoomState());
 
-    this.setCenterPoint(this.zoomState.centerX, this.zoomState.centerY, this.zoomState.scale);
     this.configureDrag();
-
-    // (window as any).moveBy = (dx: number, dy: number) => {
-    //   this.setCenterPoint(this.zoomState.centerX + dx, this.zoomState.centerY + dy);
-    // };
   }
 
   componentDidUpdate(prevProps: Readonly<Props<DragSubject>>) {
     this.configureDrag();
+  }
+
+  componentWillReceiveProps(newProps: Props<DragSubject>) {
+    if (this.props.initialZoomState !== newProps.initialZoomState) {
+      this.setZoomState(newProps.initialZoomState || defaultZoomState());
+    }
   }
 
   render() {
@@ -136,16 +142,17 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     this.onDragEvent(/*isEnd=*/true);
   }
 
-  private setCenterPoint(x: number, y: number, scale?: number) {
+  // private setCenterPoint(x: number, y: number, scale?: number) {
+  private setZoomState(zoomState: ZoomState) {
     if (!this.outerRef) {
       throw new Error("refs not set");
     }
 
-    var sel = D3.select(this.outerRef);
-    this.zoom.translateTo(sel, x, y);
+    this.zoomState = zoomState;
 
-    if (scale !== undefined) {
-      this.zoom.scaleTo(sel, scale);
-    }
+    var sel = D3.select(this.outerRef);
+    var scale = zoomState.scale;
+    this.zoom.translateTo(sel, zoomState.centerX, zoomState.centerY);
+    this.zoom.scaleTo(sel, scale);
   }
 }
