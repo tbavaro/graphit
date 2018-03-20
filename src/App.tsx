@@ -164,6 +164,7 @@ class App extends React.Component<object, State> {
       loadedDocumentId: documentId,
       document: document
     });
+    // history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "");
   }
 
   private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
@@ -191,10 +192,11 @@ class App extends React.Component<object, State> {
   }
 
   private openFile = () => {
-    new GooglePickerHelper().createPicker().then((data) => {
-      console.log("data", data);
-    }).catch((error) => {
-      console.log("error", error);
+    new GooglePickerHelper().createPicker({
+      onPicked: (fileResult) => {
+        this.loadDocumentById(fileResult.id);
+        this.closeLeftNav();
+      }
     });
   }
 }
