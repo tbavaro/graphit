@@ -4,7 +4,12 @@ import { Datastore, DatastoreStatus, DatastoreFileResult } from "./data/Datastor
 import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 import * as MaterialList from "./ui-helpers/MaterialList";
 
+export interface Actions {
+  openFile: () => void;
+}
+
 interface Props extends TemporaryNavDrawer.Props {
+  actionManager: Actions;
   datastore: Datastore;
   datastoreStatus: DatastoreStatus;
   isExpandedByDefault?: boolean;
@@ -15,7 +20,7 @@ interface State {
   files?: DatastoreFileResult[];
 }
 
-class FilesDrawerView extends React.Component<Props, State> {
+export class Component extends React.Component<Props, State> {
   state: State = {
     isLoadingFiles: false
   };
@@ -116,15 +121,26 @@ class FilesDrawerView extends React.Component<Props, State> {
       return <div>(No files)</div>;
     } else {
       return (
-        <MaterialList.Component
-          items={files.map((file) => {
-            return {
-              id: file.id,
-              label: file.name,
-              href: "?doc=" + file.id
-            };
-          })}
-        />
+        <React.Fragment>
+          <MaterialList.Component
+            items={[
+              {
+                id: "~open",
+                label: "Open...",
+                onClick: this.props.actionManager.openFile
+              }
+            ]}
+          />
+          <MaterialList.Component
+            items={files.map((file) => {
+              return {
+                id: file.id,
+                label: file.name,
+                href: "?doc=" + file.id
+              };
+            })}
+          />
+        </React.Fragment>
       );
     }
   }
@@ -149,5 +165,3 @@ class FilesDrawerView extends React.Component<Props, State> {
     this.props.datastore.signOut();
   }
 }
-
-export default FilesDrawerView;

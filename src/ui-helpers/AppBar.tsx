@@ -1,18 +1,18 @@
 import * as React from "react";
 import "./AppBar.css";
 
-interface MyActions {
+export interface Actions {
   onClickSaveDocument: () => void;
   togglePropertiesView: () => void;
 }
 
 interface Props {
-  actionManager: MyActions;
+  actionManager: Actions;
   title: string;
   onClickNavButton?: () => void;
 }
 
-class AppBar extends React.PureComponent<Props, object> {
+export class Component extends React.PureComponent<Props, object> {
   private ref?: HTMLDivElement;
 
   componentDidMount() {
@@ -64,5 +64,3 @@ class AppBar extends React.PureComponent<Props, object> {
     }
   }
 }
-
-export default AppBar;

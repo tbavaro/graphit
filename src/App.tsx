@@ -1,15 +1,19 @@
 import * as React from 'react';
 import SimulationViewport from './SimulationViewport';
 import './App.css';
-import AppBar from './ui-helpers/AppBar';
-import FilesDrawerView from './FilesDrawerView';
+import * as AppBar from './ui-helpers/AppBar';
+import * as FilesDrawerView from './FilesDrawerView';
 import { GraphDocument } from './data/GraphDocument';
-import ActionManager from './ActionManager';
 import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as QueryString from "query-string";
-import PropertiesView from './PropertiesView';
+import * as PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
 import GooglePickerHelper from './google/GooglePickerHelper';
+
+type AllActions =
+  AppBar.Actions &
+  FilesDrawerView.Actions &
+  PropertiesView.Actions;
 
 interface State {
   document?: GraphDocument;
@@ -32,7 +36,7 @@ class App extends React.Component<object, State> {
 
   pendingDocumentLoadId?: string;
 
-  actionManager: ActionManager = {
+  actionManager: AllActions = {
     onClickSaveDocument: () => {
       if (this.state.document) {
         if (!this.state.loadedDocumentId) {
@@ -62,7 +66,9 @@ class App extends React.Component<object, State> {
       this.setState({
         propertiesViewOpen: !this.state.propertiesViewOpen
       });
-    }
+    },
+
+    openFile: () => this.openFile()
   };
 
   componentWillMount() {
@@ -95,7 +101,7 @@ class App extends React.Component<object, State> {
         />
       );
       propertiesView = (
-        <PropertiesView
+        <PropertiesView.Component
           actionManager={this.actionManager}
           isOpen={this.state.propertiesViewOpen}
           document={this.state.document}
@@ -109,12 +115,13 @@ class App extends React.Component<object, State> {
 
     return (
       <div className="App">
-        <AppBar
+        <AppBar.Component
           title={title}
           onClickNavButton={this.openLeftNav}
           actionManager={this.actionManager}
         />
-        <FilesDrawerView
+        <FilesDrawerView.Component
+          actionManager={this.actionManager}
           datastore={this.datastore}
           datastoreStatus={this.state.datastoreStatus}
           isOpen={this.state.leftNavOpen}
@@ -168,14 +175,6 @@ class App extends React.Component<object, State> {
       if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
         this.loadDocumentById(this.pendingDocumentLoadId);
       }
-
-      if (newStatus === DatastoreStatus.SignedIn) {
-        new GooglePickerHelper().createPicker().then((data) => {
-          console.log("data", data);
-        }).catch((error) => {
-          console.log("error", error);
-        });
-      }
     }
   }
 
@@ -188,6 +187,14 @@ class App extends React.Component<object, State> {
   private closeLeftNav = () => {
     this.setState({
       leftNavOpen: false
+    });
+  }
+
+  private openFile = () => {
+    new GooglePickerHelper().createPicker().then((data) => {
+      console.log("data", data);
+    }).catch((error) => {
+      console.log("error", error);
     });
   }
 }

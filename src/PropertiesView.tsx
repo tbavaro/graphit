@@ -5,7 +5,7 @@ import { ValueFormatter, ValueFormatters } from "./ValueFormatters";
 import { GraphDocument } from './data/GraphDocument';
 import { SimpleListenable } from './data/Listenable';
 
-interface MyActions {
+export interface Actions {
   closePropertiesView: () => void;
 }
 
@@ -66,13 +66,13 @@ class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, S
 }
 
 interface Props {
-  actionManager: MyActions;
+  actionManager: Actions;
   isOpen: boolean;
   document: GraphDocument;
   simulationConfigListener: SimpleListenable;
 }
 
-class PropertiesView extends React.PureComponent<Props, object> {
+export class Component extends React.PureComponent<Props, object> {
   private _getForceSimulationConfig = () => this.props.document.layoutState.forceSimulationConfig;
 
   private _controlRenderers = [
@@ -147,5 +147,3 @@ class PropertiesView extends React.PureComponent<Props, object> {
     };
   }
 }
-
-export default PropertiesView;

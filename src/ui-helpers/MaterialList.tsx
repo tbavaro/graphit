@@ -5,6 +5,7 @@ export interface ItemProps {
   id: string;
   label: string;
   href?: string;
+  onClick?: () => void;
 }
 
 export interface Props {
@@ -22,7 +23,12 @@ export class Component extends React.PureComponent<Props, object> {
 
   private renderItem = (itemProps: ItemProps) => {
     var result = (
-      <li className="mdc-list-item" key={"item:" + itemProps.id}>{itemProps.label}</li>
+      <li
+        className="mdc-list-item"
+        key={"item:" + itemProps.id}
+        onClick={itemProps.onClick}
+        children={itemProps.label}
+      />
     );
 
     if (itemProps.href) {
