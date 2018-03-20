@@ -119,8 +119,6 @@ export class Component extends React.Component<Props, State> {
 
     if (this.state.isLoadingFiles) {
       return <div>(Loading...)</div>;
-    } else if (files.length === 0) {
-      return <div>(No files)</div>;
     } else {
       return (
         <React.Fragment>
@@ -137,7 +135,7 @@ export class Component extends React.Component<Props, State> {
                 onClick: this.props.actionManager.importUploadedFile
               },
               {
-                key: "action:import_upload",
+                key: "action:import_spreadsheet",
                 label: "Import spreadsheet...",
                 onClick: this.props.actionManager.importGoogleSheet
               }

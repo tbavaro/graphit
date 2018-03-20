@@ -1,12 +1,16 @@
 /// <reference path="../../node_modules/@types/gapi.client/index.d.ts"/>
 /// <reference path="../../node_modules/@types/gapi.client.drive/index.d.ts"/>
+/// <reference path="../../node_modules/@types/gapi.client.sheets/index.d.ts"/>
 /// <reference path="../../node_modules/@types/google.picker/index.d.ts"/>
 
 export const config = {
   API_KEY: "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w",
   CLIENT_ID: "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleusercontent.com",
   DISCOVERY_DOCS: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-  SCOPES: "https://www.googleapis.com/auth/drive"
+  SCOPES: [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/spreadsheets.readonly"
+  ].join(" ")
 };
 
 const DEFAULT_TIMEOUT_MS = 15000;
@@ -48,6 +52,9 @@ type ExtraClientTypes = {
   drive: {
     files: typeof gapi.client.files;
   };
+  sheets: {
+    spreadsheets: typeof gapi.client.spreadsheets;
+  }
 };
 
 export const clientSingleton = createSingletonWithPromise(() => {
@@ -95,6 +102,15 @@ export function getAuthInstance() {
   }
   return gapi.auth2.getAuthInstance();
 }
+
+export const sheetsSingleton = createSingletonWithPromise(() => {
+  return (
+    clientSingleton()
+      .then((Client) => {
+        return gapi.client.load("sheets", "v4").then(() => Client.sheets.spreadsheets);
+      })
+  );
+});
 
 export type BasicProfile = gapi.auth2.BasicProfile;
 export type DriveFile = gapi.client.drive.File;

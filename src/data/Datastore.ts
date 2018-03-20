@@ -79,32 +79,37 @@ export class Datastore {
     }
 
     return this.findOrCreateGraphitRoot()
-      .then((rootId) => {
-        var query = [
-          'name contains "' + EXTENSION + '\"',
-          '"' + rootId + '" in parents',
-          'trashed=false'
-        ].join(" and ");
-        return this.filesResource().list({
-          pageSize: 1000,
-          fields: "nextPageToken, files(id, name)",
-          q: query,
-          orderBy: "name"
-        }).then((response) => {
-          return (response.result.files || []).filter(f => {
-            return f.name && f.name.endsWith(EXTENSION);
-          }).map(f => {
-            if (!f.name || !f.id) {
-              throw new Error("name or id missing");
-            }
+      .then(
+        (rootId) => {
+          var query = [
+            'name contains "' + EXTENSION + '\"',
+            '"' + rootId + '" in parents',
+            'trashed=false'
+          ].join(" and ");
+          return this.filesResource().list({
+            pageSize: 1000,
+            fields: "nextPageToken, files(id, name)",
+            q: query,
+            orderBy: "name"
+          }).then((response) => {
+            return (response.result.files || []).filter(f => {
+              return f.name && f.name.endsWith(EXTENSION);
+            }).map(f => {
+              if (!f.name || !f.id) {
+                throw new Error("name or id missing");
+              }
 
-            return {
-              id: f.id,
-              name: f.name.substring(0, f.name.length - EXTENSION.length)
-            };
+              return {
+                id: f.id,
+                name: f.name.substring(0, f.name.length - EXTENSION.length)
+              };
+            });
           });
-        });
-      });
+        },
+        (error) => {
+          return [];
+        }
+      );
   }
 
   getFileName(fileId: string): PromiseLike<string> {

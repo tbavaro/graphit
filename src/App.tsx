@@ -10,6 +10,7 @@ import * as PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
 import GooglePickerHelper from './google/GooglePickerHelper';
 import * as LocalFiles from './localfiles/LocalFiles';
+import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 
 type AllActions =
   AppBar.Actions &
@@ -167,7 +168,9 @@ class App extends React.Component<object, State> {
       loadedDocumentId: documentId,
       document: document
     });
-    // history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "");
+
+    // TODO implement popstate too
+    history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
   }
 
   private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
@@ -178,6 +181,10 @@ class App extends React.Component<object, State> {
 
       if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
         this.loadDocumentById(this.pendingDocumentLoadId);
+      }
+
+      if (newStatus === DatastoreStatus.SignedIn) {
+        // SpreadsheetImporter.loadDocumentFromSheet("1F9_NGA1pNY_Hf09y5mINKdnzlZkVRo89v6wEjmKz-R8");
       }
     }
   }
@@ -211,7 +218,11 @@ class App extends React.Component<object, State> {
 
   private importGoogleSheet() {
     new GooglePickerHelper().createGoogleSheetPicker((fileResult) => {
-      alert("picked: " + fileResult.id);
+      // alert("picked: " + fileResult.id);
+      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((document) => {
+        this.loadDocument(document, /*documentId=*/undefined);
+        this.closeLeftNav();
+      });
     });
   }
 }

@@ -1,11 +1,17 @@
+import * as GoogleApi from "../google/GoogleApi";
+
 import {
   SerializedGraphDocument,
   SerializedNode,
-  SerializedLink
+  SerializedLink,
+  GraphDocument
 } from "./GraphDocument";
 
+const NODES_SHEET = "nodes";
 const NODE_ID_KEY = "id";
 const NODE_LABEL_KEY = "label";
+
+const LINKS_SHEET = "links";
 const LINK_SOURCE_ID_KEY = "source";
 const LINK_TARGET_ID_KEY = "target";
 
@@ -119,6 +125,41 @@ function extractValuesAsStringSkipFirst(values: any[]): string[] {
   return result;
 }
 
-export function loadDataFromSheet(sheetId: string) {
+export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphDocument> {
+  const myError = (msg?: string) => {
+    return new Error("error loading spreadsheet (" + msg + "): " + sheetId);
+  };
+
+  return GoogleApi.sheetsSingleton().then((Sheets) => {
+    return Sheets.values.batchGet({
+      spreadsheetId: sheetId,
+      majorDimension: "COLUMNS",
+      ranges: [NODES_SHEET, LINKS_SHEET] as any
+    }).then(
+      (data) => {
+        if (!data.result.valueRanges) {
+          throw myError("no values");
+        } else if (data.result.valueRanges.length !== 2) {
+          throw myError("incorrect response size");
+        }
+
+        var sheetValues: any[][] = data.result.valueRanges.map((valueRange) => valueRange.values || []);
+
+        var sgd = internals.createSGDFromSheetData({
+          nodesData: sheetValues[0],
+          linksData: sheetValues[1]
+        });
+
+        return GraphDocument.load(JSON.stringify(sgd));
+      },
+      (error) => {
+        console.log("error loading sheet", sheetId, error);
+        throw myError();
+      }
+    );
+  });
+}
+
+export function preInit() {
   /* */
 }
