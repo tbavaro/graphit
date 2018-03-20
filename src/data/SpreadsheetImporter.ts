@@ -70,12 +70,14 @@ export const internals = {
         LINK_SOURCE_ID_KEY, LINK_TARGET_ID_KEY
       ]
     );
-    return this.createSGDFromDataColumns({
+    var result = this.createSGDFromDataColumns({
       nodeIds: nodeIds,
       nodeLabels: nodeLabels,
       linkSourceIds: linkSourceIds,
       linkTargetIds: linkTargetIds
     });
+    console.log(result);
+    return result;
   },
 
   // data should be loaded with COLUMNS as the major dimension
@@ -122,6 +124,16 @@ function extractValuesAsStringSkipFirst(values: any[]): string[] {
   for (var i = 1; i < values.length; ++i) {
     result[i - 1] = extractValueAsString(values[i]);
   }
+
+  // trim any extra off the bottom
+  var j = result.length;
+  while (j > 0 && (result[j - 1] === undefined || result[j - 1] === "")) {
+    --j;
+  }
+  if (j < result.length) {
+    result = result.slice(0, j);
+  }
+
   return result;
 }
 
