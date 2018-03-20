@@ -70,7 +70,8 @@ class App extends React.Component<object, State> {
     },
 
     openFilePicker: () => this.openFile(),
-    importUploadedFile: () => this.importUploadedFile()
+    importUploadedFile: () => this.importUploadedFile(),
+    importGoogleSheet: () => this.importGoogleSheet()
   };
 
   componentWillMount() {
@@ -194,11 +195,9 @@ class App extends React.Component<object, State> {
   }
 
   private openFile = () => {
-    new GooglePickerHelper().createPicker({
-      onPicked: (fileResult) => {
-        this.loadDocumentById(fileResult.id);
-        this.closeLeftNav();
-      }
+    new GooglePickerHelper().createJsonFilePicker((fileResult) => {
+      this.loadDocumentById(fileResult.id);
+      this.closeLeftNav();
     });
   }
 
@@ -207,6 +206,12 @@ class App extends React.Component<object, State> {
       var document = GraphDocument.load(result.data, result.name);
       this.loadDocument(document, /*documentId=*/undefined);
       this.closeLeftNav();
+    });
+  }
+
+  private importGoogleSheet() {
+    new GooglePickerHelper().createGoogleSheetPicker((fileResult) => {
+      alert("picked: " + fileResult.id);
     });
   }
 }

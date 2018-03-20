@@ -7,6 +7,7 @@ import * as MaterialList from "./ui-helpers/MaterialList";
 export interface Actions {
   openFilePicker: () => void;
   importUploadedFile: () => void;
+  importGoogleSheet: () => void;
 }
 
 interface Props extends TemporaryNavDrawer.Props {
@@ -134,6 +135,11 @@ export class Component extends React.Component<Props, State> {
                 key: "action:import_upload",
                 label: "Import file...",
                 onClick: this.props.actionManager.importUploadedFile
+              },
+              {
+                key: "action:import_upload",
+                label: "Import spreadsheet...",
+                onClick: this.props.actionManager.importGoogleSheet
               }
             ]}
           />

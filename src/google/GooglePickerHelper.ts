@@ -1,6 +1,6 @@
 import * as GoogleApi from "../google/GoogleApi";
 
-const MIME_TYPES = [
+const JSON_MIME_TYPES = [
   "application/me.timba.graphit+json",
   "application/json"
 ];
@@ -16,7 +16,13 @@ export default class GooglePickerHelper {
     GoogleApi.pickerSingleton();
   }
 
-  createPicker(attrs: {
+  private createPicker(attrs: {
+    config: {
+      type: "files",
+      mimeTypes: string[]
+    } | {
+      type: "spreadsheets"
+    };
     onPicked: (file: FileResult) => void;
   }) {
     var callback = (data) => {
@@ -34,12 +40,37 @@ export default class GooglePickerHelper {
     };
 
     GoogleApi.pickerSingleton().then((Picker) => {
-      var picker = new Picker.PickerBuilder()
-        .addView(new Picker.DocsView().setMimeTypes(MIME_TYPES.join(",")))
+      var builder = new Picker.PickerBuilder()
         .setCallback(callback)
-        .setOAuthToken(GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().access_token)
-        .build();
+        .setOAuthToken(GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().access_token);
+
+      if (attrs.config.type === "files") {
+        builder.addView(new Picker.DocsView().setMimeTypes(attrs.config.mimeTypes.join(",")));
+      } else if (attrs.config.type === "spreadsheets") {
+        builder.addView(Picker.ViewId.SPREADSHEETS);
+      }
+
+      var picker = builder.build();
       picker.setVisible(true);
+    });
+  }
+
+  createJsonFilePicker(onPicked: (file: FileResult) => void) {
+    this.createPicker({
+      config: {
+        type: "files",
+        mimeTypes: JSON_MIME_TYPES
+      },
+      onPicked: onPicked
+    });
+  }
+
+  createGoogleSheetPicker(onPicked: (file: FileResult) => void) {
+    this.createPicker({
+      config: {
+        type: "spreadsheets"
+      },
+      onPicked: onPicked
     });
   }
 }
