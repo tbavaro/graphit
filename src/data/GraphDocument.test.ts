@@ -73,3 +73,42 @@ it("test load full data", () => {
   expect(document.name).toEqual("Untitled");
   expect(document.layoutState.layoutType).toEqual("other_layout_type");
 });
+
+it("test clone", () => {
+  var documentJSON = JSON.stringify({
+    nodes: [
+      {
+        id: "a",
+        label: "node a"
+      },
+      {
+        id: "b",
+        label: "node b"
+      },
+      {
+        id: "c",
+        label: "node c"
+      }
+    ],
+    links: [
+      {
+        source: "a",
+        target: "b"
+      }
+    ]
+  });
+
+  var document = GraphDocument.load(documentJSON, "named doc");
+  var clone = document.clone();
+
+  expect(document.name).toEqual(clone.name);
+  expect(document.nodes.length).toEqual(clone.nodes.length);
+  expect(document.links.length).toEqual(clone.links.length);
+
+  // make sure it's a deep copy
+  expect(document.nodes[0]).not.toBe(clone.nodes[0]);
+  expect(document.links[0]).not.toBe(clone.links[0]);
+  expect(clone.links[0].source).toBe(clone.nodes[0]);
+  expect(clone.links[0].source).not.toBe(document.nodes[0]);
+  expect(clone.links[0].target).toBe(clone.nodes[1]);
+});

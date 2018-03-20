@@ -6,14 +6,14 @@ export const DEFAULT_PARTICLE_CHARGE = 500;
 export const DEFAULT_CHARGE_DISTANCE_MAX = 300;
 export const DEFAULT_LINK_DISTANCE = 100;
 
-interface SerializedGraphDocument {
+export interface SerializedGraphDocument {
   nodes?: SerializedNode[];
   links?: SerializedLink[];
   zoomState?: DeepPartial<ZoomState>;
   layoutState?: DeepPartial<LayoutState>;
 }
 
-interface SerializedNode {
+export interface SerializedNode {
   id: string;
   label: string;
   isLocked?: boolean;
@@ -21,7 +21,7 @@ interface SerializedNode {
   y?: number;
 }
 
-interface SerializedLink {
+export interface SerializedLink {
   source: string;
   target: string;
 }
@@ -142,15 +142,21 @@ export class GraphDocument {
 
   private constructor() {}
 
-  save(): string {
-    var data: SerializedGraphDocument = {
+  clone(): GraphDocument {
+    return GraphDocument.load(this.save(), this.name);
+  }
+
+  private savePOJO(): SerializedGraphDocument {
+    return {
       nodes: this.nodes.map(this.serializeNode),
       links: this.links.map(this.serializeLink),
       zoomState: this.zoomState,
       layoutState: this.layoutState
     };
+  }
 
-    return JSON.stringify(data, null, 2);
+  save(): string {
+    return JSON.stringify(this.savePOJO(), null, 2);
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {
