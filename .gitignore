@@ -8,6 +8,7 @@
 
 # production
 /build
+/build-css
 /deployed-build
 /deployed-build-next
 
@@ -23,7 +24,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # scss
-*.css
+/src/**/*.css
 
 /package-lock.json
 
