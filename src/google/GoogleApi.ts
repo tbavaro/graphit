@@ -4,8 +4,8 @@
 /// <reference path="../../node_modules/@types/google.picker/index.d.ts"/>
 
 export const config = {
-  API_KEY: "AIzaSyCYdtUSdjMb_fpTquBiHWjLeLL4mZq5c6w",
-  CLIENT_ID: "531678471267-3bptmp310eid1diggf9hb395fj7abd3i.apps.googleusercontent.com",
+  API_KEY: process.env.REACT_APP_GOOGLE_API_KEY,
+  CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID,
   DISCOVERY_DOCS: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
   SCOPES: [
     "https://www.googleapis.com/auth/drive",
