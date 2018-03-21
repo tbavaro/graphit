@@ -70,6 +70,14 @@ function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
   const forceSimulationConfig = props.document.layoutState.forceSimulationConfig;
   simulation
     .force(
+      "x",
+      D3Force.forceX().strength(forceSimulationConfig.originPullStrength)
+    )
+    .force(
+      "y",
+      D3Force.forceY().strength(forceSimulationConfig.originPullStrength)
+    )
+    .force(
       "charge",
       D3Force.forceManyBody()
         .strength(-1 * forceSimulationConfig.particleCharge)

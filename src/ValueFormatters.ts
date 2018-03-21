@@ -12,5 +12,12 @@ export const ValueFormatters = {
     format: (value: number) => {
       return Math.round(value).toString();
     }
+  },
+  fixedPrecision: (precision: number) => {
+    return {
+      format: (value: number) => {
+        return value.toFixed(precision);
+      }
+    };
   }
 };

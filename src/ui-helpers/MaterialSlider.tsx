@@ -6,6 +6,7 @@ export interface Props {
   value: number;
   minValue: number;
   maxValue: number;
+  exponent?: number;
   onChangeValue?: (nemValue: number, isDone: boolean) => void;
   extraClassName?: string;
 }
@@ -22,12 +23,12 @@ export class Component extends React.PureComponent<Props, object> {
     var mdcRef = mdc.slider.MDCSlider.attachTo(this.ref);
     mdcRef.listen("MDCSlider:input", () => {
       if (this.props.onChangeValue) {
-        this.props.onChangeValue(mdcRef.value, /*isDone=*/false);
+        this.props.onChangeValue(this.adjustValue(mdcRef.value, true), /*isDone=*/false);
       }
     });
     mdcRef.listen("MDCSlider:change", () => {
       if (this.props.onChangeValue) {
-        this.props.onChangeValue(mdcRef.value, /*isDone=*/true);
+        this.props.onChangeValue(this.adjustValue(mdcRef.value, true), /*isDone=*/true);
       }
     });
   }
@@ -42,9 +43,9 @@ export class Component extends React.PureComponent<Props, object> {
         ])}
         tabIndex={0}
         role="slider"
-        aria-valuemin={this.props.minValue}
-        aria-valuemax={this.props.maxValue}
-        aria-valuenow={this.props.value}
+        aria-valuemin={this.adjustValue(this.props.minValue, false)}
+        aria-valuemax={this.adjustValue(this.props.maxValue, false)}
+        aria-valuenow={this.adjustValue(this.props.value, false)}
         aria-label="Select Value"
         ref={this.setRef}
       >
@@ -63,5 +64,13 @@ export class Component extends React.PureComponent<Props, object> {
 
   private setRef = (newRef: HTMLDivElement) => {
     this.ref = newRef;
+  }
+
+  private adjustValue(value: number, reverse: boolean) {
+    if (this.props.exponent === undefined) {
+      return value;
+    } else {
+      return Math.pow(value, reverse ? this.props.exponent : (1 / this.props.exponent));
+    }
   }
 }

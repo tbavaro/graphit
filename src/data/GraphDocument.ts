@@ -2,6 +2,7 @@ import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
 import { SimplePartialDeserializer, DeepPartial } from './Deserializers';
 
 export const DEFAULT_LAYOUT_TYPE = "force_simulation";
+export const DEFAULT_ORIGIN_PULL_STRENGTH = 0.001;
 export const DEFAULT_PARTICLE_CHARGE = 500;
 export const DEFAULT_CHARGE_DISTANCE_MAX = 300;
 export const DEFAULT_LINK_DISTANCE = 100;
@@ -63,6 +64,7 @@ const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>({
 });
 
 export interface ForceSimulationConfig {
+  originPullStrength: number;
   particleCharge: number;
   chargeDistanceMax: number;
   linkDistance: number;
@@ -71,6 +73,7 @@ export interface ForceSimulationConfig {
 const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>({
   defaultValueFactory: () => {
     return {
+      originPullStrength: DEFAULT_ORIGIN_PULL_STRENGTH,
       particleCharge: DEFAULT_PARTICLE_CHARGE,
       chargeDistanceMax: DEFAULT_CHARGE_DISTANCE_MAX,
       linkDistance: DEFAULT_LINK_DISTANCE

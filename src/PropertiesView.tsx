@@ -14,6 +14,7 @@ interface SliderPropertyProps {
   value: number;
   minValue: number;
   maxValue: number;
+  exponent?: number;
   formatter: ValueFormatter<number>;
   onValueChange?: (newValue: number) => void;
 }
@@ -49,6 +50,7 @@ class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, S
           value={this.state.displayValue}
           minValue={this.props.minValue}
           maxValue={this.props.maxValue}
+          exponent={this.props.exponent}
           onChangeValue={this.onSliderValueChanged}
         />
       </div>
@@ -76,6 +78,14 @@ export class Component extends React.PureComponent<Props, object> {
   private _getForceSimulationConfig = () => this.props.document.layoutState.forceSimulationConfig;
 
   private _controlRenderers = [
+    this.configSlider({
+      label: "Origin Pull Strength",
+      getParentObject: this._getForceSimulationConfig,
+      fieldName: "originPullStrength",
+      maxValue: 0.1,
+      exponent: 2,
+      formatter: ValueFormatters.fixedPrecision(5)
+    }),
     this.configSlider({
       label: "Particle Charge",
       getParentObject: this._getForceSimulationConfig,
@@ -123,7 +133,9 @@ export class Component extends React.PureComponent<Props, object> {
     getParentObject: () => Parent,
     fieldName: FieldName,
     minValue?: number,
-    maxValue: number
+    maxValue: number,
+    exponent?: number,
+    formatter?: ValueFormatter<number>
   }) {
     var onValueChange = (newValue: number) => {
       attrs.getParentObject()[attrs.fieldName] = newValue;
@@ -138,9 +150,9 @@ export class Component extends React.PureComponent<Props, object> {
             value={attrs.getParentObject()[attrs.fieldName]}
             minValue={attrs.minValue || 0}
             maxValue={attrs.maxValue}
-            formatter={ValueFormatters.roundedInt}
+            exponent={attrs.exponent}
+            formatter={attrs.formatter || ValueFormatters.roundedInt}
             onValueChange={onValueChange}
-
           />
         );
       }
