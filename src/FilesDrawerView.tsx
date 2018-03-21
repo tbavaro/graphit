@@ -6,6 +6,7 @@ import * as MaterialList from "./ui-helpers/MaterialList";
 
 export interface Actions {
   openFilePicker: () => void;
+  saveAs: () => void;
   importUploadedFile: () => void;
   importGoogleSheet: () => void;
 }
@@ -128,6 +129,11 @@ export class Component extends React.Component<Props, State> {
                 key: "action:open",
                 label: "Open...",
                 onClick: this.props.actionManager.openFilePicker
+              },
+              {
+                key: "action:save_as",
+                label: "Save as...",
+                onClick: this.props.actionManager.saveAs
               },
               {
                 key: "action:import_upload",

@@ -146,40 +146,44 @@ export class Datastore {
     });
   }
 
-  saveFileAs(name: string, data: string): PromiseLike<void> {
+  saveFileAs(name: string, data: string, mimeType: string): PromiseLike<string> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));
     }
 
-    return this.findOrCreateGraphitRoot()
-      .then((rootId) => {
-        var uri = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
-        var metadata: GoogleApi.DriveFile = {
-          name: name + EXTENSION,
-          parents: [rootId]
-        };
-        return Request({
-          uri: uri,
-          method: "POST",
-          headers: {
-            "Authorization": "Bearer " + this._accessToken
+    var uri = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+    var metadata: GoogleApi.DriveFile = {
+      name: name,
+      mimeType: mimeType
+    };
+    return Request({
+      uri: uri,
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + this._accessToken
+      },
+      multipart: {
+        data: [
+          {
+            "content-type": "application/json",
+            body: JSON.stringify(metadata)
           },
-          multipart: {
-            data: [
-              {
-                "content-type": "application/json",
-                body: JSON.stringify(metadata)
-              },
-              {
-                "content-type": "application/json",
-                body: data
-              }
-            ]
+          {
+            "content-type": "application/json",
+            body: data
           }
-        }).then(() => {
-          // TODO get the id
-        }) as PromiseLike<void>;
-      });
+        ]
+      }
+    }).then((result) => {
+      if (typeof result !== "string") {
+        throw new Error("unexpected save result");
+      }
+      var resultData = JSON.parse(result);
+      if (resultData.id === undefined) {
+        throw new Error("didn't receive id");
+      }
+      return resultData.id;
+    });
   }
 
   updateFile(fileId: string, data: string): PromiseLike<void> {

@@ -1,7 +1,9 @@
 import * as GoogleApi from "../google/GoogleApi";
 
+export const GRAPHIT_MIME_TYPE = "application/me.timba.graphit+json";
+
 const JSON_MIME_TYPES = [
-  "application/me.timba.graphit+json",
+  GRAPHIT_MIME_TYPE,
   "application/json"
 ];
 

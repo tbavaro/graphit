@@ -8,7 +8,7 @@ import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as QueryString from "query-string";
 import * as PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
-import GooglePickerHelper from './google/GooglePickerHelper';
+import GooglePickerHelper, { GRAPHIT_MIME_TYPE } from './google/GooglePickerHelper';
 import * as LocalFiles from './localfiles/LocalFiles';
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 
@@ -71,6 +71,7 @@ class App extends React.Component<object, State> {
     },
 
     openFilePicker: () => this.openFile(),
+    saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
     importGoogleSheet: () => this.importGoogleSheet()
   };
@@ -162,6 +163,11 @@ class App extends React.Component<object, State> {
     });
   }
 
+  private updateUrlWithDocumentId(documentId?: string) {
+    // TODO implement popstate too
+    history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
+  }
+
   private loadDocument = (document?: GraphDocument, documentId?: string) => {
     this.pendingDocumentLoadId = undefined;
     this.setState({
@@ -169,8 +175,7 @@ class App extends React.Component<object, State> {
       document: document
     });
 
-    // TODO implement popstate too
-    history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
+    this.updateUrlWithDocumentId(documentId);
   }
 
   private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
@@ -223,6 +228,39 @@ class App extends React.Component<object, State> {
         this.loadDocument(document, /*documentId=*/undefined);
         this.closeLeftNav();
       });
+    });
+  }
+
+  private showSaveAsDialog() {
+    // alert("save as");
+    var name = prompt("Save as", this.state.document ? this.state.document.name : "Untitled");
+    if (name === null) {
+      return;
+    }
+    name = name.trim();
+    if (name === "") {
+      alert("empty name");
+      return;
+    }
+    this.saveAs(name);
+  }
+
+  private saveAs(name: string) {
+    if (!this.state.document) {
+      return;
+    }
+
+    this.state.document.name = name;
+    this.forceUpdate(); // because we changed the name
+
+    var data = this.state.document.save();
+    this.datastore.saveFileAs(name, data, GRAPHIT_MIME_TYPE).then((id) => {
+      this.setState({
+        loadedDocumentId: id
+      });
+      this.updateUrlWithDocumentId(id);
+      this.closeLeftNav();
+      alert("saved successfully");
     });
   }
 }
