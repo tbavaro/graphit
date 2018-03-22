@@ -3,6 +3,8 @@ import * as D3 from "d3";
 import './NodeView.css';
 import  { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
+import { NodeRenderMode } from './data/GraphDocument';
+import { sanitizeForDisplay } from './util/HtmlSanitization';
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
@@ -23,6 +25,7 @@ interface Props {
   simulation: ListenableSimulationWrapper;
   isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
+  renderMode: NodeRenderMode;
 }
 
 export class Component extends ListenerPureComponent<Props, object> {
@@ -68,6 +71,18 @@ export class Component extends ListenerPureComponent<Props, object> {
       top: this.props.position.y,
       transform: ""
     };
+    var children: string | undefined;
+    var innerHTML: { __html: string } | undefined;
+    switch (this.props.renderMode) {
+      case NodeRenderMode.RAW_HTML:
+        innerHTML = { __html: sanitizeForDisplay(this.props.label) };
+        break;
+
+      case NodeRenderMode.BASIC:
+      default:
+        children = this.props.label;
+        break;
+    }
     return (
       <div
         ref={this.setRef}
@@ -77,7 +92,8 @@ export class Component extends ListenerPureComponent<Props, object> {
         <div
           className="NodeView-content"
           onDoubleClick={this.onDoubleClick}
-          children={this.props.label}
+          children={children}
+          dangerouslySetInnerHTML={innerHTML}
         />
       </div>
     );

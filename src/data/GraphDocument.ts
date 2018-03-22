@@ -12,6 +12,7 @@ export interface SerializedGraphDocument {
   links?: SerializedLink[];
   zoomState?: DeepPartial<ZoomState>;
   layoutState?: DeepPartial<LayoutState>;
+  displayConfig?: DeepPartial<DisplayConfig>;
 }
 
 export interface SerializedNode {
@@ -86,6 +87,23 @@ export interface LayoutState {
   forceSimulationConfig: ForceSimulationConfig;
 }
 
+export enum NodeRenderMode {
+  BASIC = "basic",
+  RAW_HTML = "raw_html"
+}
+
+export interface DisplayConfig {
+  nodeRenderMode: NodeRenderMode;
+}
+
+const displayConfigDeserializer = new SimplePartialDeserializer<DisplayConfig>({
+  defaultValueFactory: () => {
+    return {
+      nodeRenderMode: NodeRenderMode.BASIC
+    };
+  }
+});
+
 const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>({
   defaultValueFactory: () => {
     return {
@@ -104,6 +122,7 @@ export class GraphDocument {
   links: MyLinkDatum[] = [];
   zoomState: ZoomState = zoomStateDeserializer.defaultValueFactory();
   layoutState: LayoutState = layoutStateDeserializer.defaultValueFactory();
+  displayConfig: DisplayConfig = displayConfigDeserializer.defaultValueFactory();
 
   static empty() {
     return this.load("{}");
@@ -136,6 +155,7 @@ export class GraphDocument {
     });
     document.zoomState = zoomStateDeserializer.deserialize(data.zoomState);
     document.layoutState = layoutStateDeserializer.deserialize(data.layoutState);
+    document.displayConfig = displayConfigDeserializer.deserialize(data.displayConfig);
     if (name !== undefined) {
       document.name = name;
     }

@@ -269,6 +269,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
         id={index}
         label={node.label}
         isLocked={node.isLocked}
+        renderMode={this.props.document.displayConfig.nodeRenderMode}
         position={node as Position}
         simulation={this.simulationWrapper}
         isSelected={this.state.selectedNodes.has(node)}
