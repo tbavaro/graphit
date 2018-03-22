@@ -68,6 +68,6 @@ check_and_call(["git", "push"])
 
 os.chdir(master_repo_dir)
 check_and_call(["git", "tag", version])
-check_and_call(["git", "push"])
+check_and_call(["git", "push", "--tags"])
 
 print("Successfully pushed version {}!".format(version))
