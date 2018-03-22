@@ -4,7 +4,8 @@ import {
   SerializedGraphDocument,
   SerializedNode,
   SerializedLink,
-  GraphDocument
+  GraphDocument,
+  NodeRenderMode
 } from "./GraphDocument";
 
 const NODES_SHEET = "nodes";
@@ -14,6 +15,8 @@ const NODE_LABEL_KEY = "label";
 const LINKS_SHEET = "links";
 const LINK_SOURCE_ID_KEY = "source";
 const LINK_TARGET_ID_KEY = "target";
+
+const LOOKS_LIKE_HTML_REGEX = /<\s*\/[^>]*>|<[^>]*\/\s*>/;
 
 // exported for testing
 export const internals = {
@@ -105,6 +108,10 @@ export const internals = {
       }
       return extractValuesAsStringSkipFirst(data[index]);
     });
+  },
+
+  looksLikeHtml(value: string) {
+    return (LOOKS_LIKE_HTML_REGEX.exec(value) !== null);
   }
 };
 
@@ -162,7 +169,15 @@ export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphDocumen
           linksData: sheetValues[1]
         });
 
-        return GraphDocument.load(JSON.stringify(sgd));
+        var document = GraphDocument.load(JSON.stringify(sgd));
+
+        // hack to use html rendering if it looks like the data has html
+        var usesHtml = (document.nodes.map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
+        if (usesHtml) {
+          document.displayConfig.nodeRenderMode = NodeRenderMode.RAW_HTML;
+        }
+
+        return document;
       },
       (error) => {
         console.log("error loading sheet", sheetId, error);

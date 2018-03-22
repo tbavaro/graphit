@@ -174,7 +174,8 @@ export class GraphDocument {
       nodes: this.nodes.map(this.serializeNode),
       links: this.links.map(this.serializeLink),
       zoomState: this.zoomState,
-      layoutState: this.layoutState
+      layoutState: this.layoutState,
+      displayConfig: this.displayConfig
     };
   }
 

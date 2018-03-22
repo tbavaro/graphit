@@ -9,9 +9,12 @@
 }
 
 .NodeView-content {
-  @include mdc-typography(body2);
-  line-height: 1.1;
-  font-weight: 550;
+  @include mdc-typography(body1);
+  // line-height: 1.1;
+  // font-weight: 520;
+
+  width: max-content;
+  max-width: 150px;
 
   position: absolute;
   background-color: $normalNodeBackgroundColor;
@@ -24,6 +27,10 @@
   user-select: none;
   text-align: center;
   // box-shadow: 1px 1px lightgray;
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+  }
 }
 
 .NodeView.locked .NodeView-content {

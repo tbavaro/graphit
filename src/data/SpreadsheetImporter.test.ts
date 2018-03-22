@@ -174,3 +174,13 @@ it("test extractNamedColumnsToStringArrays", () => {
     [ "a1", "2" ]
   ]);
 });
+
+it("test looksLikeHtml", () => {
+  expect(internals.looksLikeHtml("")).toBe(false);
+  expect(internals.looksLikeHtml("hello")).toBe(false);
+  expect(internals.looksLikeHtml("3 < 4")).toBe(false);
+  expect(internals.looksLikeHtml("3 < 4 / 5 > 6")).toBe(false);
+  expect(internals.looksLikeHtml("click <a>here</a>")).toBe(true);
+  expect(internals.looksLikeHtml("click <a>here</ a>")).toBe(true);
+  expect(internals.looksLikeHtml("two<br/>lines")).toBe(true);
+});
