@@ -269,7 +269,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
         id={index}
         label={node.label}
         isLocked={node.isLocked}
-        color={node.color}
+        color={node.color || undefined}
         renderMode={this.props.document.displayConfig.nodeRenderMode}
         position={node as Position}
         simulation={this.simulationWrapper}

@@ -48,6 +48,45 @@ it("test simple spreadsheet", () => {
   });
 });
 
+it("test simple spreadsheet with colors", () => {
+  const result = internals.createSGDFromDataColumns({
+    nodeIds: [ "a", "b", "c" ],
+    nodeLabels: [ "node a", "node b", "node c" ],
+    nodeColors: [ "red", "", "blue" ],
+    linkSourceIds: [ "a", "b" ],
+    linkTargetIds: [ "b", "c" ]
+  });
+  expect(result).toMatchObject({
+    nodes: [
+      {
+        id: "a",
+        label: "node a",
+        color: "red"
+      },
+      {
+        id: "b",
+        label: "node b",
+        color: null
+      },
+      {
+        id: "c",
+        label: "node c",
+        color: "blue"
+      }
+    ],
+    links: [
+      {
+        source: "a",
+        target: "b"
+      },
+      {
+        source: "b",
+        target: "c"
+      }
+    ]
+  });
+});
+
 function transpose(input: any[][]): any[][] {
   if (input.length === 0) {
     return [];

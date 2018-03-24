@@ -7,9 +7,13 @@ import {
   NodeRenderMode
 } from "./GraphDocument";
 
+// TODO this whole file is kind of a mess, was rushed this week. should probably
+// rewrite if a lot more complexity is needed
+
 const NODES_SHEET = "nodes";
 const NODE_ID_KEY = "id";
 const NODE_LABEL_KEY = "label";
+const NODE_COLOR_KEY = "color";
 
 const LINKS_SHEET = "links";
 const LINK_SOURCE_ID_KEY = "source";
@@ -17,37 +21,57 @@ const LINK_TARGET_ID_KEY = "target";
 
 const LOOKS_LIKE_HTML_REGEX = /<\s*\/[^>]*>|<[^>]*\/\s*>/;
 
+function removeUndefineds<T>(values: (T | undefined)[]): T[] {
+  return values.filter((v) => v !== undefined) as T[];
+}
+
+function nthIfDefinedElseDefault<T, U>(values: T[], n: number, defaultValue: U): (T | U) {
+  return (values.length > n ? values[n] : defaultValue);
+}
+
+function assertDefined<T>(value: (T | undefined), label: string): T {
+  if (value === undefined) {
+    throw new Error("value must not be undefined: " + label);
+  }
+  return value;
+}
+
 // exported for testing
 export const internals = {
   createSGDFromDataColumns(attrs: {
     nodeIds: string[],
     nodeLabels: string[],
+    nodeColors?: string[],
     linkSourceIds: string[],
     linkTargetIds: string[]
   }) {
-    if (attrs.nodeIds.length !== attrs.nodeLabels.length) {
-      throw new Error("node columns are not the same length");
-    }
+    const nodes: SerializedNode[] = removeUndefineds(attrs.nodeIds.map((id, index) => {
+      if (id === undefined) {
+        return undefined;
+      }
 
-    if (attrs.linkSourceIds.length !== attrs.linkTargetIds.length) {
-      throw new Error("link columns are not the same length");
-    }
-
-    const nodes: SerializedNode[] = attrs.nodeIds.map((id, index) => {
-      const label = attrs.nodeLabels[index];
-      return {
+      var result: SerializedNode = {
         id: id,
-        label: label
+        label: nthIfDefinedElseDefault(attrs.nodeLabels, index, id)
       };
-    });
 
-    const links: SerializedLink[] = attrs.linkSourceIds.map((sourceId, index) => {
+      if (attrs.nodeColors !== undefined) {
+        result.color = nthIfDefinedElseDefault(attrs.nodeColors, index, "") || null;
+      }
+
+      return result;
+    }));
+
+    const links: SerializedLink[] = removeUndefineds(attrs.linkSourceIds.map((sourceId, index) => {
       const targetId = attrs.linkTargetIds[index];
+      if (sourceId === undefined || targetId === undefined) {
+        return undefined;
+      }
       return {
         source: sourceId,
         target: targetId
       };
-    });
+    }));
 
     const doc: SerializedGraphDocument = {
       nodes: nodes,
@@ -62,9 +86,9 @@ export const internals = {
     nodesData: any[][],
     linksData: any[][]
   }) {
-    var [nodeIds, nodeLabels] = this.extractNamedColumnsToStringArrays(
+    var [nodeIds, nodeLabels, nodeColors] = this.extractNamedColumnsToStringArrays(
       attrs.nodesData, [
-        NODE_ID_KEY, NODE_LABEL_KEY
+        NODE_ID_KEY, NODE_LABEL_KEY, NODE_COLOR_KEY
       ]
     );
     var [linkSourceIds, linkTargetIds] = this.extractNamedColumnsToStringArrays(
@@ -73,17 +97,18 @@ export const internals = {
       ]
     );
     var result = this.createSGDFromDataColumns({
-      nodeIds: nodeIds,
-      nodeLabels: nodeLabels,
-      linkSourceIds: linkSourceIds,
-      linkTargetIds: linkTargetIds
+      nodeIds: assertDefined(nodeIds, "nodeIds"),
+      nodeLabels: assertDefined(nodeLabels, "nodeLabels"),
+      nodeColors: nodeColors,
+      linkSourceIds: assertDefined(linkSourceIds, "linkSourceIds"),
+      linkTargetIds: assertDefined(linkTargetIds, "linkTargetIds")
     });
     console.log(result);
     return result;
   },
 
   // data should be loaded with COLUMNS as the major dimension
-  extractNamedColumnsToStringArrays(data: any[][], columnNames: string[]): string[][] {
+  extractNamedColumnsToStringArrays(data: any[][], columnNames: string[]): (string[] | undefined)[] {
     var columnNamesToIndex = new Map<String, number>();
     columnNames.forEach((columnName, index) => {
       if (columnNamesToIndex.has(columnName)) {
@@ -103,9 +128,10 @@ export const internals = {
     });
     return columnIndexes.map((index, nth) => {
       if (index === -1) {
-        throw new Error("could not find column: " + columnNames[nth]);
+        return undefined;
+      } else {
+        return extractValuesAsStringSkipFirst(data[index]);
       }
-      return extractValuesAsStringSkipFirst(data[index]);
     });
   },
 

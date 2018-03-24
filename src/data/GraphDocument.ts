@@ -18,7 +18,7 @@ export interface SerializedGraphDocument {
 export interface SerializedNode {
   id: string;
   label: string;
-  color?: string;
+  color?: string | null;
   isLocked?: boolean;
   x?: number;
   y?: number;
@@ -162,6 +162,7 @@ export const internals = {
     originalDoc: SerializedGraphDocument,
     newDoc: SerializedGraphDocument
   ): SerializedGraphDocument => {
+    console.log("merging", originalDoc, newDoc);
     const mergeValueField = <K extends keyof SerializedGraphDocument>(key: K): SerializedGraphDocument[K] => {
       return internals.mergeValueSimple(originalDoc[key], newDoc[key]);
     };

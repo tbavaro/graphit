@@ -58,7 +58,7 @@ export class SimpleDeserializer<SERIALIZED_T, T> {
   }
 
   private _deserializePrimitiveOrArrayOfPrimitives(mostRecentKey: string, value: any): any {
-    if (typeof value === "object") {
+    if (typeof value === "object" && value !== null) {
       if (value instanceof Array) {
         return this._deserializeArrayOfPrimitives(mostRecentKey, value);
       } else {
