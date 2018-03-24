@@ -1,7 +1,8 @@
 @import "@material/top-app-bar/mdc-top-app-bar.scss";
+@import "../_all";
 
 .AppBar {
-  @include mdc-top-app-bar-fill-color-accessible(royalblue);
+  @include mdc-top-app-bar-fill-color-accessible($appBarBackgroundColor);
 }
 
 .AppBar-iconButton.disabled {

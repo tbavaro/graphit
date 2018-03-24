@@ -21,6 +21,7 @@ interface Props {
   id: number;
   label: string;
   isLocked: boolean;
+  color?: string;
   position: Position;
   simulation: ListenableSimulationWrapper;
   isSelected: boolean;
@@ -83,6 +84,9 @@ export class Component extends ListenerPureComponent<Props, object> {
         children = this.props.label;
         break;
     }
+    var contentStyle = {
+      backgroundColor: this.props.isSelected ? undefined : this.props.color
+    };
     return (
       <div
         ref={this.setRef}
@@ -90,6 +94,7 @@ export class Component extends ListenerPureComponent<Props, object> {
         style={style}
       >
         <div
+          style={contentStyle}
           className="NodeView-content"
           onDoubleClick={this.onDoubleClick}
           children={children}

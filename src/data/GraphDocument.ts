@@ -18,6 +18,7 @@ export interface SerializedGraphDocument {
 export interface SerializedNode {
   id: string;
   label: string;
+  color?: string;
   isLocked?: boolean;
   x?: number;
   y?: number;
@@ -267,6 +268,7 @@ export class GraphDocument {
       id: node.id,
       label: node.label,
       isLocked: node.isLocked,
+      color: node.color,
       x: node.x,
       y: node.y
     });

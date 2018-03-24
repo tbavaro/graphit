@@ -9,6 +9,27 @@
 
 $documentBackgroundColor: white;
 
+
+////////////////////////////////////////////////////////////////////////////////
+// MAIN COLOR PALETTE
+////////////////////////////////////////////////////////////////////////////////
+
+$primaryColor: royalblue;
+$primaryTextColor: white;
+$secondaryColor: #ef6c00;// #d84315;
+$secondaryTextColor: white;
+
+$selectionColor: #43a047;
+$selectionTextColor: white;
+
+////////////////////////////////////////////////////////////////////////////////
+// MAIN UI
+////////////////////////////////////////////////////////////////////////////////
+
+$appBarBackgroundColor: $primaryColor;
+$appBarTextColor: $primaryTextColor;
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // LEFT DRAWER
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,13 +53,11 @@ $propertiesDrawerBackgroundColor: white ;
 // GRAPH (nodes, links, etc)
 ////////////////////////////////////////////////////////////////////////////////
 
-$nodeTextColor: white;
+$normalNodeBackgroundColor: $secondaryColor;
+$nodeTextColor: $secondaryTextColor;
 
 @function nodeBackgroundColor($deltaL: 0) {
-  @return hsl(20, 80%, between(0%, 100%, 60% + $deltaL));
+  @return hsl(30, 75%, between(0%, 100%, 50% + $deltaL));
 }
-
-$normalNodeBackgroundColor: nodeBackgroundColor(+0%);
-$lockedNodeBackgroundColor: nodeBackgroundColor(-40%);
 
 $linkColor: hsl(0, 10%, 80%);
