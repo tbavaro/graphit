@@ -1,18 +1,26 @@
 import { sanitizeForDisplay } from "./HtmlSanitization";
 
 it("test sanitizeForDisplay", () => {
+  const test = (input, output) => {
+    expect(sanitizeForDisplay(input)).toBe(output);
+  };
+
   // test valid things
-  expect(sanitizeForDisplay("")).toBe("");
-  expect(sanitizeForDisplay("hello")).toBe("hello");
-  expect(sanitizeForDisplay("<b>hello</b>")).toBe("<b>hello</b>");
-  expect(sanitizeForDisplay("<p>hello</p>")).toBe("<p>hello</p>");
-  expect(sanitizeForDisplay("<a>hello</a>")).toBe("<a>hello</a>");
-  expect(sanitizeForDisplay("<a href='google.com'>hello</a>")).toBe("<a href=\"google.com\">hello</a>");
+  test("", "");
+  test("hello", "hello");
+  test("<b>hello</b>", "<b>hello</b>");
+  test("<p>hello</p>", "<p>hello</p>");
+  test("<a>hello</a>", "<a>hello</a>");
+  test("<a href='google.com'>hello</a>", "<a href=\"google.com\">hello</a>");
+  test("<img src='foo'/>", "<img src=\"foo\" />");
+  test("<img src='foo' height=20 width='30'/>", "<img src=\"foo\" height=\"20\" width=\"30\" />");
 
   // test invalid tags
-  expect(sanitizeForDisplay("<script>bad</script>hello")).toBe("hello");
+  test("<script>bad</script>hello", "hello");
 
   // test tricky ways to get javascript in there
-  expect(sanitizeForDisplay("<a onclick='bad'>hello</a>")).toBe("<a>hello</a>");
-  expect(sanitizeForDisplay("<a onmouseover='bad'>hello</a>")).toBe("<a>hello</a>");
+  test("<a href='javascript:bad'>hello</a>", "<a>hello</a>");
+  test("<a onclick='bad'>hello</a>", "<a>hello</a>");
+  test("<a onmouseover='bad'>hello</a>", "<a>hello</a>");
+  test("<img onclick='bad' />", "<img />");
 });
