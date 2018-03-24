@@ -9,6 +9,7 @@ export interface Actions {
   saveAs: () => void;
   importUploadedFile: () => void;
   importGoogleSheet: () => void;
+  mergeGoogleSheet: () => void;
 }
 
 interface Props extends TemporaryNavDrawer.Props {
@@ -144,6 +145,11 @@ export class Component extends React.Component<Props, State> {
                 key: "action:import_spreadsheet",
                 label: "Import spreadsheet...",
                 onClick: this.props.actionManager.importGoogleSheet
+              },
+              {
+                key: "action:merge_spreadsheet",
+                label: "Merge spreadsheet...",
+                onClick: this.props.actionManager.mergeGoogleSheet
               }
             ]}
           />

@@ -73,7 +73,8 @@ class App extends React.Component<object, State> {
     openFilePicker: () => this.openFile(),
     saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
-    importGoogleSheet: () => this.importGoogleSheet()
+    importGoogleSheet: () => this.importOrMergeGoogleSheet(/*shouldMerge=*/false),
+    mergeGoogleSheet: () => this.importOrMergeGoogleSheet(/*shouldMerge=*/true)
   };
 
   componentWillMount() {
@@ -221,11 +222,20 @@ class App extends React.Component<object, State> {
     });
   }
 
-  private importGoogleSheet() {
+  private importOrMergeGoogleSheet(shouldMerge: boolean) {
     new GooglePickerHelper().createGoogleSheetPicker((fileResult) => {
       // alert("picked: " + fileResult.id);
-      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((document) => {
-        this.loadDocument(document, /*documentId=*/undefined);
+      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
+        var document: GraphDocument;
+        var documentId: string | undefined;
+        if (!shouldMerge || !this.state.document) {
+          document = GraphDocument.loadSGD(serializedDocument);
+          documentId = undefined;
+        } else {
+          document = this.state.document.merge(serializedDocument);
+          documentId = this.state.loadedDocumentId;
+        }
+        this.loadDocument(document, documentId);
         this.closeLeftNav();
       });
     });

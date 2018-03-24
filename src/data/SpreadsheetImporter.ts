@@ -4,7 +4,6 @@ import {
   SerializedGraphDocument,
   SerializedNode,
   SerializedLink,
-  GraphDocument,
   NodeRenderMode
 } from "./GraphDocument";
 
@@ -144,7 +143,7 @@ function extractValuesAsStringSkipFirst(values: any[]): string[] {
   return result;
 }
 
-export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphDocument> {
+export function loadDocumentFromSheet(sheetId: string): PromiseLike<SerializedGraphDocument> {
   const myError = (msg?: string) => {
     return new Error("error loading spreadsheet (" + msg + "): " + sheetId);
   };
@@ -169,15 +168,14 @@ export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphDocumen
           linksData: sheetValues[1]
         });
 
-        var document = GraphDocument.load(JSON.stringify(sgd));
-
         // hack to use html rendering if it looks like the data has html
-        var usesHtml = (document.nodes.map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
+        var usesHtml = ((sgd.nodes || []).map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
         if (usesHtml) {
-          document.displayConfig.nodeRenderMode = NodeRenderMode.RAW_HTML;
+          sgd.displayConfig = sgd.displayConfig || {};
+          sgd.displayConfig.nodeRenderMode = NodeRenderMode.RAW_HTML;
         }
 
-        return document;
+        return sgd;
       },
       (error) => {
         console.log("error loading sheet", sheetId, error);

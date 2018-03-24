@@ -116,6 +116,75 @@ const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>({
   }
 });
 
+export const internals = {
+  mergeValueSimple: <T>(originalValue: T, newValue: T): T => {
+    if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
+      return cloneViaSerialization(newValue);
+    } else {
+      var result = cloneViaSerialization(originalValue);
+      Object.keys(newValue).forEach((key) => {
+        result[key] = internals.mergeValueSimple(originalValue[key], newValue[key]);
+      });
+      return result;
+    }
+  },
+
+  /**
+   * Merge arrays, preserving old data fields when not supplied by new data, but
+   * removing entries that are missing altogether from the new array.
+   */
+  mergeArraysSmart: <T>(
+    originalValues: T[],
+    newValues: T[],
+    generateKey: (value: T) => string
+  ): T[] => {
+    var results: T[] = [];
+    var originalValuesMap = buildKeyedMap(originalValues, generateKey);
+
+    newValues.forEach((newValue) => {
+      const key = generateKey(newValue);
+      if (originalValuesMap.has(key)) {
+        var originalValue = originalValuesMap.get(key) as T;
+        results.push(internals.mergeValueSimple(originalValue, newValue));
+      } else {
+        results.push(cloneViaSerialization(newValue));
+      }
+    });
+
+    return results;
+  },
+
+  nodeKey: (node: SerializedNode) => node.id,
+  linkKey: (link: SerializedLink) => JSON.stringify([link.source, link.target]),
+
+  mergeSerializedDocuments: (
+    originalDoc: SerializedGraphDocument,
+    newDoc: SerializedGraphDocument
+  ): SerializedGraphDocument => {
+    const mergeValueField = <K extends keyof SerializedGraphDocument>(key: K): SerializedGraphDocument[K] => {
+      return internals.mergeValueSimple(originalDoc[key], newDoc[key]);
+    };
+
+    return {
+      nodes:
+        internals.mergeArraysSmart(
+          originalDoc.nodes || [],
+          newDoc.nodes || [],
+          internals.nodeKey
+        ),
+      links:
+        internals.mergeArraysSmart(
+          originalDoc.links || [],
+          newDoc.links || [],
+          internals.linkKey
+        ),
+      zoomState: mergeValueField("zoomState"),
+      layoutState: mergeValueField("layoutState"),
+      displayConfig: mergeValueField("displayConfig")
+    };
+  }
+};
+
 export class GraphDocument {
   name: string = "Untitled";
   nodes: MyNodeDatum[] = [];
@@ -130,6 +199,10 @@ export class GraphDocument {
 
   static load(jsonData: string, name?: string) {
     var data = JSON.parse(jsonData) as SerializedGraphDocument;
+    return this.loadSGD(data, name);
+  }
+
+  static loadSGD(data: SerializedGraphDocument, name?: string) {
     var serializedNodes = data.nodes || [];
     var serializedLinks = data.links || [];
 
@@ -169,7 +242,13 @@ export class GraphDocument {
     return GraphDocument.load(this.save(), this.name);
   }
 
-  private savePOJO(): SerializedGraphDocument {
+  merge(serializedOtherDocument: SerializedGraphDocument): GraphDocument {
+    const serializedMergedDocument =
+      internals.mergeSerializedDocuments(this.saveSGD(), serializedOtherDocument);
+    return GraphDocument.loadSGD(serializedMergedDocument, this.name);
+  }
+
+  private saveSGD(): SerializedGraphDocument {
     return {
       nodes: this.nodes.map(this.serializeNode),
       links: this.links.map(this.serializeLink),
@@ -180,7 +259,7 @@ export class GraphDocument {
   }
 
   save(): string {
-    return JSON.stringify(this.savePOJO(), null, 2);
+    return JSON.stringify(this.saveSGD(), null, 2);
   }
 
   private serializeNode = (node: MyNodeDatum): SerializedNode => {
@@ -223,51 +302,3 @@ function buildKeyedMap<T>(values: T[], generateKey: (value: T) => string): Map<s
   });
   return map;
 }
-
-export const internals = {
-  mergeValueSimple: <T>(originalValue: T, newValue: T): T => {
-    if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
-      return cloneViaSerialization(newValue);
-    } else {
-      var result = cloneViaSerialization(originalValue);
-      Object.keys(newValue).forEach((key) => {
-        result[key] = internals.mergeValueSimple(originalValue[key], newValue[key]);
-      });
-      return result;
-    }
-  },
-
-  /**
-   * Merge arrays, preserving old data fields when not supplied by new data, but
-   * removing entries that are missing altogether from the new array.
-   */
-  mergeArraysSmart: <T>(
-    originalValues: T[],
-    newValues: T[],
-    generateKey: (value: T) => string
-  ): T[] => {
-    var results: T[] = [];
-    var originalValuesMap = buildKeyedMap(originalValues, generateKey);
-
-    newValues.forEach((newValue) => {
-      const key = generateKey(newValue);
-      if (originalValuesMap.has(key)) {
-        var originalValue = originalValuesMap.get(key) as T;
-        results.push(internals.mergeValueSimple(originalValue, newValue));
-      } else {
-        results.push(cloneViaSerialization(newValue));
-      }
-    });
-
-    return results;
-  }
-  // },
-
-  // merge: (
-  //   originalDoc: SerializedGraphDocument,
-  //   newDoc: SerializedGraphDocument
-  // ): SerializedGraphDocument => {
-  //   var resultDoc = cloneViaSerialization(originalDoc);
-  //   return resultDoc;
-  // }
-};
