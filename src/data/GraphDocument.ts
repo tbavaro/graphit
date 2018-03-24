@@ -119,7 +119,9 @@ const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>({
 
 export const internals = {
   mergeValueSimple: <T>(originalValue: T, newValue: T): T => {
-    if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
+    if (newValue === undefined) {
+      return cloneViaSerialization(originalValue);
+    } else if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
       return cloneViaSerialization(newValue);
     } else {
       var result = cloneViaSerialization(originalValue);

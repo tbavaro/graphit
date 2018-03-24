@@ -121,7 +121,7 @@ it("test mergeValueSimple", () => {
   expect(mergeValueSimple(null, null)).toBe(null);
   expect(mergeValueSimple(null as (string | null), "foo")).toBe("foo");
   expect(mergeValueSimple("foo" as (string | null), null)).toBe(null);
-  expect(mergeValueSimple("foo" as (string | undefined), undefined)).toBe(undefined);
+  expect(mergeValueSimple("foo" as (string | undefined), undefined)).toBe("foo");
   expect(mergeValueSimple("foo" as string, "")).toBe("");
 
   // array + array
@@ -135,8 +135,12 @@ it("test mergeValueSimple", () => {
   expect(mergeValueSimple({ a: 1 }, {})).toEqual({ a: 1 });
   expect(mergeValueSimple({ a: 1 }, { a: 2 })).toEqual({ a: 2 });
   expect(mergeValueSimple({ a: 1 } as any, { b: 2 })).toEqual({ a: 1, b: 2 });
-  expect(mergeValueSimple({ a: 1, b: 2 }, { a: undefined })).toEqual({ a: undefined, b: 2 });
+  expect(mergeValueSimple({ a: 1, b: 2 }, { a: undefined })).toEqual({ a: 1, b: 2 });
+  expect(mergeValueSimple({ a: 1, b: 2 }, { a: null })).toEqual({ a: null, b: 2 });
   expect(mergeValueSimple({ a: { foo: 1, bar: 2 } }, { a: { foo: 3 } })).toEqual({ a: { foo: 3, bar: 2 } });
+
+  // object + undefined
+  expect(mergeValueSimple({ a: 1 }, undefined)).toEqual({ a: 1 });
 
   // object + primitive / primitive + object
   expect(mergeValueSimple({ a: 1 } as any, "foo")).toEqual("foo");
