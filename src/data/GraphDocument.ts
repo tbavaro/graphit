@@ -200,3 +200,74 @@ export class GraphDocument {
     });
   }
 }
+
+function cloneViaSerialization<T>(object: T): T {
+  if (!(object instanceof Object)) {
+    return object;
+  }
+  return JSON.parse(JSON.stringify(object));
+}
+
+function isArrayOrPrimitive<T>(object: T): boolean {
+  return (object instanceof Array || !(object instanceof Object));
+}
+
+function buildKeyedMap<T>(values: T[], generateKey: (value: T) => string): Map<string, T> {
+  var map = new Map<string, T>();
+  values.forEach((value) => {
+    var key = generateKey(value);
+    if (map.get(key) !== undefined) {
+      throw new Error("duplicate key generated from array: " + key);
+    }
+    map.set(key, value);
+  });
+  return map;
+}
+
+export const internals = {
+  mergeValueSimple: <T>(originalValue: T, newValue: T): T => {
+    if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
+      return cloneViaSerialization(newValue);
+    } else {
+      var result = cloneViaSerialization(originalValue);
+      Object.keys(newValue).forEach((key) => {
+        result[key] = internals.mergeValueSimple(originalValue[key], newValue[key]);
+      });
+      return result;
+    }
+  },
+
+  /**
+   * Merge arrays, preserving old data fields when not supplied by new data, but
+   * removing entries that are missing altogether from the new array.
+   */
+  mergeArraysSmart: <T>(
+    originalValues: T[],
+    newValues: T[],
+    generateKey: (value: T) => string
+  ): T[] => {
+    var results: T[] = [];
+    var originalValuesMap = buildKeyedMap(originalValues, generateKey);
+
+    newValues.forEach((newValue) => {
+      const key = generateKey(newValue);
+      if (originalValuesMap.has(key)) {
+        var originalValue = originalValuesMap.get(key) as T;
+        results.push(internals.mergeValueSimple(originalValue, newValue));
+      } else {
+        results.push(cloneViaSerialization(newValue));
+      }
+    });
+
+    return results;
+  }
+  // },
+
+  // merge: (
+  //   originalDoc: SerializedGraphDocument,
+  //   newDoc: SerializedGraphDocument
+  // ): SerializedGraphDocument => {
+  //   var resultDoc = cloneViaSerialization(originalDoc);
+  //   return resultDoc;
+  // }
+};
