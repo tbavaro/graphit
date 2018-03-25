@@ -301,6 +301,10 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
 
   private onDrag = (id: number, dx: number, dy: number, isEnd: boolean) => {
     this.state.selectedNodes.forEach((node) => {
+      if (dx !== 0 || dy !== 0) {
+        node.isLocked = true;
+      }
+
       node.x = (node.x || 0) + dx;
       node.y = (node.y || 0) + dy;
       if (isEnd && !node.isLocked) {
@@ -318,6 +322,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
   }
 
   private onDragStart = (index: number, metaKey: boolean) => {
+    console.log("drag start", index);
     var node = this.props.document.nodes[index];
 
     var newSelectedNodes: Set<MyNodeDatum> | undefined;
