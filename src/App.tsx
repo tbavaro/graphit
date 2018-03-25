@@ -8,7 +8,7 @@ import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as QueryString from "query-string";
 import * as PropertiesView from './PropertiesView';
 import { SimpleListenable } from './data/Listenable';
-import GooglePickerHelper, { GRAPHIT_MIME_TYPE } from './google/GooglePickerHelper';
+import * as GooglePickerHelper from './google/GooglePickerHelper';
 import * as LocalFiles from './localfiles/LocalFiles';
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 
@@ -57,8 +57,7 @@ class App extends React.Component<object, State> {
     save: () => this.save(),
     saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
-    importGoogleSheet: () => this.importOrMergeGoogleSheet(/*shouldMerge=*/false),
-    mergeGoogleSheet: () => this.importOrMergeGoogleSheet(/*shouldMerge=*/true)
+    mergeGoogleSheet: () => this.promptForMergeGoogleSheet()
   };
 
   componentWillMount() {
@@ -215,9 +214,13 @@ class App extends React.Component<object, State> {
   }
 
   private openFile = () => {
-    new GooglePickerHelper().createJsonFilePicker((fileResult) => {
-      this.loadDocumentById(fileResult.id);
-      this.closeLeftNav();
+    new GooglePickerHelper.default().createAnythingPicker((fileResult) => {
+      if (fileResult.mimeType === GooglePickerHelper.SPREADSHEET_MIME_TYPE) {
+        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/false);
+      } else {
+        this.loadDocumentById(fileResult.id);
+        this.closeLeftNav();
+      }
     });
   }
 
@@ -229,22 +232,26 @@ class App extends React.Component<object, State> {
     });
   }
 
-  private importOrMergeGoogleSheet(shouldMerge: boolean) {
-    new GooglePickerHelper().createGoogleSheetPicker((fileResult) => {
-      // alert("picked: " + fileResult.id);
-      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
-        var document: GraphDocument;
-        var documentId: string | undefined;
-        if (!shouldMerge || !this.state.document) {
-          document = GraphDocument.loadSGD(serializedDocument);
-          documentId = undefined;
-        } else {
-          document = this.state.document.merge(serializedDocument);
-          documentId = this.state.loadedDocumentId;
-        }
-        this.loadDocument(document, documentId, this.state.canSaveDocument);
-        this.closeLeftNav();
-      });
+  private promptForMergeGoogleSheet() {
+    new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
+      this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+    });
+  }
+
+  private importOrMergeGoogleSheet(fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) {
+    SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
+      var document: GraphDocument;
+      var documentId: string | undefined;
+      if (!shouldMerge || !this.state.document) {
+        document = GraphDocument.loadSGD(serializedDocument);
+        document.name = fileResult.name;
+        documentId = undefined;
+      } else {
+        document = this.state.document.merge(serializedDocument);
+        documentId = this.state.loadedDocumentId;
+      }
+      this.loadDocument(document, documentId, this.state.canSaveDocument);
+      this.closeLeftNav();
     });
   }
 
@@ -294,7 +301,7 @@ class App extends React.Component<object, State> {
     this.forceUpdate(); // because we changed the name
 
     var data = this.state.document.save();
-    this.datastore.saveFileAs(name, data, GRAPHIT_MIME_TYPE).then((id) => {
+    this.datastore.saveFileAs(name, data, GooglePickerHelper.GRAPHIT_MIME_TYPE).then((id) => {
       this.setState({
         loadedDocumentId: id,
         canSaveDocument: true

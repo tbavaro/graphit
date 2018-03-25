@@ -1,6 +1,7 @@
 import * as GoogleApi from "../google/GoogleApi";
 
 export const GRAPHIT_MIME_TYPE = "application/me.timba.graphit+json";
+export const SPREADSHEET_MIME_TYPE = "application/vnd.google-apps.spreadsheet";
 
 const JSON_MIME_TYPES = [
   GRAPHIT_MIME_TYPE,
@@ -9,9 +10,17 @@ const JSON_MIME_TYPES = [
 
 export interface FileResult {
   id: string;
+  mimeType: string;
   name: string;
   downloadUrl: string;
 }
+
+type PickerConfig = {
+  type: "files",
+  mimeTypes: string[]
+} | {
+  type: "spreadsheets"
+};
 
 export default class GooglePickerHelper {
   constructor() {
@@ -19,12 +28,7 @@ export default class GooglePickerHelper {
   }
 
   private createPicker(attrs: {
-    config: {
-      type: "files",
-      mimeTypes: string[]
-    } | {
-      type: "spreadsheets"
-    };
+    configs: PickerConfig[];
     onPicked: (file: FileResult) => void;
   }) {
     var callback = (data) => {
@@ -36,7 +40,8 @@ export default class GooglePickerHelper {
         attrs.onPicked({
           id: docResult.id,
           name: docResult.name,
-          downloadUrl: docResult.url
+          downloadUrl: docResult.url,
+          mimeType: docResult.mimeType
         });
       }
     };
@@ -52,32 +57,45 @@ export default class GooglePickerHelper {
         builder.setSize(1051, 650);
       }
 
-      if (attrs.config.type === "files") {
-        builder.addView(new Picker.DocsView().setMimeTypes(attrs.config.mimeTypes.join(",")));
-      } else if (attrs.config.type === "spreadsheets") {
-        builder.addView(Picker.ViewId.SPREADSHEETS);
-      }
+      attrs.configs.forEach((config) => {
+        if (config.type === "files") {
+          builder.addView(new Picker.DocsView().setMimeTypes(config.mimeTypes.join(",")));
+        } else if (config.type === "spreadsheets") {
+          builder.addView(Picker.ViewId.SPREADSHEETS);
+        }
+      });
 
       var picker = builder.build();
       picker.setVisible(true);
     });
   }
 
+  private FILES_CONFIG: PickerConfig = {
+    type: "files",
+    mimeTypes: JSON_MIME_TYPES
+  };
+
+  private SHEETS_CONFIG: PickerConfig = {
+    type: "spreadsheets"
+  };
+
   createJsonFilePicker(onPicked: (file: FileResult) => void) {
     this.createPicker({
-      config: {
-        type: "files",
-        mimeTypes: JSON_MIME_TYPES
-      },
+      configs: [ this.FILES_CONFIG ],
       onPicked: onPicked
     });
   }
 
   createGoogleSheetPicker(onPicked: (file: FileResult) => void) {
     this.createPicker({
-      config: {
-        type: "spreadsheets"
-      },
+      configs: [ this.SHEETS_CONFIG ],
+      onPicked: onPicked
+    });
+  }
+
+  createAnythingPicker(onPicked: (file: FileResult) => void) {
+    this.createPicker({
+      configs: [ this.FILES_CONFIG, this.SHEETS_CONFIG ],
       onPicked: onPicked
     });
   }

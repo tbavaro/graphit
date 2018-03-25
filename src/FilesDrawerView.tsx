@@ -10,7 +10,6 @@ export interface Actions {
   save: () => void;
   saveAs: () => void;
   importUploadedFile: () => void;
-  importGoogleSheet: () => void;
   mergeGoogleSheet: () => void;
 }
 
@@ -106,7 +105,7 @@ export class Component extends ListenerPureComponent<Props, {}> {
               onClick: this.props.actionManager.openFilePicker
             },
             {
-              key: "action:save_as",
+              key: "action:save",
               label: "Save",
               onClick: this.props.actionManager.save,
               disabled: !this.props.canSave
@@ -121,11 +120,6 @@ export class Component extends ListenerPureComponent<Props, {}> {
               key: "action:import_upload",
               label: "Import file...",
               onClick: this.props.actionManager.importUploadedFile
-            },
-            {
-              key: "action:import_spreadsheet",
-              label: "Import spreadsheet...",
-              onClick: this.props.actionManager.importGoogleSheet
             },
             {
               key: "action:merge_spreadsheet",
