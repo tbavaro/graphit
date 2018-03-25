@@ -2,8 +2,6 @@ import * as Request from "request-promise-native";
 import * as GoogleApi from "../google/GoogleApi";
 import { BasicListenable } from "./Listenable";
 
-const EXTENSION = ".graphit.json";
-
 type Maybe<T> = T | undefined;
 
 export enum DatastoreStatus {
@@ -67,17 +65,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
     return this.filesResource().get({
       fileId: fileId,
       fields: "name"
-    }).then((f) => {
-      var name = f.result.name;
-      if (name) {
-        if (name.endsWith(EXTENSION)) {
-          name = name.substring(0, name.length - EXTENSION.length);
-        }
-        return name;
-      } else {
-        return "Untitled";
-      }
-    });
+    }).then((f) => f.result.name || "Untitled");
   }
 
   loadFile(fileId: string): PromiseLike<string> {
