@@ -2,7 +2,6 @@ import * as React from "react";
 import "./AppBar.css";
 
 export interface Actions {
-  onClickSaveDocument: () => void;
   togglePropertiesView: () => void;
 }
 
@@ -34,7 +33,6 @@ export class Component extends React.PureComponent<Props, object> {
             <span className="mdc-top-app-bar__title">{this.props.title}</span>
           </section>
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
-            {this.renderButton("save", "Save document", this.props.actionManager.onClickSaveDocument)}
             {this.renderButton("edit", "Edit", this.props.actionManager.togglePropertiesView)}
           </section>
         </div>

@@ -20,6 +20,8 @@ type AllActions =
 interface State {
   document?: GraphDocument;
   loadedDocumentId?: string;
+  isLoading: boolean;
+  canSaveDocument: boolean;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
 }
@@ -31,31 +33,14 @@ class App extends React.Component<object, State> {
 
   state: State = {
     leftNavOpen: false,
-    propertiesViewOpen: false
+    propertiesViewOpen: false,
+    canSaveDocument: false,
+    isLoading: true
   };
 
   pendingDocumentLoadId?: string;
 
   actionManager: AllActions = {
-    onClickSaveDocument: () => {
-      if (this.state.document) {
-        if (!this.state.loadedDocumentId) {
-          alert("can't save document without id (yet)");
-          return;
-        }
-
-        var data = this.state.document.save();
-        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
-          () => {
-            alert("saved successfully!");
-          },
-          (reason) => {
-            alert("save failed!\n" + reason);
-          }
-        );
-      }
-    },
-
     closePropertiesView: () => {
       this.setState({
         propertiesViewOpen: false
@@ -69,6 +54,7 @@ class App extends React.Component<object, State> {
     },
 
     openFilePicker: () => this.openFile(),
+    save: () => this.save(),
     saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
     importGoogleSheet: () => this.importOrMergeGoogleSheet(/*shouldMerge=*/false),
@@ -85,9 +71,9 @@ class App extends React.Component<object, State> {
       this.loadDocumentById(documentId);
     } else {
       this.setState({
-        leftNavOpen: true
+        leftNavOpen: true,
+        isLoading: false
       });
-      this.loadNewDocument();
     }
   }
 
@@ -98,9 +84,11 @@ class App extends React.Component<object, State> {
   render() {
     var viewportView: any;
     var propertiesView: any = undefined;
-    var title: string;
+    var title: string = "GraphIt";
 
-    if (this.state.document) {
+    if (this.state.isLoading) {
+      viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
+    } else if (this.state.document) {
       title = this.state.document.name;
       viewportView = (
         <SimulationViewport
@@ -117,8 +105,7 @@ class App extends React.Component<object, State> {
         />
       );
     } else {
-      title = "GraphIt";
-      viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
+      viewportView = <div className="App-empty"/>;
     }
 
     return (
@@ -131,6 +118,8 @@ class App extends React.Component<object, State> {
         <FilesDrawerView.Component
           actionManager={this.actionManager}
           datastore={this.datastore}
+          canSave={this.state.canSaveDocument}
+          isDocumentLoaded={this.state.document !== undefined}
           isOpen={this.state.leftNavOpen}
           onClosed={this.closeLeftNav}
         />
@@ -142,10 +131,6 @@ class App extends React.Component<object, State> {
     );
   }
 
-  private loadNewDocument = () => {
-    this.loadDocument(GraphDocument.empty());
-  }
-
   private loadDocumentById = (id: string) => {
     // if the datastore isn't ready yet, don't try to load it yet
     if (this.datastore.status() !== DatastoreStatus.SignedIn) {
@@ -153,15 +138,12 @@ class App extends React.Component<object, State> {
       return;
     }
 
-    this.loadDocument(undefined, undefined);
+    this.startLoading();
 
-    Promise.all([
-      this.datastore.getFileName(id),
-      this.datastore.loadFile(id)
-    ]).then(([name, data]) => {
-      var document = GraphDocument.load(data);
-      document.name = name;
-      this.loadDocument(document, id);
+    this.datastore.loadFile(id).then((result) => {
+      var document = GraphDocument.load(result.content);
+      document.name = result.name;
+      this.loadDocument(document, id, result.canSave);
     });
   }
 
@@ -170,20 +152,53 @@ class App extends React.Component<object, State> {
     history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
   }
 
-  private loadDocument = (document?: GraphDocument, documentId?: string) => {
-    this.pendingDocumentLoadId = undefined;
+  private startLoading = () => {
+    this.setState({
+      loadedDocumentId: undefined,
+      document: undefined,
+      canSaveDocument: false,
+      isLoading: true
+    });
+  }
+
+  private loadDocument = (
+    document: GraphDocument,
+    documentId: string | undefined,
+    canSave: boolean
+  ) => {
     this.setState({
       loadedDocumentId: documentId,
-      document: document
+      document: document,
+      canSaveDocument: canSave,
+      isLoading: false
     });
 
     this.updateUrlWithDocumentId(documentId);
   }
 
   private onDatastoreStatusChanged = () => {
-    var newStatus = this.datastore.status();
-    if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
-      this.loadDocumentById(this.pendingDocumentLoadId);
+    switch (this.datastore.status()) {
+      case DatastoreStatus.SignedIn:
+        // assume we can't save it; we'll check in just a sec
+        this.setState({ canSaveDocument: false });
+
+        if (this.pendingDocumentLoadId) {
+          let id = this.pendingDocumentLoadId;
+          this.pendingDocumentLoadId = undefined;
+          this.loadDocumentById(id);
+        } else if (this.state.loadedDocumentId) {
+          let id = this.state.loadedDocumentId;
+          this.datastore.canSave(id).then((canSave) => {
+            // if another doc was loaded in the meantime then nevermind
+            if (id === this.state.loadedDocumentId) {
+              this.setState({ canSaveDocument: canSave });
+            }
+          });
+        }
+        break;
+
+      default:
+        break;
     }
   }
 
@@ -209,7 +224,7 @@ class App extends React.Component<object, State> {
   private importUploadedFile() {
     LocalFiles.openLocalFile((result: LocalFiles.FileResult) => {
       var document = GraphDocument.load(result.data, result.name);
-      this.loadDocument(document, /*documentId=*/undefined);
+      this.loadDocument(document, /*documentId=*/undefined, false);
       this.closeLeftNav();
     });
   }
@@ -227,7 +242,7 @@ class App extends React.Component<object, State> {
           document = this.state.document.merge(serializedDocument);
           documentId = this.state.loadedDocumentId;
         }
-        this.loadDocument(document, documentId);
+        this.loadDocument(document, documentId, this.state.canSaveDocument);
         this.closeLeftNav();
       });
     });
@@ -247,6 +262,29 @@ class App extends React.Component<object, State> {
     this.saveAs(name);
   }
 
+  private save() {
+    if (this.state.document) {
+      if (!this.state.loadedDocumentId) {
+        alert("can't save document without id (yet)");
+        return;
+      }
+
+      if (!this.state.canSaveDocument) {
+        alert("saving probably won't work due to permissions");
+      }
+
+      var data = this.state.document.save();
+      this.datastore.updateFile(this.state.loadedDocumentId, data).then(
+        () => {
+          alert("saved successfully!");
+        },
+        (reason) => {
+          alert("save failed!\n" + reason);
+        }
+      );
+    }
+  }
+
   private saveAs(name: string) {
     if (!this.state.document) {
       return;
@@ -258,7 +296,8 @@ class App extends React.Component<object, State> {
     var data = this.state.document.save();
     this.datastore.saveFileAs(name, data, GRAPHIT_MIME_TYPE).then((id) => {
       this.setState({
-        loadedDocumentId: id
+        loadedDocumentId: id,
+        canSaveDocument: true
       });
       this.updateUrlWithDocumentId(id);
       this.closeLeftNav();

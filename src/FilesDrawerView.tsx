@@ -7,6 +7,7 @@ import { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPur
 
 export interface Actions {
   openFilePicker: () => void;
+  save: () => void;
   saveAs: () => void;
   importUploadedFile: () => void;
   importGoogleSheet: () => void;
@@ -15,8 +16,9 @@ export interface Actions {
 
 interface Props extends TemporaryNavDrawer.Props {
   actionManager: Actions;
+  canSave: boolean;
   datastore: Datastore;
-  isExpandedByDefault?: boolean;
+  isDocumentLoaded: boolean;
 }
 
 export class Component extends ListenerPureComponent<Props, {}> {
@@ -105,8 +107,15 @@ export class Component extends ListenerPureComponent<Props, {}> {
             },
             {
               key: "action:save_as",
+              label: "Save",
+              onClick: this.props.actionManager.save,
+              disabled: !this.props.canSave
+            },
+            {
+              key: "action:save_as",
               label: "Save as...",
-              onClick: this.props.actionManager.saveAs
+              onClick: this.props.actionManager.saveAs,
+              disabled: !this.props.isDocumentLoaded
             },
             {
               key: "action:import_upload",
@@ -121,7 +130,8 @@ export class Component extends ListenerPureComponent<Props, {}> {
             {
               key: "action:merge_spreadsheet",
               label: "Merge spreadsheet...",
-              onClick: this.props.actionManager.mergeGoogleSheet
+              onClick: this.props.actionManager.mergeGoogleSheet,
+              disabled: !this.props.isDocumentLoaded
             }
           ]}
         />

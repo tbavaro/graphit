@@ -6,6 +6,7 @@ export interface ItemProps {
   label: string;
   href?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface Props {
@@ -24,10 +25,12 @@ export class Component extends React.PureComponent<Props, object> {
   private renderItem = (itemProps: ItemProps) => {
     var result = (
       <li
-        className="mdc-list-item"
+        className={"mdc-list-item" + (itemProps.disabled ? " disabled" : "")}
         key={itemProps.key}
-        onClick={itemProps.onClick}
+        onClick={itemProps.disabled ? undefined : itemProps.onClick}
         children={itemProps.label}
+        aria-disabled={!!itemProps.disabled}
+        tabIndex={itemProps.disabled ? -1 : undefined}
       />
     );
 

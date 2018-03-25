@@ -10,6 +10,25 @@ export enum DatastoreStatus {
   SignedIn
 }
 
+export interface DatastoreLoadFileResult<T> {
+  id: string;
+  name: string;
+  content: T;
+  canSave: boolean;
+}
+
+// function transformLoadFileResult<T, U>(
+//   original: DatastoreLoadFileResult<T>,
+//   transform: (value: T) => U
+// ): DatastoreLoadFileResult<U> {
+//   return {
+//     id: original.id,
+//     name: original.name,
+//     content: transform(original.content),
+//     canSave: original.canSave
+//   };
+// }
+
 export class Datastore extends BasicListenable<"status_changed"> {
   private _status = DatastoreStatus.Initializing;
   private _accessToken?: string;
@@ -57,18 +76,18 @@ export class Datastore extends BasicListenable<"status_changed"> {
     return this.maybeGetProfileData(p => p.getImageUrl());
   }
 
-  getFileName(fileId: string): PromiseLike<string> {
+  private getFileMetadata(fileId: string): PromiseLike<GoogleApi.DriveFile> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));
     }
 
     return this.filesResource().get({
       fileId: fileId,
-      fields: "name"
-    }).then((f) => f.result.name || "Untitled");
+      fields: "name, capabilities"
+    }).then((f) => f.result);
   }
 
-  loadFile(fileId: string): PromiseLike<string> {
+  private loadFileContent(fileId: string): PromiseLike<string> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));
     }
@@ -78,6 +97,31 @@ export class Datastore extends BasicListenable<"status_changed"> {
       headers: {
         "Authorization": "Bearer " + this._accessToken
       }
+    });
+  }
+
+  private interpretCanSave(metadata: GoogleApi.DriveFile) {
+    return metadata.capabilities ? (metadata.capabilities.canEdit || false) : false;
+  }
+
+  canSave(fileId: string): PromiseLike<boolean> {
+    return this.getFileMetadata(fileId).then(
+      (metadata) => this.interpretCanSave(metadata),
+      () => false
+    );
+  }
+
+  loadFile(fileId: string): PromiseLike<DatastoreLoadFileResult<string>> {
+    return Promise.all([
+      this.getFileMetadata(fileId),
+      this.loadFileContent(fileId)
+    ]).then(([metadata, content]) => {
+      return {
+        id: fileId,
+        name: metadata.name || "Untitled",
+        content: content,
+        canSave: this.interpretCanSave(metadata)
+      };
     });
   }
 

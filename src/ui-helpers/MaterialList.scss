@@ -7,4 +7,12 @@
 
 .MaterialList li {
   cursor: pointer;
+
+  &.disabled {
+    @include mdc-states-hover-opacity(0);
+    @include mdc-states-press-opacity(0);
+    @include mdc-states-focus-opacity(0, false);
+    color: rgba(0, 0, 0, 0.26);
+    cursor: default;
+  }
 }
