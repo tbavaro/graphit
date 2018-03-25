@@ -46,6 +46,12 @@ export default class GooglePickerHelper {
         .setCallback(callback)
         .setOAuthToken(GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().access_token);
 
+      // hack to make it better on mobile
+      if (window.innerWidth < 800 || window.innerHeight < 800) {
+        // if the screen is small, ask for the max size to try to fill the space
+        builder.setSize(1051, 650);
+      }
+
       if (attrs.config.type === "files") {
         builder.addView(new Picker.DocsView().setMimeTypes(attrs.config.mimeTypes.join(",")));
       } else if (attrs.config.type === "spreadsheets") {
