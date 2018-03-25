@@ -1,8 +1,9 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
-import { Datastore, DatastoreStatus, DatastoreFileResult } from "./data/Datastore";
+import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 import * as MaterialList from "./ui-helpers/MaterialList";
+import { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
 
 export interface Actions {
   openFilePicker: () => void;
@@ -15,80 +16,25 @@ export interface Actions {
 interface Props extends TemporaryNavDrawer.Props {
   actionManager: Actions;
   datastore: Datastore;
-  datastoreStatus: DatastoreStatus;
   isExpandedByDefault?: boolean;
 }
 
-interface State {
-  isLoadingFiles: boolean;
-  files?: DatastoreFileResult[];
-}
-
-export class Component extends React.Component<Props, State> {
-  state: State = {
-    isLoadingFiles: false
-  };
-
-  componentWillReceiveProps(newProps: Props) {
-    var isNewDatastore = (newProps.datastore !== this.props.datastore);
-    var isSignedIn = (newProps.datastoreStatus === DatastoreStatus.SignedIn);
-    var wasSignedIn = (this.props.datastoreStatus === DatastoreStatus.SignedIn);
-
-    if (isNewDatastore) {
-      this.setState({
-        isLoadingFiles: false,
-        files: undefined
-      });
+export class Component extends ListenerPureComponent<Props, {}> {
+  protected bindings: ListenerBinding<Props>[] = [
+    {
+      propertyName: "datastore",
+      eventType: "status_changed",
+      callback: () => this.datastoreStatusChanged()
     }
-
-    if (isNewDatastore || (isSignedIn && !wasSignedIn)) {
-      // TODO see if we need to worry about these overlapping
-      this.setState({
-        isLoadingFiles: true
-      });
-      newProps.datastore.listFiles().then((files) => {
-        this.setState({
-          isLoadingFiles: false,
-          files: files
-        });
-      });
-    }
-  }
+  ];
 
   render() {
     var headerContents: any;
     var contents: any;
 
-    switch (this.props.datastoreStatus) {
+    switch (this.props.datastore.status()) {
       case DatastoreStatus.SignedIn:
-        var headerClassName = [
-          "mdc-list",
-          "mdc-list--dense",
-          "mdc-list--avatar-list",
-          "mdc-list--non-interactive",
-          "FilesDrawerView-avatarList"
-        ].join(" ");
-        headerContents = (
-          <ul className={headerClassName}>
-            <li className="mdc-list-item">
-              <img
-                className="mdc-list-item__graphic"
-                src={this.props.datastore.currentUserImageUrl() || ""}
-                width="56"
-                height="56"
-              />
-              <span className="FilesDrawerView-avatarList-name">
-                {this.props.datastore.currentUserName()}
-              </span>
-              <button
-                className="FilesDrawerView-avatarList-expandButton mdc-button mdc-button--dense"
-                onClick={this.onClickSignOut}
-              >
-                <i className="material-icons mdc-button__icon">expand_more</i>
-              </button>
-            </li>
-          </ul>
-        );
+        headerContents = this.renderSignedInHeaderContents();
         contents = this.renderSignedInContents();
         break;
 
@@ -112,59 +58,75 @@ export class Component extends React.Component<Props, State> {
     );
   }
 
+  private renderSignedInHeaderContents() {
+    var headerClassName = [
+      "mdc-list",
+      "mdc-list--dense",
+      "mdc-list--avatar-list",
+      "mdc-list--non-interactive",
+      "FilesDrawerView-avatarList"
+    ].join(" ");
+    return (
+      <ul className={headerClassName}>
+        <li className="mdc-list-item">
+          <img
+            className="mdc-list-item__graphic"
+            src={this.props.datastore.currentUserImageUrl() || ""}
+            width="56"
+            height="56"
+          />
+          <span className="FilesDrawerView-avatarList-name">
+            {this.props.datastore.currentUserName()}
+          </span>
+          <button
+            className="FilesDrawerView-avatarList-expandButton mdc-button mdc-button--dense"
+            onClick={this.onClickSignOut}
+          >
+            <i className="material-icons mdc-button__icon">expand_more</i>
+          </button>
+        </li>
+      </ul>
+    );
+  }
+
   private renderInitializingContents() {
     return "Connecting to Google...";
   }
 
   private renderSignedInContents() {
-    var files = this.state.files || [];
-
-    if (this.state.isLoadingFiles) {
-      return <div>(Loading...)</div>;
-    } else {
-      return (
-        <React.Fragment>
-          <MaterialList.Component
-            items={[
-              {
-                key: "action:open",
-                label: "Open...",
-                onClick: this.props.actionManager.openFilePicker
-              },
-              {
-                key: "action:save_as",
-                label: "Save as...",
-                onClick: this.props.actionManager.saveAs
-              },
-              {
-                key: "action:import_upload",
-                label: "Import file...",
-                onClick: this.props.actionManager.importUploadedFile
-              },
-              {
-                key: "action:import_spreadsheet",
-                label: "Import spreadsheet...",
-                onClick: this.props.actionManager.importGoogleSheet
-              },
-              {
-                key: "action:merge_spreadsheet",
-                label: "Merge spreadsheet...",
-                onClick: this.props.actionManager.mergeGoogleSheet
-              }
-            ]}
-          />
-          <MaterialList.Component
-            items={files.map((file) => {
-              return {
-                key: "file:" + file.id,
-                label: file.name,
-                href: "?doc=" + file.id
-              };
-            })}
-          />
-        </React.Fragment>
-      );
-    }
+    return (
+      <React.Fragment>
+        <MaterialList.Component
+          items={[
+            {
+              key: "action:open",
+              label: "Open...",
+              onClick: this.props.actionManager.openFilePicker
+            },
+            {
+              key: "action:save_as",
+              label: "Save as...",
+              onClick: this.props.actionManager.saveAs
+            },
+            {
+              key: "action:import_upload",
+              label: "Import file...",
+              onClick: this.props.actionManager.importUploadedFile
+            },
+            {
+              key: "action:import_spreadsheet",
+              label: "Import spreadsheet...",
+              onClick: this.props.actionManager.importGoogleSheet
+            },
+            {
+              key: "action:merge_spreadsheet",
+              label: "Merge spreadsheet...",
+              onClick: this.props.actionManager.mergeGoogleSheet
+            }
+          ]}
+        />
+      </React.Fragment>
+    );
   }
 
   private renderSignedOutContents() {
@@ -185,5 +147,9 @@ export class Component extends React.Component<Props, State> {
 
   private onClickSignOut = () => {
     this.props.datastore.signOut();
+  }
+
+  private datastoreStatusChanged = () => {
+    this.forceUpdate();
   }
 }

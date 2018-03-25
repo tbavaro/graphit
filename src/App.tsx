@@ -20,7 +20,6 @@ type AllActions =
 interface State {
   document?: GraphDocument;
   loadedDocumentId?: string;
-  datastoreStatus: DatastoreStatus;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
 }
@@ -31,7 +30,6 @@ class App extends React.Component<object, State> {
   simulationConfigListener = new SimpleListenable();
 
   state: State = {
-    datastoreStatus: this.datastore.status(),
     leftNavOpen: false,
     propertiesViewOpen: false
   };
@@ -78,8 +76,8 @@ class App extends React.Component<object, State> {
   };
 
   componentWillMount() {
-    this.datastore.onStatusChanged = this.onDatastoreStatusChanged;
-    this.onDatastoreStatusChanged(this.datastore.status());
+    this.datastore.addListener("status_changed", this.onDatastoreStatusChanged);
+    this.onDatastoreStatusChanged();
 
     var queryParams = QueryString.parse(location.search);
     var documentId: string | null = queryParams.doc || null;
@@ -91,6 +89,10 @@ class App extends React.Component<object, State> {
       });
       this.loadNewDocument();
     }
+  }
+
+  componentWillUnmount() {
+    this.datastore.removeListener("status_changed", this.onDatastoreStatusChanged);
   }
 
   render() {
@@ -129,7 +131,6 @@ class App extends React.Component<object, State> {
         <FilesDrawerView.Component
           actionManager={this.actionManager}
           datastore={this.datastore}
-          datastoreStatus={this.state.datastoreStatus}
           isOpen={this.state.leftNavOpen}
           onClosed={this.closeLeftNav}
         />
@@ -147,7 +148,7 @@ class App extends React.Component<object, State> {
 
   private loadDocumentById = (id: string) => {
     // if the datastore isn't ready yet, don't try to load it yet
-    if (this.state.datastoreStatus !== DatastoreStatus.SignedIn) {
+    if (this.datastore.status() !== DatastoreStatus.SignedIn) {
       this.pendingDocumentLoadId = id;
       return;
     }
@@ -179,19 +180,10 @@ class App extends React.Component<object, State> {
     this.updateUrlWithDocumentId(documentId);
   }
 
-  private onDatastoreStatusChanged = (newStatus: DatastoreStatus) => {
-    if (this.state.datastoreStatus !== newStatus) {
-      this.setState({
-        datastoreStatus: newStatus
-      });
-
-      if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
-        this.loadDocumentById(this.pendingDocumentLoadId);
-      }
-
-      if (newStatus === DatastoreStatus.SignedIn) {
-        // SpreadsheetImporter.loadDocumentFromSheet("1F9_NGA1pNY_Hf09y5mINKdnzlZkVRo89v6wEjmKz-R8");
-      }
+  private onDatastoreStatusChanged = () => {
+    var newStatus = this.datastore.status();
+    if (newStatus === DatastoreStatus.SignedIn && this.pendingDocumentLoadId) {
+      this.loadDocumentById(this.pendingDocumentLoadId);
     }
   }
 
