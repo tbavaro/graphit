@@ -65,7 +65,7 @@ version = update_version(lambda v: semver.bump_patch(v))
 # there's no easy way to make `git fetch` not get it all
 os.chdir(DEPLOY_REPO_DIR)
 check_and_call(["git", "add", "-A"])
-check_and_call(["git", "commit", "--amend", "-m", version])
+check_and_call(["git", "commit", "--amend", "--date=now", "-m", version])
 check_and_call(["git", "push", "-f"])
 
 os.chdir(master_repo_dir)
