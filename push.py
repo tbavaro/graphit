@@ -61,10 +61,12 @@ build()
 copy_build_artifacts()
 version = update_version(lambda v: semver.bump_patch(v))
 
+# replace the current repo commit, since the history isn't that helpful and
+# there's no easy way to make `git fetch` not get it all
 os.chdir(DEPLOY_REPO_DIR)
 check_and_call(["git", "add", "-A"])
-check_and_call(["git", "commit", "-m", version])
-check_and_call(["git", "push"])
+check_and_call(["git", "commit", "--amend", "-m", version])
+check_and_call(["git", "push", "-f"])
 
 os.chdir(master_repo_dir)
 check_and_call(["git", "tag", version])
