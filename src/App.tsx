@@ -20,7 +20,7 @@ type AllActions =
 interface State {
   document: GraphDocument | null;
   loadedDocumentId?: string; // TODO move into GraphDocument?
-  isLoading: boolean;
+  modalOverlayText?: string;
   canSaveDocument: boolean;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
@@ -36,7 +36,7 @@ class App extends React.Component<object, State> {
     leftNavOpen: false,
     propertiesViewOpen: false,
     canSaveDocument: false,
-    isLoading: true
+    modalOverlayText: "Loading..."
   };
 
   pendingDocumentLoadId?: string;
@@ -71,9 +71,9 @@ class App extends React.Component<object, State> {
       this.loadDocumentById(documentId);
     } else {
       this.setState({
-        leftNavOpen: true,
-        isLoading: false
+        leftNavOpen: true
       });
+      this.hideModalOverlay();
     }
   }
 
@@ -85,12 +85,8 @@ class App extends React.Component<object, State> {
     var viewportView: any;
     var propertiesView: any = undefined;
     var title: string = "GraphIt";
-    var isDocumentLoaded: boolean = false;
 
-    if (this.state.isLoading) {
-      viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
-    } else if (this.state.document !== null) {
-      isDocumentLoaded = true;
+    if (this.state.document !== null) {
       title = this.state.document.name;
       viewportView = (
         <SimulationViewport
@@ -116,19 +112,32 @@ class App extends React.Component<object, State> {
           title={title}
           onClickNavButton={this.openLeftNav}
           actionManager={this.actionManager}
-          isDocumentLoaded={isDocumentLoaded}
+          isDocumentLoaded={!!this.state.document}
         />
         <FilesDrawerView.Component
           actionManager={this.actionManager}
           datastore={this.datastore}
           canSave={this.state.canSaveDocument}
-          isDocumentLoaded={isDocumentLoaded}
+          isDocumentLoaded={!!this.state.document}
           isOpen={this.state.leftNavOpen}
           onClosed={this.closeLeftNav}
         />
         <div className="App-content">
           {viewportView}
           {propertiesView}
+        </div>
+        {this.state.modalOverlayText ? this.renderModalOverlay(this.state.modalOverlayText) : null}
+      </div>
+    );
+  }
+
+  private renderModalOverlay(text: string) {
+    return (
+      <div className="App-modalOverlay">
+        <div className="App-modalOverlay-row">
+          <div className="App-modalOverlay-text">
+            {text}
+          </div>
         </div>
       </div>
     );
@@ -141,13 +150,19 @@ class App extends React.Component<object, State> {
       return;
     }
 
-    this.startLoading();
-
-    this.datastore.loadFile(id).then((result) => {
-      var document = GraphDocument.load(result.content);
-      document.name = result.name;
-      this.loadDocument(document, id, result.canSave);
-    });
+    this.showModalOverlayDuring(
+      "Loading...",
+      this.datastore.loadFile(id).then(
+        (result) => {
+          var document = GraphDocument.load(result.content);
+          document.name = result.name;
+          this.setDocument(document, id, result.canSave);
+        },
+        (reason) => {
+          alert("error loading document:\n" + this.decodeErrorReason(reason));
+        }
+      )
+    );
   }
 
   private updateUrlWithDocumentId(documentId?: string) {
@@ -155,16 +170,7 @@ class App extends React.Component<object, State> {
     history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
   }
 
-  private startLoading = () => {
-    this.setState({
-      loadedDocumentId: undefined,
-      document: null,
-      canSaveDocument: false,
-      isLoading: true
-    });
-  }
-
-  private loadDocument = (
+  private setDocument = (
     document: GraphDocument,
     documentId: string | undefined,
     canSave: boolean
@@ -172,8 +178,7 @@ class App extends React.Component<object, State> {
     this.setState({
       loadedDocumentId: documentId,
       document: document,
-      canSaveDocument: canSave,
-      isLoading: false
+      canSaveDocument: canSave
     });
 
     this.updateUrlWithDocumentId(documentId);
@@ -231,7 +236,7 @@ class App extends React.Component<object, State> {
   private importUploadedFile() {
     LocalFiles.openLocalFile((result: LocalFiles.FileResult) => {
       var document = GraphDocument.load(result.data, result.name);
-      this.loadDocument(document, /*documentId=*/undefined, false);
+      this.setDocument(document, /*documentId=*/undefined, false);
       this.closeLeftNav();
     });
   }
@@ -254,7 +259,7 @@ class App extends React.Component<object, State> {
         document = this.state.document.merge(serializedDocument);
         documentId = this.state.loadedDocumentId;
       }
-      this.loadDocument(document, documentId, this.state.canSaveDocument);
+      this.setDocument(document, documentId, this.state.canSaveDocument);
       this.closeLeftNav();
     });
   }
@@ -285,13 +290,14 @@ class App extends React.Component<object, State> {
       }
 
       var data = this.state.document.save();
-      this.datastore.updateFile(this.state.loadedDocumentId, data).then(
-        () => {
-          alert("saved successfully!");
-        },
-        (reason) => {
-          alert("save failed!\n" + reason);
-        }
+      this.showModalOverlayDuring(
+        "Saving...",
+        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
+          () => { /* */ },
+          (reason) => {
+            alert("save failed!\n" + this.decodeErrorReason(reason));
+          }
+        )
       );
     }
   }
@@ -305,15 +311,57 @@ class App extends React.Component<object, State> {
     this.forceUpdate(); // because we changed the name
 
     var data = this.state.document.save();
-    this.datastore.saveFileAs(name, data, GooglePickerHelper.GRAPHIT_MIME_TYPE).then((id) => {
-      this.setState({
-        loadedDocumentId: id,
-        canSaveDocument: true
-      });
-      this.updateUrlWithDocumentId(id);
-      this.closeLeftNav();
-      alert("saved successfully");
-    });
+    this.showModalOverlayDuring(
+      "Saving...",
+      this.datastore.saveFileAs(name, data, GooglePickerHelper.GRAPHIT_MIME_TYPE).then(
+        (id) => {
+          this.setState({
+            loadedDocumentId: id,
+            canSaveDocument: true
+          });
+          this.updateUrlWithDocumentId(id);
+          this.closeLeftNav();
+        },
+        (reason) => {
+          alert("save failed!\n" + this.decodeErrorReason(reason));
+        }
+      )
+    );
+  }
+
+  private showModalOverlay = (text: string) => {
+    this.setState({ modalOverlayText: text });
+  }
+
+  private hideModalOverlay = () => {
+    this.setState({ modalOverlayText: undefined });
+  }
+
+  private showModalOverlayDuring<T>(text: string, promise: PromiseLike<T>): PromiseLike<T> {
+    this.showModalOverlay(text);
+    return promise.then(
+      (value) => {
+        this.hideModalOverlay();
+        return value;
+      },
+      (reason) => {
+        this.hideModalOverlay();
+        throw reason;
+      }
+    );
+  }
+
+  private decodeErrorReason(reason: any): string {
+    if (reason && reason.result && reason.result.error && reason.result.error.errors) {
+      let errors = reason.result.error.errors;
+      if (errors.length === 1) {
+        let onlyError = errors[0];
+        if (onlyError.message) {
+          return ("" + onlyError.message);
+        }
+      }
+    }
+    return JSON.stringify(reason);
   }
 }
 
