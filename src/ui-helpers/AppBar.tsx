@@ -9,6 +9,7 @@ interface Props {
   actionManager: Actions;
   title: string;
   onClickNavButton?: () => void;
+  isDocumentLoaded: boolean;
 }
 
 export class Component extends React.PureComponent<Props, object> {
@@ -33,21 +34,36 @@ export class Component extends React.PureComponent<Props, object> {
             <span className="mdc-top-app-bar__title">{this.props.title}</span>
           </section>
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
-            {this.renderButton("edit", "Edit", this.props.actionManager.togglePropertiesView)}
+            {this.renderButton({
+              iconName: "edit",
+              ariaLabel: "Edit",
+              onClick: this.props.actionManager.togglePropertiesView,
+              isDisabled: !this.props.isDocumentLoaded
+            })}
           </section>
         </div>
       </div>
     );
   }
 
-  private renderButton = (iconName: string, ariaLabel: string, onClick?: () => void, isDisabled?: boolean) => {
+  private renderButton = (attrs: {
+    iconName: string;
+    ariaLabel: string;
+    onClick?: () => void;
+    isDisabled?: boolean;
+  }) => {
     return (
       <a
-        href={isDisabled ? undefined : "#"}
-        className={"AppBar-iconButton material-icons mdc-top-app-bar__action-item" + (isDisabled ? " disabled" : "")}
-        aria-label={ariaLabel}
-        onClick={onClick}
-        children={iconName}
+        href={attrs.isDisabled ? undefined : "#"}
+        className={[
+          "AppBar-iconButton",
+          "material-icons",
+          "mdc-top-app-bar__action-item",
+          (attrs.isDisabled ? " disabled" : "")
+        ].join(" ")}
+        aria-label={attrs.ariaLabel}
+        onClick={attrs.onClick}
+        children={attrs.iconName}
       />
     );
   }

@@ -18,8 +18,8 @@ type AllActions =
   PropertiesView.Actions;
 
 interface State {
-  document?: GraphDocument;
-  loadedDocumentId?: string;
+  document: GraphDocument | null;
+  loadedDocumentId?: string; // TODO move into GraphDocument?
   isLoading: boolean;
   canSaveDocument: boolean;
   leftNavOpen: boolean;
@@ -32,6 +32,7 @@ class App extends React.Component<object, State> {
   simulationConfigListener = new SimpleListenable();
 
   state: State = {
+    document: null,
     leftNavOpen: false,
     propertiesViewOpen: false,
     canSaveDocument: false,
@@ -84,10 +85,12 @@ class App extends React.Component<object, State> {
     var viewportView: any;
     var propertiesView: any = undefined;
     var title: string = "GraphIt";
+    var isDocumentLoaded: boolean = false;
 
     if (this.state.isLoading) {
       viewportView = <div className="App-loading"><div className="App-loading-text">Loading...</div></div>;
-    } else if (this.state.document) {
+    } else if (this.state.document !== null) {
+      isDocumentLoaded = true;
       title = this.state.document.name;
       viewportView = (
         <SimulationViewport
@@ -113,12 +116,13 @@ class App extends React.Component<object, State> {
           title={title}
           onClickNavButton={this.openLeftNav}
           actionManager={this.actionManager}
+          isDocumentLoaded={isDocumentLoaded}
         />
         <FilesDrawerView.Component
           actionManager={this.actionManager}
           datastore={this.datastore}
           canSave={this.state.canSaveDocument}
-          isDocumentLoaded={this.state.document !== undefined}
+          isDocumentLoaded={isDocumentLoaded}
           isOpen={this.state.leftNavOpen}
           onClosed={this.closeLeftNav}
         />
@@ -154,7 +158,7 @@ class App extends React.Component<object, State> {
   private startLoading = () => {
     this.setState({
       loadedDocumentId: undefined,
-      document: undefined,
+      document: null,
       canSaveDocument: false,
       isLoading: true
     });
@@ -242,7 +246,7 @@ class App extends React.Component<object, State> {
     SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
       var document: GraphDocument;
       var documentId: string | undefined;
-      if (!shouldMerge || !this.state.document) {
+      if (!shouldMerge || (this.state.document === null)) {
         document = GraphDocument.loadSGD(serializedDocument);
         document.name = fileResult.name;
         documentId = undefined;
@@ -257,7 +261,7 @@ class App extends React.Component<object, State> {
 
   private showSaveAsDialog() {
     // alert("save as");
-    var name = prompt("Save as", this.state.document ? this.state.document.name : "Untitled");
+    var name = prompt("Save as", (this.state.document !== null) ? this.state.document.name : "Untitled");
     if (name === null) {
       return;
     }
@@ -270,7 +274,7 @@ class App extends React.Component<object, State> {
   }
 
   private save() {
-    if (this.state.document) {
+    if (this.state.document !== null) {
       if (!this.state.loadedDocumentId) {
         alert("can't save document without id (yet)");
         return;
@@ -293,7 +297,7 @@ class App extends React.Component<object, State> {
   }
 
   private saveAs(name: string) {
-    if (!this.state.document) {
+    if (this.state.document === null) {
       return;
     }
 
