@@ -143,10 +143,15 @@ class App extends React.Component<object, State> {
     );
   }
 
-  private loadDocumentById = (id: string) => {
+  private loadDocumentById = (id?: string) => {
     // if the datastore isn't ready yet, don't try to load it yet
-    if (this.datastore.status() !== DatastoreStatus.SignedIn) {
+    if (this.datastore.status() === DatastoreStatus.Initializing) {
       this.pendingDocumentLoadId = id;
+      return;
+    }
+
+    if (id === undefined) {
+      this.setDocument(GraphDocument.empty(), undefined, false);
       return;
     }
 
@@ -165,9 +170,13 @@ class App extends React.Component<object, State> {
     );
   }
 
-  private updateUrlWithDocumentId(documentId?: string) {
-    // TODO implement popstate too
-    history.pushState({}, window.document.title, documentId ? ("?doc=" + documentId) : "?");
+  private updateUrlWithDocumentId() {
+    let documentId = this.state.loadedDocumentId;
+    history.replaceState(
+      {},
+      window.document.title,
+      documentId ? ("?doc=" + documentId) : "?"
+    );
   }
 
   private setDocument = (
@@ -180,8 +189,7 @@ class App extends React.Component<object, State> {
       document: document,
       canSaveDocument: canSave
     });
-
-    this.updateUrlWithDocumentId(documentId);
+    this.updateUrlWithDocumentId();
   }
 
   private onDatastoreStatusChanged = () => {
@@ -319,7 +327,7 @@ class App extends React.Component<object, State> {
             loadedDocumentId: id,
             canSaveDocument: true
           });
-          this.updateUrlWithDocumentId(id);
+          this.updateUrlWithDocumentId();
           this.closeLeftNav();
         },
         (reason) => {

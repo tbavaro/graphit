@@ -30,7 +30,7 @@ export class Component extends React.PureComponent<Props, object> {
       <div className="AppBar mdc-top-app-bar" ref={this.setRef}>
         <div className="mdc-top-app-bar__row">
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-            <a href="#" className="material-icons mdc-top-app-bar__navigation-icon">menu</a>
+            <a className="material-icons mdc-top-app-bar__navigation-icon">menu</a>
             <span className="mdc-top-app-bar__title">{this.props.title}</span>
           </section>
           <section className="mdc-top-app-bar__section mdc-top-app-bar__section--align-end" role="toolbar">
@@ -54,7 +54,6 @@ export class Component extends React.PureComponent<Props, object> {
   }) => {
     return (
       <a
-        href={attrs.isDisabled ? undefined : "#"}
         className={[
           "AppBar-iconButton",
           "material-icons",
