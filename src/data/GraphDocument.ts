@@ -164,7 +164,6 @@ export const internals = {
     originalDoc: SerializedGraphDocument,
     newDoc: SerializedGraphDocument
   ): SerializedGraphDocument => {
-    console.log("merging", originalDoc, newDoc);
     const mergeValueField = <K extends keyof SerializedGraphDocument>(key: K): SerializedGraphDocument[K] => {
       return internals.mergeValueSimple(originalDoc[key], newDoc[key]);
     };

@@ -322,7 +322,6 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
   }
 
   private onDragStart = (index: number, metaKey: boolean) => {
-    console.log("drag start", index);
     var node = this.props.document.nodes[index];
 
     var newSelectedNodes: Set<MyNodeDatum> | undefined;

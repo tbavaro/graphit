@@ -4,7 +4,7 @@
 /// <reference path="../../node_modules/@types/google.picker/index.d.ts"/>
 
 export const config = {
-  API_KEY: process.env.REACT_APP_GOOGLE_API_KEY,
+  API_KEY: process.env.REACT_APP_GOOGLE_API_KEY as string,
   CLIENT_ID: process.env.REACT_APP_GOOGLE_CLIENT_ID,
   DISCOVERY_DOCS: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
   SCOPES: [
@@ -59,7 +59,7 @@ type ExtraClientTypes = {
 
 export const clientSingleton = createSingletonWithPromise(() => {
   return loadClientAuth2ApiSingleton().then(() => {
-    gapi.client.init({
+    return gapi.client.init({
       apiKey: config.API_KEY,
       clientId: config.CLIENT_ID,
       discoveryDocs: config.DISCOVERY_DOCS,

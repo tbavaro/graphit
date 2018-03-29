@@ -1,6 +1,7 @@
 import * as Request from "request-promise-native";
 import * as GoogleApi from "../google/GoogleApi";
 import { BasicListenable } from "./Listenable";
+import { Headers } from "request";
 
 type Maybe<T> = T | undefined;
 
@@ -77,27 +78,43 @@ export class Datastore extends BasicListenable<"status_changed"> {
   }
 
   private getFileMetadata(fileId: string): PromiseLike<GoogleApi.DriveFile> {
-    if (!this.isSignedIn()) {
-      return Promise.reject(new Error("not logged in"));
-    }
-
     return this.filesResource().get({
       fileId: fileId,
-      fields: "name, capabilities"
+      fields: "name, capabilities",
+      key: GoogleApi.config.API_KEY
     }).then((f) => f.result);
   }
 
-  private loadFileContent(fileId: string): PromiseLike<string> {
-    if (!this.isSignedIn()) {
-      return Promise.reject(new Error("not logged in"));
+  private addQueryParams(url: string, queryParams: { [k: string]: string }) {
+    const queryKeys = Object.keys(queryParams);
+    if (queryKeys.length === 0) {
+      return url;
     }
 
-    var url = "https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media";
-    return Request.get(url, {
-      headers: {
-        "Authorization": "Bearer " + this._accessToken
-      }
+    url += (url.includes("?") ? "&" : "?");
+
+    const queryParts = queryKeys.map((key) => {
+      const value = ("" + queryParams[key]);
+      return encodeURIComponent(key) + "=" + encodeURIComponent(value);
     });
+
+    return url + queryParts.join("&");
+  }
+
+  private loadFileContent(fileId: string): PromiseLike<string> {
+    var url = this.addQueryParams(
+      "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(fileId),
+      {
+        "alt": "media",
+        "key": GoogleApi.config.API_KEY
+      }
+    );
+    var headers: Headers = {};
+    if (this._accessToken) {
+      headers.Authorization = "Bearer " + this._accessToken;
+    }
+
+    return Request.get(url, { headers: headers });
   }
 
   private interpretCanSave(metadata: GoogleApi.DriveFile) {
@@ -130,7 +147,13 @@ export class Datastore extends BasicListenable<"status_changed"> {
       return Promise.reject(new Error("not logged in"));
     }
 
-    var uri = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+    var uri = this.addQueryParams(
+      "https://www.googleapis.com/upload/drive/v3/files",
+      {
+        "uploadType": "multipart",
+        "key": GoogleApi.config.API_KEY
+      }
+    );
     var metadata: GoogleApi.DriveFile = {
       name: name,
       mimeType: mimeType
@@ -166,7 +189,13 @@ export class Datastore extends BasicListenable<"status_changed"> {
   }
 
   updateFile(fileId: string, data: string): PromiseLike<void> {
-    var uri = "https://www.googleapis.com/upload/drive/v3/files/" + fileId;
+    var uri = this.addQueryParams(
+      "https://www.googleapis.com/upload/drive/v3/files/" + encodeURIComponent(fileId),
+      {
+        "key": GoogleApi.config.API_KEY
+      }
+    );
+
     return Request.patch({
       uri: uri,
       headers: {

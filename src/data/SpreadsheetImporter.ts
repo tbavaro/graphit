@@ -103,7 +103,6 @@ export const internals = {
       linkSourceIds: assertDefined(linkSourceIds, "linkSourceIds"),
       linkTargetIds: assertDefined(linkTargetIds, "linkTargetIds")
     });
-    console.log(result);
     return result;
   },
 

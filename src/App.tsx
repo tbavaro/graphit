@@ -193,28 +193,23 @@ class App extends React.Component<object, State> {
   }
 
   private onDatastoreStatusChanged = () => {
-    switch (this.datastore.status()) {
-      case DatastoreStatus.SignedIn:
-        // assume we can't save it; we'll check in just a sec
-        this.setState({ canSaveDocument: false });
+    if (this.datastore.status() !== DatastoreStatus.Initializing) {
+      // assume we can't save it; we'll check in just a sec
+      this.setState({ canSaveDocument: false });
 
-        if (this.pendingDocumentLoadId) {
-          let id = this.pendingDocumentLoadId;
-          this.pendingDocumentLoadId = undefined;
-          this.loadDocumentById(id);
-        } else if (this.state.loadedDocumentId) {
-          let id = this.state.loadedDocumentId;
-          this.datastore.canSave(id).then((canSave) => {
-            // if another doc was loaded in the meantime then nevermind
-            if (id === this.state.loadedDocumentId) {
-              this.setState({ canSaveDocument: canSave });
-            }
-          });
-        }
-        break;
-
-      default:
-        break;
+      if (this.pendingDocumentLoadId) {
+        let id = this.pendingDocumentLoadId;
+        this.pendingDocumentLoadId = undefined;
+        this.loadDocumentById(id);
+      } else if (this.state.loadedDocumentId) {
+        let id = this.state.loadedDocumentId;
+        this.datastore.canSave(id).then((canSave) => {
+          // if another doc was loaded in the meantime then nevermind
+          if (id === this.state.loadedDocumentId) {
+            this.setState({ canSaveDocument: canSave });
+          }
+        });
+      }
     }
   }
 
