@@ -18,7 +18,8 @@
     "react-dom": "^16.2.0",
     "react-scripts-ts": "2.13.0",
     "request-promise-native": "^1.0.5",
-    "sanitize-html": "^1.18.2"
+    "sanitize-html": "^1.18.2",
+    "tsvalidators": "github:tbavaro/tsvalidators"
   },
   "scripts": {
     "start-ts": "react-scripts-ts start",
@@ -46,7 +47,7 @@
     "@types/react-dom": "^16.0.4",
     "@types/request-promise-native": "^1.0.14",
     "@types/sanitize-html": "^1.14.0",
-    "autogents": "file:../autogents",
+    "autogents": "github:tbavaro/autogents",
     "typescript": "^2.8.1"
   }
 }
