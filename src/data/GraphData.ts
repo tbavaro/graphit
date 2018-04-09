@@ -7,6 +7,9 @@ export type Id = string;
  * V1
  */
 
+/**
+ * @autogents validator
+ */
 export type NodeV1 = {
   id: Id;
   label: string;
@@ -16,19 +19,28 @@ export type NodeV1 = {
   y?: number | null;
 };
 
+/**
+ * @autogents validator
+ */
 export type LinkV1 = {
   source: Id;
   target: Id;
 };
 
+/**
+ * @autogents validator
+ */
 export type ZoomStateV1 = {
   centerX: number;
   centerY: number;
   scale: number;
 };
 
+/**
+ * @autogents validator
+ */
 export type SerializedDocumentV1 = {
-  version?: 1;
+  version?: number ;
   nodes?: NodeV1[];
   links?: LinkV1[];
   zoomState?: ZoomStateV1;
@@ -38,6 +50,9 @@ export type SerializedDocumentV1 = {
  * Latest version
  */
 
+/**
+ * @autogents validator
+ */
 export type SerializedDocument = SerializedDocumentV1;
 
 export type Document = Defaults.DeepRequired<SerializedDocument>;
