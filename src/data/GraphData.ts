@@ -84,8 +84,3 @@ export const documentDefaults = DeepReadonly.deepFreeze<Document>({
 export function createDefaultDocument(): Document {
   return Defaults.createFromDefaults(documentDefaults);
 }
-
-function foo() {
-  const document = createDefaultDocument();
-  document.version = 1;
-}

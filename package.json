@@ -48,6 +48,7 @@
     "@types/request-promise-native": "^1.0.14",
     "@types/sanitize-html": "^1.14.0",
     "autogents": "github:tbavaro/autogents#dist",
+    "tsdevtools": "github:tbavaro/tsdevtools#dist",
     "typescript": "^2.8.1"
   }
 }
