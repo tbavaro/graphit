@@ -30,7 +30,7 @@
     "watch-css": "npm run build-css && node-sass-chokidar --importer sass-custom-importer.js --include-path ./src --include-path ./node_modules src/ -o src/ --watch --recursive",
     "start": "npm-run-all -p watch-css start-ts",
     "build": "npm-run-all build-css build-ts",
-    "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build --moveNodeModulesTemporarily"
+    "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.3",
