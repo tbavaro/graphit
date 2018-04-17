@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./MaterialSlider.css";
 import * as classNames from "classnames";
-import * as mdc from 'material-components-web';
+import mdc from "./mdchack";
 
 export interface Props {
   value: number;

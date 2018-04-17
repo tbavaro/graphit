@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './TemporaryNavDrawer.css';
-import * as mdc from 'material-components-web';
+import mdc from "./mdchack";
 
 export interface Props {
   isOpen: boolean;

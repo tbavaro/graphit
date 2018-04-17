@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./MaterialDialog.css";
 import * as classNames from "classnames";
-import * as mdc from 'material-components-web';
+import mdc from "./mdchack";
 
 // for scrollable regions, this is a proxy for vertical margin + header & button heights
 const WINDOW_HEIGHT_ADJUSTMENT = 300;
