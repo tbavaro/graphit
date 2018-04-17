@@ -1,4 +1,4 @@
-import { tabularDataToPOJOs } from "./TabularDataUtils";
+import { tabularDataToPOJOs, pojosToTabularData } from "./TabularDataUtils";
 
 function testTabularDataToPOJOs<T>(
   input: {
@@ -149,4 +149,116 @@ testTabularDataToPOJOs<any>(
     { "a": { "foo": 1 } }
   ],
   "works with non-string types"
+);
+
+////////////////////////////////////
+
+function testPOJOsToTabularData<T>(
+  input: { [key: string]: T }[],
+  expected: {
+    headers: string[],
+    rows: Array<T | undefined>[]
+  },
+  name?: string
+) {
+  name = ("pojosToTabularData: " + (name || JSON.stringify(input)));
+  it(name, () => {
+    expect(pojosToTabularData(input)).toEqual(expected);
+  });
+}
+
+testPOJOsToTabularData(
+  [],
+  {
+    headers: [],
+    rows: []
+  },
+  "empty"
+);
+
+testPOJOsToTabularData(
+  [
+    {}
+  ],
+  {
+    headers: [],
+    rows: [
+      []
+    ]
+  },
+  "empty object"
+);
+
+testPOJOsToTabularData(
+  [
+    {
+      "a": "a1",
+      "b": "b1"
+    }
+  ],
+  {
+    headers: [
+      "a", "b"
+    ],
+    rows: [
+      [
+        "a1",
+        "b1"
+      ]
+    ]
+  },
+  "simple object"
+);
+
+testPOJOsToTabularData(
+  [
+    {
+      "a": "a1"
+    },
+    {
+      "b": "b2"
+    }
+  ],
+  {
+    headers: [
+      "a", "b"
+    ],
+    rows: [
+      [
+        "a1"
+      ],
+      [
+        undefined,
+        "b2"
+      ]
+    ]
+  },
+  "totally sparse"
+);
+
+testPOJOsToTabularData(
+  [
+    {
+      "a": "a1"
+    },
+    {
+      "b": "b2",
+      "a": "a2"
+    }
+  ],
+  {
+    headers: [
+      "a", "b"
+    ],
+    rows: [
+      [
+        "a1"
+      ],
+      [
+        "a2",
+        "b2"
+      ]
+    ]
+  },
+  "sparse with repeats"
 );
