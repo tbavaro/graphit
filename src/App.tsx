@@ -11,6 +11,7 @@ import { SimpleListenable } from './data/Listenable';
 import * as GooglePickerHelper from './google/GooglePickerHelper';
 import * as LocalFiles from './localfiles/LocalFiles';
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
+import * as MaterialDialog from "./ui-helpers/MaterialDialog";
 
 type AllActions =
   AppBar.Actions &
@@ -24,6 +25,7 @@ interface State {
   canSaveDocument: boolean;
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
+  activeDialog?: any;
 }
 
 class App extends React.Component<object, State> {
@@ -58,7 +60,8 @@ class App extends React.Component<object, State> {
     save: () => this.save(),
     saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
-    mergeGoogleSheet: () => this.promptForMergeGoogleSheet()
+    mergeGoogleSheet: () => this.promptForMergeGoogleSheet(),
+    viewAsJSON: () => this.viewAsJSON()
   };
 
   componentWillMount() {
@@ -127,6 +130,7 @@ class App extends React.Component<object, State> {
           {propertiesView}
         </div>
         {this.state.modalOverlayText ? this.renderModalOverlay(this.state.modalOverlayText) : null}
+        {this.state.activeDialog}
       </div>
     );
   }
@@ -365,6 +369,41 @@ class App extends React.Component<object, State> {
       }
     }
     return JSON.stringify(reason);
+  }
+
+  private showDialog(props: MaterialDialog.Props) {
+    props = { ...props };
+    const oldDismissDialog = props.dismissDialog;
+    props.dismissDialog = () => {
+      this.dismissDialog();
+      if (oldDismissDialog) {
+        oldDismissDialog();
+      }
+    };
+    this.dismissDialog();
+    this.setState({
+      activeDialog: React.createElement(MaterialDialog.Component, props)
+    });
+  }
+
+  private dismissDialog = () => {
+    console.log("dismissed");
+    this.setState({
+      activeDialog: undefined
+    });
+  }
+
+  private viewAsJSON() {
+    let contents = "(no document loaded)";
+    if (this.state.document) {
+      contents = this.state.document.save();
+    }
+    this.showDialog({
+      title: "View as JSON",
+      body: contents,
+      preformattedBody: true,
+      scrollable: true
+    });
   }
 }
 

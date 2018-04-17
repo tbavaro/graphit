@@ -11,6 +11,7 @@ export interface Actions {
   saveAs: () => void;
   importUploadedFile: () => void;
   mergeGoogleSheet: () => void;
+  viewAsJSON: () => void;
 }
 
 interface Props extends TemporaryNavDrawer.Props {
@@ -125,6 +126,12 @@ export class Component extends ListenerPureComponent<Props, {}> {
               key: "action:merge_spreadsheet",
               label: "Merge spreadsheet...",
               onClick: this.props.actionManager.mergeGoogleSheet,
+              disabled: !this.props.isDocumentLoaded
+            },
+            {
+              key: "action:view_as_json",
+              label: "View as JSON",
+              onClick: this.props.actionManager.viewAsJSON,
               disabled: !this.props.isDocumentLoaded
             }
           ]}

@@ -1,5 +1,6 @@
 import * as React from "react";
 import "./AppBar.css";
+import * as mdc from 'material-components-web';
 
 export interface Actions {
   togglePropertiesView: () => void;
@@ -20,8 +21,9 @@ export class Component extends React.PureComponent<Props, object> {
       throw new Error("ref not set");
     }
 
-    var mdc = ((window as any).mdc);
-    mdc.topAppBar.MDCTopAppBar.attachTo(this.ref);
+    // HACK the typings don't currently seem to do anything with the top app bar
+    const topAppBar = (mdc as any).topAppBar;
+    topAppBar.MDCTopAppBar.attachTo(this.ref);
     this.ref.addEventListener("MDCTopAppBar:nav", this.onClickNavButton);
   }
 

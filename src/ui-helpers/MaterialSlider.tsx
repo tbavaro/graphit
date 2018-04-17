@@ -1,6 +1,7 @@
 import * as React from "react";
 import "./MaterialSlider.css";
 import * as classNames from "classnames";
+import * as mdc from 'material-components-web';
 
 export interface Props {
   value: number;
@@ -19,7 +20,6 @@ export class Component extends React.PureComponent<Props, object> {
       throw new Error("ref not set");
     }
 
-    var mdc = ((window as any).mdc);
     var mdcRef = mdc.slider.MDCSlider.attachTo(this.ref);
     mdcRef.listen("MDCSlider:input", () => {
       if (this.props.onChangeValue) {

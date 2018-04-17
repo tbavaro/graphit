@@ -1,5 +1,6 @@
 import * as React from 'react';
 import './TemporaryNavDrawer.css';
+import * as mdc from 'material-components-web';
 
 export interface Props {
   isOpen: boolean;
@@ -16,7 +17,6 @@ export class TemporaryNavDrawer extends React.Component<Props, object> {
       throw new Error("ref not set");
     }
 
-    var mdc = ((window as any).mdc);
     this.mdcRef = mdc.drawer.MDCTemporaryDrawer.attachTo(this.ref);
     this.mdcRef.open = this.props.isOpen;
     this.mdcRef.listen("MDCTemporaryDrawer:close", () => {
