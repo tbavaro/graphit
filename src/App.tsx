@@ -402,7 +402,8 @@ class App extends React.Component<object, State> {
       title: "View as JSON",
       body: contents,
       preformattedBody: true,
-      scrollable: true
+      scrollable: true,
+      selectable: true
     });
   }
 }

@@ -11,6 +11,7 @@ export interface Props {
   body: string;
   preformattedBody?: boolean;
   scrollable?: boolean;
+  selectable?: boolean;
   dismissDialog?: () => void;
 }
 
@@ -89,7 +90,8 @@ export class Component extends React.PureComponent<Props, State> {
               }
             )}
             style={{
-              maxHeight: (this.props.scrollable ? this.state.bodyMaxHeight : undefined)
+              maxHeight: (this.props.scrollable ? this.state.bodyMaxHeight : undefined),
+              userSelect: (this.props.selectable ? "text" : undefined)
             }}
           >
             {this.props.body}
