@@ -1,3 +1,5 @@
+import { DeepReadonly } from "./DeepReadonly";
+
 /**
  * limitations:
  *   - conditional types are going to be trouble
@@ -34,7 +36,7 @@ function isObject(value: any): value is object {
 
 export function applyDefaults<T extends object>(
   object: T,
-  defaults: Defaults<T>
+  defaults: Defaults<T> | DeepReadonly<Defaults<T>>
 ): DeepRequired<T> {
   for (const key of Object.keys(defaults)) {
     const defaultValue = defaults[key];
