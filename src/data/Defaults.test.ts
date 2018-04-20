@@ -85,3 +85,25 @@ it("fills in defaults for array entries", () => {
     )
   ).toEqual({ items: [ { aNumber: 100 }, { aNumber: 2 } ] });
 });
+
+type NullableValue = {
+  value?: number | null;
+};
+
+it("null works as a default value", () => {
+  expect(
+    Defaults.applyDefaults<NullableValue>(
+      {},
+      { value: null }
+    )
+  ).toEqual({ value: null });
+});
+
+it("null works as a real value", () => {
+  expect(
+    Defaults.applyDefaults<NullableValue>(
+      { value: null },
+      { value: 3 }
+    )
+  ).toEqual({ value: null });
+});

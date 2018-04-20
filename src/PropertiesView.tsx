@@ -75,7 +75,7 @@ interface Props {
 }
 
 export class Component extends React.PureComponent<Props, object> {
-  private _getForceSimulationConfig = () => this.props.document.layoutState.forceSimulationConfig;
+  private _getForceSimulationConfig = () => this.props.document.data.layoutState.forceSimulationConfig;
 
   private _controlRenderers = [
     this.configSlider({

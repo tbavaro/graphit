@@ -48,12 +48,12 @@ export type ZoomStateV1 = {
  * @autogents validator
  */
 export type LayoutStateV1 = {
-  layoutType: "force_simulation";
-  forceSimulationConfig: {
-    originPullStrength: number;
-    particleCharge: number;
-    chargeDistanceMax: number;
-    linkDistance: number;
+  layoutType?: "force_simulation";
+  forceSimulationConfig?: {
+    originPullStrength?: number;
+    particleCharge?: number;
+    chargeDistanceMax?: number;
+    linkDistance?: number;
   };
 };
 
@@ -69,7 +69,7 @@ export type NodeRenderModeV1 = (
  * @autogents validator
  */
 export type DisplayConfigV1 = {
-  nodeRenderMode: NodeRenderModeV1;
+  nodeRenderMode?: NodeRenderModeV1;
 };
 
 /**
@@ -94,6 +94,8 @@ export const validateDocumentV1 =
  */
 
 export type SerializedDocument = SerializedDocumentV1;
+export type SerializedNode = NodeV1;
+export type SerializedLink = LinkV1;
 
 const REQUIRED_VALUE = Object.freeze(["<required value>"]) as any;
 
@@ -141,6 +143,10 @@ export function createDefaultDocument(): Document {
   return Defaults.createFromDefaults(documentDefaults);
 }
 
+export function applyDefaults(sd: SerializedDocument): Document {
+  return Defaults.applyDefaults<SerializedDocument>(sd, documentDefaults);
+}
+
 export function load<T extends { version?: number, [key: string]: any }>(
   input: T
 ): Document {
@@ -160,7 +166,7 @@ export function load<T extends { version?: number, [key: string]: any }>(
 
   // NB: could try re-validating here if upgrade logic gets janky
 
-  return Defaults.applyDefaults<SerializedDocument>(inputDocument, documentDefaults);
+  return applyDefaults(inputDocument);
 }
 
 function upgradeV1(input: SerializedDocumentV1): SerializedDocument {

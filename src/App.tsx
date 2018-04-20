@@ -260,8 +260,10 @@ class App extends React.Component<object, State> {
       var document: GraphDocument;
       var documentId: string | undefined;
       if (!shouldMerge || (this.state.document === null)) {
-        document = GraphDocument.loadSGD(serializedDocument);
-        document.name = fileResult.name;
+        document = new GraphDocument({
+          name: fileResult.name,
+          data: GraphData.applyDefaults(serializedDocument)
+        });
         documentId = undefined;
       } else {
         document = this.state.document.merge(serializedDocument);

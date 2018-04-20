@@ -1,9 +1,11 @@
 import {
   GraphDocument,
-  DEFAULT_LAYOUT_TYPE,
-  DEFAULT_PARTICLE_CHARGE,
   internals
 } from "./GraphDocument";
+import {
+  DEFAULT_LAYOUT_TYPE,
+  DEFAULT_PARTICLE_CHARGE,
+} from "./GraphData";
 
 const mergeValueSimple = internals.mergeValueSimple;
 
@@ -12,8 +14,8 @@ it("test empty", () => {
   expect(document.name).toEqual("Untitled");
   expect(document.nodes.length).toEqual(0);
   expect(document.links.length).toEqual(0);
-  expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
-  expect(document.layoutState.forceSimulationConfig.particleCharge).toEqual(DEFAULT_PARTICLE_CHARGE);
+  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
+  expect(document.data.layoutState.forceSimulationConfig.particleCharge).toEqual(DEFAULT_PARTICLE_CHARGE);
 });
 
 it("test load basic data only", () => {
@@ -54,7 +56,7 @@ it("test load basic data only", () => {
 
   // defaults for non-specified fields
   expect(document.name).toEqual("Untitled");
-  expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
+  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
 
 it("test load name", () => {
@@ -67,14 +69,14 @@ it("test load full data", () => {
     nodes: [],
     links: [],
     layoutState: {
-      layoutType: "other_layout_type"
+      layoutType: DEFAULT_LAYOUT_TYPE
     }
   });
 
   var document = GraphDocument.load(documentJSON);
 
   expect(document.name).toEqual("Untitled");
-  expect(document.layoutState.layoutType).toEqual("other_layout_type");
+  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
 
 it("test clone", () => {

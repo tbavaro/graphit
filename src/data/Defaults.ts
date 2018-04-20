@@ -31,7 +31,7 @@ export type Defaults<T> = (
 );
 
 function isObject(value: any): value is object {
-  return typeof value === "object" && !(value instanceof Array);
+  return typeof value === "object" && !(value instanceof Array) && value !== null;
 }
 
 export function applyDefaults<T extends object>(

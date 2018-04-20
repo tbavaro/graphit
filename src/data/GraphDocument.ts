@@ -1,122 +1,7 @@
 import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
-import { SimplePartialDeserializer, DeepPartial } from './Deserializers';
+import * as GraphData from "./GraphData";
 
-export const DEFAULT_LAYOUT_TYPE = "force_simulation";
-export const DEFAULT_ORIGIN_PULL_STRENGTH = 0.001;
-export const DEFAULT_PARTICLE_CHARGE = 500;
-export const DEFAULT_CHARGE_DISTANCE_MAX = 300;
-export const DEFAULT_LINK_DISTANCE = 100;
-
-export interface SerializedGraphDocument {
-  nodes?: SerializedNode[];
-  links?: SerializedLink[];
-  zoomState?: DeepPartial<ZoomState>;
-  layoutState?: DeepPartial<LayoutState>;
-  displayConfig?: DeepPartial<DisplayConfig>;
-}
-
-export interface SerializedNode {
-  id: string;
-  label: string;
-  color?: string | null;
-  isLocked?: boolean;
-  x?: number;
-  y?: number;
-}
-
-export interface SerializedLink {
-  source: string;
-  target: string;
-}
-
-function removeNullsAndUndefineds<T>(object: T): T {
-  for (var propName in object) {
-    if (object[propName] === null || object[propName] === undefined) {
-      delete object[propName];
-    }
-  }
-
-  return object;
-}
-
-const nodeDeserializer = new SimplePartialDeserializer<MyNodeDatum>({
-  defaultValueFactory: () => {
-    return {
-      id: "",
-      label: "",
-      isLocked: false
-    };
-  }
-});
-
-export interface ZoomState {
-  centerX: number;
-  centerY: number;
-  scale: number;
-}
-
-const zoomStateDeserializer = new SimplePartialDeserializer<ZoomState>({
-  defaultValueFactory: () => {
-    return {
-      centerX: 0,
-      centerY: 0,
-      scale: 1
-    };
-  }
-});
-
-export interface ForceSimulationConfig {
-  originPullStrength: number;
-  particleCharge: number;
-  chargeDistanceMax: number;
-  linkDistance: number;
-}
-
-const forceSimulationConfigDeserializer = new SimplePartialDeserializer<ForceSimulationConfig>({
-  defaultValueFactory: () => {
-    return {
-      originPullStrength: DEFAULT_ORIGIN_PULL_STRENGTH,
-      particleCharge: DEFAULT_PARTICLE_CHARGE,
-      chargeDistanceMax: DEFAULT_CHARGE_DISTANCE_MAX,
-      linkDistance: DEFAULT_LINK_DISTANCE
-    };
-  }
-});
-
-export interface LayoutState {
-  layoutType: "force_simulation";
-  forceSimulationConfig: ForceSimulationConfig;
-}
-
-export enum NodeRenderMode {
-  BASIC = "basic",
-  RAW_HTML = "raw_html"
-}
-
-export interface DisplayConfig {
-  nodeRenderMode: NodeRenderMode;
-}
-
-const displayConfigDeserializer = new SimplePartialDeserializer<DisplayConfig>({
-  defaultValueFactory: () => {
-    return {
-      nodeRenderMode: NodeRenderMode.BASIC
-    };
-  }
-});
-
-const layoutStateDeserializer = new SimplePartialDeserializer<LayoutState>({
-  defaultValueFactory: () => {
-    return {
-      layoutType: DEFAULT_LAYOUT_TYPE,
-      forceSimulationConfig: forceSimulationConfigDeserializer.defaultValueFactory()
-    };
-  },
-  specialFieldDeserializers: {
-    forceSimulationConfig: forceSimulationConfigDeserializer
-  }
-});
-
+// TODO move merge logic out of here, now that the data is separated
 export const internals = {
   mergeValueSimple: <T>(originalValue: T, newValue: T): T => {
     if (newValue === undefined) {
@@ -157,18 +42,18 @@ export const internals = {
     return results;
   },
 
-  nodeKey: (node: SerializedNode) => node.id,
-  linkKey: (link: SerializedLink) => JSON.stringify([link.source, link.target]),
+  nodeKey: (node: GraphData.NodeV1) => node.id,
+  linkKey: (link: GraphData.LinkV1) => JSON.stringify([link.source, link.target]),
 
   mergeSerializedDocuments: (
-    originalDoc: SerializedGraphDocument,
-    newDoc: SerializedGraphDocument
-  ): SerializedGraphDocument => {
-    const mergeValueField = <K extends keyof SerializedGraphDocument>(key: K): SerializedGraphDocument[K] => {
+    originalDoc: GraphData.Document,
+    newDoc: GraphData.SerializedDocument
+  ): GraphData.Document => {
+    const mergeValueField = <K extends keyof GraphData.SerializedDocument>(key: K): GraphData.SerializedDocument[K] => {
       return internals.mergeValueSimple(originalDoc[key], newDoc[key]);
     };
 
-    return {
+    return GraphData.applyDefaults({
       nodes:
         internals.mergeArraysSmart(
           originalDoc.nodes || [],
@@ -184,103 +69,107 @@ export const internals = {
       zoomState: mergeValueField("zoomState"),
       layoutState: mergeValueField("layoutState"),
       displayConfig: mergeValueField("displayConfig")
-    };
+    });
   }
 };
 
+function assertDefined<T>(value: T | undefined): T {
+  if (value === undefined) {
+    throw new Error("unexpected undefined");
+  }
+  return value;
+}
+
 export class GraphDocument {
-  name: string = "Untitled";
-  nodes: MyNodeDatum[] = [];
-  links: MyLinkDatum[] = [];
-  zoomState: ZoomState = zoomStateDeserializer.defaultValueFactory();
-  layoutState: LayoutState = layoutStateDeserializer.defaultValueFactory();
-  displayConfig: DisplayConfig = displayConfigDeserializer.defaultValueFactory();
+  name: string;
+  nodes: MyNodeDatum[];
+  links: MyLinkDatum[];
+  data: GraphData.Document;
 
   static empty() {
     return this.load("{}");
   }
 
   static load(jsonData: string, name?: string) {
-    var data = JSON.parse(jsonData) as SerializedGraphDocument;
-    return this.loadSGD(data, name);
+    var data = GraphData.load(JSON.parse(jsonData));
+    return new GraphDocument({
+      name: name || "Untitled",
+      data: data
+    });
   }
 
-  static loadSGD(data: SerializedGraphDocument, name?: string) {
-    var serializedNodes = data.nodes || [];
-    var serializedLinks = data.links || [];
+  public constructor(
+    attrs: {
+      name: string,
+      data: GraphData.Document
+    }
+  ) {
+    this.name = attrs.name;
+    this.data = attrs.data;
+    this.copyDataToSimulation();
+  }
 
-    var nodeMap = new Map<String, MyNodeDatum>();
-
-    var document = new GraphDocument();
-    document.nodes = serializedNodes.map((sn: SerializedNode) => {
-      var node = nodeDeserializer.deserialize(sn);
-
+  private copyDataToSimulation() {
+    const idToNodeMap = new Map<string, MyNodeDatum>();
+    this.nodes = this.data.nodes.map(sn => {
+      const node: MyNodeDatum = {
+        id: sn.id,
+        label: sn.label,
+        isLocked: sn.isLocked,
+        color: sn.color,
+        x: (sn.x === null ? undefined : sn.x),
+        y: (sn.y === null ? undefined : sn.y)
+      };
       if (node.isLocked) {
         node.fx = node.x;
         node.fy = node.y;
       }
-
-      nodeMap.set(sn.id, node);
+      idToNodeMap.set(node.id, node);
       return node;
     });
-    document.links = serializedLinks.map((sl: SerializedLink) => {
-      return {
-        source: nodeMap.get(sl.source) as MyNodeDatum,
-        target: nodeMap.get(sl.target) as MyNodeDatum
-      };
-    });
-    document.zoomState = zoomStateDeserializer.deserialize(data.zoomState);
-    document.layoutState = layoutStateDeserializer.deserialize(data.layoutState);
-    document.displayConfig = displayConfigDeserializer.deserialize(data.displayConfig);
-    if (name !== undefined) {
-      document.name = name;
-    }
-
-    return document;
+    this.links = this.data.links.map(sl => ({
+      source: assertDefined(idToNodeMap.get(sl.source)),
+      target: assertDefined(idToNodeMap.get(sl.target))
+    }));
   }
 
-  private constructor() {}
+  private copyDataFromSimulation() {
+    this.nodes.forEach((node, i) => {
+      const sn = this.data.nodes[i];
+      if (node.id !== sn.id) {
+        throw new Error("ids don't match");
+      }
+      sn.isLocked = node.isLocked;
+      sn.x = (node.x === undefined ? null : node.x);
+      sn.y = (node.y === undefined ? null : node.y);
+    });
+    this.links.forEach((link, i) => {
+      const sl = this.data.links[i];
+      sl.source = (link.source as MyNodeDatum).id;
+      sl.target = (link.target as MyNodeDatum).id;
+    });
+  }
 
   clone(): GraphDocument {
     return GraphDocument.load(this.save(), this.name);
   }
 
-  merge(serializedOtherDocument: SerializedGraphDocument): GraphDocument {
+  merge(serializedOtherDocument: GraphData.SerializedDocument): GraphDocument {
     const serializedMergedDocument =
       internals.mergeSerializedDocuments(this.saveSGD(), serializedOtherDocument);
-    return GraphDocument.loadSGD(serializedMergedDocument, this.name);
+    return new GraphDocument({
+      name: this.name,
+      data: serializedMergedDocument
+    });
   }
 
-  private saveSGD(): SerializedGraphDocument {
-    return {
-      nodes: this.nodes.map(this.serializeNode),
-      links: this.links.map(this.serializeLink),
-      zoomState: this.zoomState,
-      layoutState: this.layoutState,
-      displayConfig: this.displayConfig
-    };
+  private saveSGD(): GraphData.Document {
+    this.copyDataFromSimulation();
+    return this.data;
   }
 
   save(): string {
     return JSON.stringify(this.saveSGD(), null, 2);
-  }
-
-  private serializeNode = (node: MyNodeDatum): SerializedNode => {
-    return removeNullsAndUndefineds({
-      id: node.id,
-      label: node.label,
-      isLocked: node.isLocked,
-      color: node.color,
-      x: node.x,
-      y: node.y
-    });
-  }
-
-  private serializeLink = (link: MyLinkDatum): SerializedLink => {
-    return removeNullsAndUndefineds({
-      source: (link.source as MyNodeDatum).id,
-      target: (link.target as MyNodeDatum).id
-    });
   }
 }
 

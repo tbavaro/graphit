@@ -3,7 +3,7 @@ import * as D3 from "d3";
 import './NodeView.css';
 import  { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
 import { ListenableSimulationWrapper } from './ListenableSimulation';
-import { NodeRenderMode } from './data/GraphDocument';
+import { Document } from './data/GraphData';
 import { sanitizeForDisplay } from './util/HtmlSanitization';
 
 export interface NodeActionManager {
@@ -26,7 +26,7 @@ interface Props {
   simulation: ListenableSimulationWrapper;
   isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
-  renderMode: NodeRenderMode;
+  renderMode: Document["displayConfig"]["nodeRenderMode"];
 }
 
 export class Component extends ListenerPureComponent<Props, object> {
@@ -75,11 +75,11 @@ export class Component extends ListenerPureComponent<Props, object> {
     var children: string | undefined;
     var innerHTML: { __html: string } | undefined;
     switch (this.props.renderMode) {
-      case NodeRenderMode.RAW_HTML:
+      case "raw_html":
         innerHTML = { __html: sanitizeForDisplay(this.props.label) };
         break;
 
-      case NodeRenderMode.BASIC:
+      case "basic":
       default:
         children = this.props.label;
         break;

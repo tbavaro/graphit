@@ -1,11 +1,6 @@
 import * as GoogleApi from "../google/GoogleApi";
 
-import {
-  SerializedGraphDocument,
-  SerializedNode,
-  SerializedLink,
-  NodeRenderMode
-} from "./GraphDocument";
+import * as GraphData from "./GraphData";
 
 // TODO this whole file is kind of a mess, was rushed this week. should probably
 // rewrite if a lot more complexity is needed
@@ -44,13 +39,13 @@ export const internals = {
     nodeColors?: string[],
     linkSourceIds: string[],
     linkTargetIds: string[]
-  }) {
-    const nodes: SerializedNode[] = removeUndefineds(attrs.nodeIds.map((id, index) => {
+  }): GraphData.SerializedDocument {
+    const nodes = removeUndefineds(attrs.nodeIds.map((id, index) => {
       if (id === undefined) {
         return undefined;
       }
 
-      var result: SerializedNode = {
+      var result: GraphData.SerializedNode = {
         id: id,
         label: nthIfDefinedElseDefault(attrs.nodeLabels, index, id)
       };
@@ -62,7 +57,7 @@ export const internals = {
       return result;
     }));
 
-    const links: SerializedLink[] = removeUndefineds(attrs.linkSourceIds.map((sourceId, index) => {
+    const links: GraphData.SerializedLink[] = removeUndefineds(attrs.linkSourceIds.map((sourceId, index) => {
       const targetId = attrs.linkTargetIds[index];
       if (sourceId === undefined || targetId === undefined) {
         return undefined;
@@ -73,12 +68,10 @@ export const internals = {
       };
     }));
 
-    const doc: SerializedGraphDocument = {
+    return {
       nodes: nodes,
       links: links
     };
-
-    return doc;
   },
 
   // data should be loaded with COLUMNS as the major dimension
@@ -168,7 +161,7 @@ function extractValuesAsStringSkipFirst(values: any[]): string[] {
   return result;
 }
 
-export function loadDocumentFromSheet(sheetId: string): PromiseLike<SerializedGraphDocument> {
+export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphData.SerializedDocument> {
   const myError = (msg?: string) => {
     return new Error("error loading spreadsheet (" + msg + "): " + sheetId);
   };
@@ -197,7 +190,7 @@ export function loadDocumentFromSheet(sheetId: string): PromiseLike<SerializedGr
         var usesHtml = ((sgd.nodes || []).map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
         if (usesHtml) {
           sgd.displayConfig = sgd.displayConfig || {};
-          sgd.displayConfig.nodeRenderMode = NodeRenderMode.RAW_HTML;
+          sgd.displayConfig.nodeRenderMode = "raw_html";
         }
 
         return sgd;
