@@ -67,7 +67,7 @@ class FPSView {
 }
 
 function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
-  const forceSimulationConfig = props.document.data.layoutState.forceSimulationConfig;
+  const forceSimulationConfig = props.document.layoutState.forceSimulationConfig;
   simulation
     .force(
       "x",
@@ -247,7 +247,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
         dragBehavior={this.drag}
         onDrag={this.onDrag}
         onDragStart={this.onDragStart}
-        initialZoomState={this.props.document.data.zoomState}
+        initialZoomState={this.props.document.zoomState}
       />
     );
   }
@@ -270,7 +270,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
         label={node.label}
         isLocked={node.isLocked}
         color={node.color || undefined}
-        renderMode={this.props.document.data.displayConfig.nodeRenderMode}
+        renderMode={this.props.document.displayConfig.nodeRenderMode}
         position={node as Position}
         simulation={this.simulationWrapper}
         isSelected={this.state.selectedNodes.has(node)}
@@ -290,7 +290,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
   }
 
   private onViewportZoom = (zoomState: Viewport.ZoomState, transform: string) => {
-    const dzs = this.props.document.data.zoomState;
+    const dzs = this.props.document.zoomState;
     dzs.centerX = zoomState.centerX;
     dzs.centerY = zoomState.centerY;
     dzs.scale = zoomState.scale;

@@ -14,8 +14,8 @@ it("test empty", () => {
   expect(document.name).toEqual("Untitled");
   expect(document.nodes.length).toEqual(0);
   expect(document.links.length).toEqual(0);
-  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
-  expect(document.data.layoutState.forceSimulationConfig.particleCharge).toEqual(DEFAULT_PARTICLE_CHARGE);
+  expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
+  expect(document.layoutState.forceSimulationConfig.particleCharge).toEqual(DEFAULT_PARTICLE_CHARGE);
 });
 
 it("test load basic data only", () => {
@@ -56,7 +56,7 @@ it("test load basic data only", () => {
 
   // defaults for non-specified fields
   expect(document.name).toEqual("Untitled");
-  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
+  expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
 
 it("test load name", () => {
@@ -76,7 +76,7 @@ it("test load full data", () => {
   var document = GraphDocument.load(documentJSON);
 
   expect(document.name).toEqual("Untitled");
-  expect(document.data.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
+  expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
 
 it("test clone", () => {

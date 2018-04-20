@@ -82,9 +82,18 @@ function assertDefined<T>(value: T | undefined): T {
 
 export class GraphDocument {
   name: string;
-  nodes: MyNodeDatum[];
-  links: MyLinkDatum[];
-  data: GraphData.Document;
+  readonly nodes: MyNodeDatum[];
+  readonly links: MyLinkDatum[];
+  private data: GraphData.Document;
+  get layoutState() {
+    return this.data.layoutState;
+  }
+  get zoomState() {
+    return this.data.zoomState;
+  }
+  get displayConfig() {
+    return this.data.displayConfig;
+  }
 
   static empty() {
     return this.load("{}");
@@ -106,10 +115,7 @@ export class GraphDocument {
   ) {
     this.name = attrs.name;
     this.data = attrs.data;
-    this.copyDataToSimulation();
-  }
 
-  private copyDataToSimulation() {
     const idToNodeMap = new Map<string, MyNodeDatum>();
     this.nodes = this.data.nodes.map(sn => {
       const node: MyNodeDatum = {
@@ -145,8 +151,8 @@ export class GraphDocument {
     });
     this.links.forEach((link, i) => {
       const sl = this.data.links[i];
-      sl.source = (link.source as MyNodeDatum).id;
-      sl.target = (link.target as MyNodeDatum).id;
+      sl.source = link.source.id;
+      sl.target = link.target.id;
     });
   }
 
