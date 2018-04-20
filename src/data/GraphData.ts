@@ -1,7 +1,15 @@
 import * as DeepReadonly from "./DeepReadonly";
 import * as Defaults from "./Defaults";
+import * as GraphDataValidators from "../generated/GraphDataValidators";
+import { createValidationFunction } from "tsvalidators";
 
 export type Id = string;
+
+export const DEFAULT_LAYOUT_TYPE = "force_simulation";
+export const DEFAULT_ORIGIN_PULL_STRENGTH = 0.001;
+export const DEFAULT_PARTICLE_CHARGE = 500;
+export const DEFAULT_CHARGE_DISTANCE_MAX = 300;
+export const DEFAULT_LINK_DISTANCE = 100;
 
 /**
  * V1
@@ -39,20 +47,52 @@ export type ZoomStateV1 = {
 /**
  * @autogents validator
  */
+export type LayoutStateV1 = {
+  layoutType: "force_simulation";
+  forceSimulationConfig: {
+    originPullStrength: number;
+    particleCharge: number;
+    chargeDistanceMax: number;
+    linkDistance: number;
+  };
+};
+
+/**
+ * @autogents validator
+ */
+export type NodeRenderModeV1 = (
+  "basic" |
+  "raw_html"
+);
+
+/**
+ * @autogents validator
+ */
+export type DisplayConfigV1 = {
+  nodeRenderMode: NodeRenderModeV1;
+};
+
+/**
+ * @autogents validator
+ */
 export type SerializedDocumentV1 = {
   version?: 1;
   nodes?: NodeV1[];
   links?: LinkV1[];
   zoomState?: ZoomStateV1;
+  layoutState?: LayoutStateV1;
+  displayConfig?: DisplayConfigV1;
 };
+
+const validateDocumentV1 =
+  createValidationFunction<SerializedDocumentV1>(
+    GraphDataValidators.validatorForSerializedDocumentV1
+  );
 
 /**
  * Latest version
  */
 
-/**
- * @autogents validator
- */
 export type SerializedDocument = SerializedDocumentV1;
 
 const REQUIRED_VALUE = Object.freeze(["<required value>"]) as any;
@@ -80,6 +120,18 @@ export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<Serial
     centerX: 0,
     centerY: 0,
     scale: 1
+  },
+  layoutState: {
+    layoutType: DEFAULT_LAYOUT_TYPE,
+    forceSimulationConfig: {
+      originPullStrength: DEFAULT_ORIGIN_PULL_STRENGTH,
+      particleCharge: DEFAULT_PARTICLE_CHARGE,
+      chargeDistanceMax: DEFAULT_CHARGE_DISTANCE_MAX,
+      linkDistance: DEFAULT_LINK_DISTANCE
+    }
+  },
+  displayConfig: {
+    nodeRenderMode: "basic"
   }
 });
 
@@ -92,16 +144,12 @@ export function createDefaultDocument(): Document {
 export function load<T extends { version?: number, [key: string]: any }>(
   input: T
 ): Document {
-  if (input.version === undefined) {
-    input.version = 1;
-  }
-
   let inputDocument: SerializedDocument;
 
   switch (input.version) {
+    case undefined:
     case 1: {
-      // TODO actually do validation
-      const inputDocumentV1 = input as SerializedDocumentV1;
+      const inputDocumentV1 = validateDocumentV1(input);
       inputDocument = upgradeV1(inputDocumentV1);
       break;
     }

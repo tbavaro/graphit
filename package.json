@@ -28,9 +28,10 @@
     "eject": "react-scripts-ts eject",
     "build-css": "node-sass-chokidar --importer sass-custom-importer.js --include-path ./src --include-path ./node_modules src/ -o src/ -",
     "watch-css": "npm run build-css && node-sass-chokidar --importer sass-custom-importer.js --include-path ./src --include-path ./node_modules src/ -o src/ --watch --recursive",
-    "start": "npm-run-all -p watch-css start-ts",
-    "build": "npm-run-all build-css build-ts",
-    "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build"
+    "start": "npm-run-all codegen -p watch-css start-ts",
+    "build": "npm-run-all codegen build-css build-ts",
+    "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
+    "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.3",
