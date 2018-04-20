@@ -84,7 +84,7 @@ export type SerializedDocumentV1 = {
   displayConfig?: DisplayConfigV1;
 };
 
-const validateDocumentV1 =
+export const validateDocumentV1 =
   createValidationFunction<SerializedDocumentV1>(
     GraphDataValidators.validatorForSerializedDocumentV1
   );

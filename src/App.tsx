@@ -12,6 +12,7 @@ import * as GooglePickerHelper from './google/GooglePickerHelper';
 import * as LocalFiles from './localfiles/LocalFiles';
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as MaterialDialog from "./ui-helpers/MaterialDialog";
+import * as GraphData from "./data/GraphData";
 
 type AllActions =
   AppBar.Actions &
@@ -395,11 +396,18 @@ class App extends React.Component<object, State> {
 
   private viewAsJSON() {
     let contents = "(no document loaded)";
+    let isValid = true;
     if (this.state.document) {
       contents = this.state.document.save();
+      try {
+        GraphData.validateDocumentV1(JSON.parse(contents));
+      } catch (e) {
+        alert("e: " + e);
+        isValid = false;
+      }
     }
     this.showDialog({
-      title: "View as JSON",
+      title: "View as JSON (" + (isValid ? "" : "in") + "valid)",
       body: contents,
       preformattedBody: true,
       scrollable: true,
