@@ -86,7 +86,8 @@ export type SerializedDocumentV1 = {
 
 export const validateDocumentV1 =
   createValidationFunction<SerializedDocumentV1>(
-    GraphDataValidators.validatorForSerializedDocumentV1
+    GraphDataValidators.validatorForSerializedDocumentV1,
+    "SerializedDocumentV1"
   );
 
 /**
