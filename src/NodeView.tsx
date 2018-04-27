@@ -1,3 +1,4 @@
+import * as classNames from "classnames";
 import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
@@ -17,27 +18,24 @@ export interface Position {
 }
 
 type SharedProps = {
+  renderMode: Document["displayConfig"]["nodeRenderMode"];
   label: string;
   color?: string;
+  isLocked: boolean;
   isSelected: boolean;
-  renderMode: Document["displayConfig"]["nodeRenderMode"];
 };
 
-type InnerProps = SharedProps & {
+export type InnerProps = SharedProps & {
   onDoubleClick?: () => void;
+  extraStyle?: React.CSSProperties;
 };
 
 type Props = SharedProps & {
   actionManager?: NodeActionManager;
   id: number;
-  // label: string;
-  isLocked: boolean;
-  // color?: string;
   position: Position;
   simulation: ListenableSimulationWrapper;
-  // isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
-  // renderMode: Document["displayConfig"]["nodeRenderMode"];
 };
 
 export class InnerComponent extends React.Component<InnerProps, {}> {
@@ -55,12 +53,19 @@ export class InnerComponent extends React.Component<InnerProps, {}> {
         break;
     }
     var contentStyle = {
-      backgroundColor: this.props.isSelected ? undefined : this.props.color
+      backgroundColor: this.props.isSelected ? undefined : this.props.color,
+      ...this.props.extraStyle
     };
     return (
       <div
         style={contentStyle}
-        className="NodeView-content"
+        className={classNames(
+          "NodeView-content",
+          {
+            "locked": this.props.isLocked,
+            "selected": this.props.isSelected
+          }
+        )}
         onDoubleClick={this.props.onDoubleClick}
         children={children}
         dangerouslySetInnerHTML={innerHTML}
@@ -119,7 +124,7 @@ export class Component extends ListenerPureComponent<Props, object> {
     return (
       <div
         ref={this.setRef}
-        className={"NodeView" + (this.props.isLocked ? " locked" : "") + (this.props.isSelected ? " selected" : "")}
+        className={"NodeView"}
         style={style}
       >
         {innerComponent}

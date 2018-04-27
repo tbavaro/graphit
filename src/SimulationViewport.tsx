@@ -26,7 +26,7 @@ class FPSView {
   private element?: HTMLDivElement;
   private ticksSinceUpdate: number;
   private lastUpdateTime: number;
-  private intervalId?: NodeJS.Timer;
+  private intervalId?: number;
 
   constructor() {
     this.element = document.createElement("div");
@@ -34,7 +34,7 @@ class FPSView {
     document.body.appendChild(this.element);
     this.ticksSinceUpdate = 0;
     this.lastUpdateTime = new Date().getTime();
-    this.intervalId = setInterval(this.update, 1000);
+    this.intervalId = window.setInterval(this.update, 1000);
   }
 
   destroy() {

@@ -47,11 +47,11 @@ $nodeMaxWidth: 150px;
   }
 }
 
-.NodeView.locked .NodeView-content {
+.NodeView-content.locked {
   border: 3px solid rgba(0, 0, 0, 0.25);
 }
 
-.NodeView.selected .NodeView-content {
+.NodeView-content.selected {
   color: $selectionTextColor;;
   background-color: $selectionColor !important;
   border: 3px solid rgba(0, 0, 0, 0.25) !important;
