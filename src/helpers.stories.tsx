@@ -1,7 +1,9 @@
 import * as React from "react";
 import { Story } from "@storybook/react";
+import { action } from "@storybook/addon-actions";
 import { AllActions } from "./App";
 import { isFunction } from "util";
+import { SimpleListenable } from "./data/Listenable";
 
 export function centerOnPage(node: React.ReactNode): React.ReactNode {
   return (
@@ -108,19 +110,29 @@ export function createVariations<P extends {}>(attrs: {
   };
 }
 
-function logStub(msg: string): () => void {
-  return () => {
-    console.log(msg);
-  };
+export const stubActionManager: Readonly<AllActions> = Object.freeze({
+  togglePropertiesView: action("togglePropertiesView"),
+  closePropertiesView: action("closePropertiesView"),
+  openFilePicker: action("openFilePicker"),
+  save: action("save"),
+  saveAs: action("saveAs"),
+  importUploadedFile: action("importUploadedFile"),
+  mergeGoogleSheet: action("mergeGoogleSheet"),
+  viewAsJSON: action("viewAsJSON")
+});
+
+function defaultParametersFunc() {
+  return [];
 }
 
-export const stubActionManager: Readonly<AllActions> = Object.freeze({
-  togglePropertiesView: logStub("togglePropertiesView"),
-  closePropertiesView: logStub("closePropertiesView"),
-  openFilePicker: logStub("openFilePicker"),
-  save: logStub("save"),
-  saveAs: logStub("saveAs"),
-  importUploadedFile: logStub("importUploadedFile"),
-  mergeGoogleSheet: logStub("mergeGoogleSheet"),
-  viewAsJSON: logStub("viewAsJSON")
-});
+export function createSimpleActionListener(
+  name: string,
+  parametersFunc?: () => any[]
+): SimpleListenable {
+  const listener = new SimpleListenable();
+  const actionFunc = action(name);
+  listener.addListener("changed", () => {
+    actionFunc.apply(actionFunc, (parametersFunc || defaultParametersFunc)());
+  });
+  return listener;
+}

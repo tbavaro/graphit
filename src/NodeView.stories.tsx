@@ -2,7 +2,7 @@ import { storiesOf } from "@storybook/react";
 
 import * as helpers from "./helpers.stories";
 import * as NodeView from "./NodeView";
-// import { action } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 // import { linkTo } from "@storybook/addon-links";
 
 const DEFAULT_PROPS: NodeView.InnerProps = {
@@ -10,6 +10,7 @@ const DEFAULT_PROPS: NodeView.InnerProps = {
   isLocked: false,
   isSelected: false,
   renderMode: "basic",
+  onDoubleClick: action("double click"),
   extraStyle: {
     "position": "relative",
     "transform": "none"
