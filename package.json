@@ -31,9 +31,15 @@
     "start": "npm-run-all codegen -p watch-css start-ts",
     "build": "npm-run-all codegen build-css build-ts",
     "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
-    "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts"
+    "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^3.4.2",
+    "@storybook/addon-links": "^3.4.2",
+    "@storybook/addons": "^3.4.2",
+    "@storybook/react": "^3.4.2",
     "@types/classnames": "^2.2.3",
     "@types/d3": "^4.12.0",
     "@types/gapi": "0.0.35",
@@ -49,7 +55,11 @@
     "@types/react-dom": "^16.0.4",
     "@types/request-promise-native": "^1.0.14",
     "@types/sanitize-html": "^1.14.0",
+    "@types/storybook__react": "^3.0.7",
     "autogents": "github:tbavaro/autogents#dist",
+    "awesome-typescript-loader": "^5.0.0",
+    "babel-core": "^6.26.2",
+    "babel-runtime": "^6.26.0",
     "tsdevtools": "github:tbavaro/tsdevtools#dist",
     "typescript": "^2.8.1"
   }

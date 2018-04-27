@@ -16,17 +16,57 @@ export interface Position {
   y: number;
 }
 
-interface Props {
+type SharedProps = {
+  label: string;
+  color?: string;
+  isSelected: boolean;
+  renderMode: Document["displayConfig"]["nodeRenderMode"];
+};
+
+type InnerProps = SharedProps & {
+  onDoubleClick?: () => void;
+};
+
+type Props = SharedProps & {
   actionManager?: NodeActionManager;
   id: number;
-  label: string;
+  // label: string;
   isLocked: boolean;
-  color?: string;
+  // color?: string;
   position: Position;
   simulation: ListenableSimulationWrapper;
-  isSelected: boolean;
+  // isSelected: boolean;
   dragBehavior?: D3.DragBehavior<any, number, any>;
-  renderMode: Document["displayConfig"]["nodeRenderMode"];
+  // renderMode: Document["displayConfig"]["nodeRenderMode"];
+};
+
+export class InnerComponent extends React.Component<InnerProps, {}> {
+  render() {
+    var children: string | undefined;
+    var innerHTML: { __html: string } | undefined;
+    switch (this.props.renderMode) {
+      case "raw_html":
+        innerHTML = { __html: sanitizeForDisplay(this.props.label) };
+        break;
+
+      case "basic":
+      default:
+        children = this.props.label;
+        break;
+    }
+    var contentStyle = {
+      backgroundColor: this.props.isSelected ? undefined : this.props.color
+    };
+    return (
+      <div
+        style={contentStyle}
+        className="NodeView-content"
+        onDoubleClick={this.props.onDoubleClick}
+        children={children}
+        dangerouslySetInnerHTML={innerHTML}
+      />
+    );
+  }
 }
 
 export class Component extends ListenerPureComponent<Props, object> {
@@ -72,34 +112,17 @@ export class Component extends ListenerPureComponent<Props, object> {
       top: this.props.position.y,
       transform: ""
     };
-    var children: string | undefined;
-    var innerHTML: { __html: string } | undefined;
-    switch (this.props.renderMode) {
-      case "raw_html":
-        innerHTML = { __html: sanitizeForDisplay(this.props.label) };
-        break;
-
-      case "basic":
-      default:
-        children = this.props.label;
-        break;
-    }
-    var contentStyle = {
-      backgroundColor: this.props.isSelected ? undefined : this.props.color
-    };
+    const innerComponent = React.createElement(InnerComponent, {
+      ...this.props as InnerProps,
+      onDoubleClick: this.onDoubleClick
+    });
     return (
       <div
         ref={this.setRef}
         className={"NodeView" + (this.props.isLocked ? " locked" : "") + (this.props.isSelected ? " selected" : "")}
         style={style}
       >
-        <div
-          style={contentStyle}
-          className="NodeView-content"
-          onDoubleClick={this.onDoubleClick}
-          children={children}
-          dangerouslySetInnerHTML={innerHTML}
-        />
+        {innerComponent}
       </div>
     );
   }
