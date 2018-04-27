@@ -96,7 +96,7 @@ export function createVariations<P extends {}>(attrs: {
     } else {
       defProps = (attrs.defaultProps as P);
     }
-    const props = { ...defProps, ...(newProps as {}) } as P;
+    const props = { ...defProps, ...(newProps as {}), key: Math.random() } as any;
     attrs.storyGroup.add(name, () => {
       let result: React.ReactNode = React.createElement(attrs.componentClass, props);
       if (attrs.showCorners !== false) {
@@ -125,14 +125,40 @@ function defaultParametersFunc() {
   return [];
 }
 
+function getMethodNames<T extends {}>(obj: T): Array<keyof T> {
+  const result: string[] = [];
+  for (const key in obj) {
+    if (isFunction(obj[key])) {
+      result.push(key);
+    }
+  }
+  return result as Array<keyof T>;
+}
+
+function wrapMethodsWithAction<T extends {}>(obj: T, objName: string, methodNames?: Array<keyof T>): T {
+  if (methodNames === undefined) {
+    methodNames = getMethodNames(obj);
+  }
+  for (const methodName of methodNames) {
+    const oldMethod = obj[methodName];
+    const actionFunc = action(`${objName}: ${methodName}`);
+    obj[methodName] = function(this: T) {
+      actionFunc.apply(actionFunc, arguments);
+      return oldMethod.apply(this, arguments);
+    } as any;
+  }
+  return obj;
+}
+
 export function createSimpleActionListener(
   name: string,
   parametersFunc?: () => any[]
 ): SimpleListenable {
   const listener = new SimpleListenable();
-  const actionFunc = action(name);
+  const actionFunc = action(`${name}: changed`);
   listener.addListener("changed", () => {
     actionFunc.apply(actionFunc, (parametersFunc || defaultParametersFunc)());
   });
+  wrapMethodsWithAction(listener, name);
   return listener;
 }
