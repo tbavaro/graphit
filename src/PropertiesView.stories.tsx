@@ -30,3 +30,4 @@ const addVariation = helpers.createVariations({
 
 // basic states
 addVariation("normal", {});
+addVariation("closed", { isOpen: false });

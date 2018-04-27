@@ -48,7 +48,7 @@ class Box extends React.Component<{}, {}> {
           style={{
             position: "relative",
             lineHeight: "normal",
-            display: "inline-block",
+            display: "inline",
             // width: "max-content"
           }}
           children={this.props.children}
