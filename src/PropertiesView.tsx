@@ -67,7 +67,7 @@ class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, S
   }
 }
 
-interface Props {
+export interface Props {
   actionManager: Actions;
   isOpen: boolean;
   document: GraphDocument;

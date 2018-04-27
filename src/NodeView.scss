@@ -27,6 +27,7 @@ $nodeMaxWidth: 150px;
   cursor: pointer;
   user-select: none;
   text-align: center;
+  word-break: break-word;
   // box-shadow: 1px 1px lightgray;
 
   &.shape-oval {

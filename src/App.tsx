@@ -14,7 +14,7 @@ import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as MaterialDialog from "./ui-helpers/MaterialDialog";
 import * as GraphData from "./data/GraphData";
 
-type AllActions =
+export type AllActions =
   AppBar.Actions &
   FilesDrawerView.Actions &
   PropertiesView.Actions;

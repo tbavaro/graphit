@@ -33,7 +33,7 @@ export interface DatastoreLoadFileResult<T> {
 export class Datastore extends BasicListenable<"status_changed"> {
   private _status = DatastoreStatus.Initializing;
   private _accessToken?: string;
-  private _reloadAccessTokenTimeoutId?: NodeJS.Timer;
+  private _reloadAccessTokenTimeoutId?: number;
   private _files?: GoogleApi.DriveFilesResource;
 
   constructor() {
@@ -255,7 +255,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
 
     var secondsToExpire = GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
     var secondsToWaitBeforeReload = Math.max(1, secondsToExpire - 120);
-    this._reloadAccessTokenTimeoutId = setTimeout(this.doAuthReload, secondsToWaitBeforeReload * 1000);
+    this._reloadAccessTokenTimeoutId = window.setTimeout(this.doAuthReload, secondsToWaitBeforeReload * 1000);
   }
 
   private maybeGetProfileData<T>(func: (profile: GoogleApi.BasicProfile) => T): Maybe<T> {
