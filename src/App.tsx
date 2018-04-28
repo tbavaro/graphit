@@ -62,7 +62,9 @@ class App extends React.Component<object, State> {
     saveAs: () => this.showSaveAsDialog(),
     importUploadedFile: () => this.importUploadedFile(),
     mergeGoogleSheet: () => this.promptForMergeGoogleSheet(),
-    viewAsJSON: () => this.viewAsJSON()
+    viewAsJSON: () => this.viewAsJSON(),
+    signIn: () => this.datastore.signIn(),
+    signOut: () => this.datastore.signOut()
   };
 
   componentWillMount() {
@@ -120,11 +122,13 @@ class App extends React.Component<object, State> {
         />
         <FilesDrawerView.Component
           actionManager={this.actionManager}
-          datastore={this.datastore}
           canSave={this.state.canSaveDocument}
           isDocumentLoaded={!!this.state.document}
           isOpen={this.state.leftNavOpen}
           onClosed={this.closeLeftNav}
+          datastoreStatus={this.datastore.status()}
+          currentUserImageUrl={this.datastore.currentUserImageUrl()}
+          currentUserName={this.datastore.currentUserName()}
         />
         <div className="App-content">
           {viewportView}
@@ -216,6 +220,7 @@ class App extends React.Component<object, State> {
         });
       }
     }
+    this.forceUpdate();
   }
 
   private openLeftNav = () => {

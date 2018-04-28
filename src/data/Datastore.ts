@@ -2,14 +2,11 @@ import * as Request from "request-promise-native";
 import * as GoogleApi from "../google/GoogleApi";
 import { BasicListenable } from "./Listenable";
 import { Headers } from "request";
+import { DatastoreStatus } from "./DatastoreStatus";
 
 type Maybe<T> = T | undefined;
 
-export enum DatastoreStatus {
-  Initializing,
-  SignedOut,
-  SignedIn
-}
+export { DatastoreStatus };
 
 export interface DatastoreLoadFileResult<T> {
   id: string;

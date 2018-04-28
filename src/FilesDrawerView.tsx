@@ -1,9 +1,8 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
-import { Datastore, DatastoreStatus } from "./data/Datastore";
+import { DatastoreStatus } from "./data/DatastoreStatus";
 import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 import * as MaterialList from "./ui-helpers/MaterialList";
-import { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
 
 export interface Actions {
   openFilePicker: () => void;
@@ -12,29 +11,25 @@ export interface Actions {
   importUploadedFile: () => void;
   mergeGoogleSheet: () => void;
   viewAsJSON: () => void;
+  signIn: () => void;
+  signOut: () => void;
 }
 
-interface Props extends TemporaryNavDrawer.Props {
+export interface Props extends TemporaryNavDrawer.Props {
   actionManager: Actions;
   canSave: boolean;
-  datastore: Datastore;
   isDocumentLoaded: boolean;
+  datastoreStatus: DatastoreStatus;
+  currentUserImageUrl?: string;
+  currentUserName?: string;
 }
 
-export class Component extends ListenerPureComponent<Props, {}> {
-  protected bindings: ListenerBinding<Props>[] = [
-    {
-      propertyName: "datastore",
-      eventType: "status_changed",
-      callback: () => this.datastoreStatusChanged()
-    }
-  ];
-
+export class Component extends React.PureComponent<Props, {}> {
   render() {
     var headerContents: any;
     var contents: any;
 
-    switch (this.props.datastore.status()) {
+    switch (this.props.datastoreStatus) {
       case DatastoreStatus.SignedIn:
         headerContents = this.renderSignedInHeaderContents();
         contents = this.renderSignedInContents();
@@ -73,16 +68,16 @@ export class Component extends ListenerPureComponent<Props, {}> {
         <li className="mdc-list-item">
           <img
             className="mdc-list-item__graphic"
-            src={this.props.datastore.currentUserImageUrl() || ""}
+            src={this.props.currentUserImageUrl || ""}
             width="56"
             height="56"
           />
           <span className="FilesDrawerView-avatarList-name">
-            {this.props.datastore.currentUserName()}
+            {this.props.currentUserName || "(user name not available)"}
           </span>
           <button
             className="FilesDrawerView-avatarList-expandButton mdc-button mdc-button--dense"
-            onClick={this.onClickSignOut}
+            onClick={this.props.actionManager.signOut}
           >
             <i className="material-icons mdc-button__icon">expand_more</i>
           </button>
@@ -142,25 +137,26 @@ export class Component extends ListenerPureComponent<Props, {}> {
 
   private renderSignedOutContents() {
     return [
-      this.renderButton("Sign in", this.onClickSignIn, "button:sign-in")
+      this.renderButton(
+        "Sign in",
+        this.props.actionManager.signIn,
+        "button:sign-in"
+      )
     ];
   }
 
-  private renderButton(label: string, action: () => void, key?: string) {
+  private renderButton(
+    label: string,
+    action: () => void,
+    key?: string
+  ) {
     return (
-      <div className="FilesDrawerView-button button" key={key} onClick={action}>{label}</div>
+      <div
+        className="FilesDrawerView-button button"
+        key={key}
+        onClick={action}
+        children={label}
+      />
     );
-  }
-
-  private onClickSignIn = () => {
-    this.props.datastore.signIn();
-  }
-
-  private onClickSignOut = () => {
-    this.props.datastore.signOut();
-  }
-
-  private datastoreStatusChanged = () => {
-    this.forceUpdate();
   }
 }

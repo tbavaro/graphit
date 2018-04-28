@@ -118,7 +118,9 @@ export const stubActionManager: Readonly<AllActions> = Object.freeze({
   saveAs: action("saveAs"),
   importUploadedFile: action("importUploadedFile"),
   mergeGoogleSheet: action("mergeGoogleSheet"),
-  viewAsJSON: action("viewAsJSON")
+  viewAsJSON: action("viewAsJSON"),
+  signIn: action("signIn"),
+  signOut: action("signOut")
 });
 
 function defaultParametersFunc() {
@@ -159,6 +161,6 @@ export function createSimpleActionListener(
   listener.addListener("changed", () => {
     actionFunc.apply(actionFunc, (parametersFunc || defaultParametersFunc)());
   });
-  wrapMethodsWithAction(listener, name);
+  wrapMethodsWithAction(listener, name, ["addListener", "removeListener"]);
   return listener;
 }
