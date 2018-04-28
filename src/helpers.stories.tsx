@@ -82,11 +82,28 @@ export function showCorners(node: React.ReactNode): React.ReactNode {
   );
 }
 
+export function fill(node: React.ReactNode): React.ReactNode {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        display: "flex",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%"
+      }}
+      children={node}
+    />
+  );
+}
+
 export function createVariations<P extends {}>(attrs: {
   storyGroup: Story,
   componentClass: React.ComponentClass<P> | React.SFC<P>,
   defaultProps: P | (() => P),
   centerOnPage?: boolean,
+  fill?: boolean,
   showCorners?: boolean  // default is TRUE
 }): (name: string, propOverrides: Partial<P>) => void {
   return (name: string, newProps: Partial<P>) => {
@@ -104,6 +121,9 @@ export function createVariations<P extends {}>(attrs: {
       }
       if (attrs.centerOnPage) {
         result = centerOnPage(result);
+      }
+      if (attrs.fill) {
+        result = fill(result);
       }
       return result as JSX.Element;
     });

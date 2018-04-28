@@ -12,7 +12,7 @@ import { ListenableSimulationWrapper } from './ListenableSimulation';
 import { SimpleListenable } from './data/Listenable';
 import * as LinkRenderers from './LinkRenderers';
 
-interface Props {
+export interface Props {
   document: GraphDocument;
   simulationConfigListener: SimpleListenable;
 }
