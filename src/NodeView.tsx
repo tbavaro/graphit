@@ -2,19 +2,12 @@ import * as classNames from "classnames";
 import * as React from 'react';
 import * as D3 from "d3";
 import './NodeView.css';
-import  { ListenerPureComponent, ListenerBinding } from './ui-helpers/ListenerPureComponent';
-import { ListenableSimulationWrapper } from './ListenableSimulation';
 import { Document } from './data/GraphData';
 import { sanitizeForDisplay } from './util/HtmlSanitization';
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
   toggleIsLocked: (id: number) => void;
-}
-
-export interface Position {
-  x: number;
-  y: number;
 }
 
 type SharedProps = {
@@ -33,8 +26,8 @@ export type InnerProps = SharedProps & {
 type Props = SharedProps & {
   actionManager?: NodeActionManager;
   id: number;
-  position: Position;
-  simulation: ListenableSimulationWrapper;
+  initialX: number;
+  initialY: number;
   dragBehavior?: D3.DragBehavior<any, number, any>;
 };
 
@@ -74,16 +67,12 @@ export class InnerComponent extends React.Component<InnerProps, {}> {
   }
 }
 
-export class Component extends ListenerPureComponent<Props, object> {
-  protected readonly bindings: ListenerBinding<Props>[] = [
-    {
-      propertyName: "simulation",
-      eventType: "tick",
-      callback: () => this.onSignal()
-    }
-  ];
-
+export class Component extends React.PureComponent<Props, {}> {
   ref?: HTMLDivElement;
+
+  // not using State because we explicitly don't want to re-render
+  private x: number = this.props.initialX;
+  private y: number = this.props.initialY;
 
   componentDidMount() {
     if (super.componentDidMount) {
@@ -102,21 +91,24 @@ export class Component extends ListenerPureComponent<Props, object> {
     }
   }
 
-  componentWillReceiveProps(newProps: Readonly<Props>) {
+  componentWillReceiveProps(newProps: Readonly<Props>, nextContext: any) {
     // clear old drag behavior if it's changing
     if (this.ref && this.props.dragBehavior !== newProps.dragBehavior) {
       D3.select(this.ref).on(".drag", null);
     }
 
-    super.componentWillReceiveProps(newProps);
+    if (newProps.initialX !== this.props.initialX || newProps.initialY !== this.props.initialY) {
+      this.setPosition(newProps.initialX, newProps.initialY);
+    }
+
+    if (super.componentWillReceiveProps) {
+      super.componentWillReceiveProps(newProps, nextContext);
+    }
   }
 
   render() {
-    var style = {
-      left: this.props.position.x,
-      top: this.props.position.y,
-      transform: ""
-    };
+    var style = { transform: "" };
+    this.updateStyleForPosition(style);
     const innerComponent = React.createElement(InnerComponent, {
       ...this.props as InnerProps,
       onDoubleClick: this.onDoubleClick
@@ -142,10 +134,16 @@ export class Component extends ListenerPureComponent<Props, object> {
     }
   }
 
-  protected onSignal() {
+  private updateStyleForPosition(style: React.CSSProperties | CSSStyleDeclaration) {
+    style.left = `${this.x}px`;
+    style.top = `${this.y}px`;
+  }
+
+  public setPosition(x: number, y: number) {
+    this.x = x;
+    this.y = y;
     if (this.ref) {
-      this.ref.style.left = this.props.position.x + "px";
-      this.ref.style.top = this.props.position.y + "px";
+      this.updateStyleForPosition(this.ref.style);
     }
   }
 }

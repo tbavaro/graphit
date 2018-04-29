@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as D3 from "d3";
 import * as D3Force from 'd3-force';
 import { MyLinkDatum, MyNodeDatum } from './data/MyNodeDatum';
-import { Component as NodeView, Position } from './NodeView';
+import { Component as NodeView } from './NodeView';
 import { NodeActionManager } from './NodeView';
 import './SimulationViewport.css';
 import { GraphDocument } from './data/GraphDocument';
@@ -158,6 +158,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
   fpsView?: FPSView;
 
   svgRef?: SVGGElement;
+  private nodeRefs: Array<NodeView | null> = [];
 
   renderNodes = true;
   renderLinks = true;
@@ -254,6 +255,7 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
 
   private initializeSimulation = (document: GraphDocument) => {
     this.simulation.nodes(document.nodes);
+    this.nodeRefs = document.nodes.map(_ => null);
   }
 
   private restartSimulation = () => {
@@ -265,14 +267,15 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
     return (
       <NodeView
         key={"node." + index}
+        ref={(newRef) => this.nodeRefs[index] = newRef}
         actionManager={this.nodeActionManager}
         id={index}
         label={node.label}
         isLocked={node.isLocked}
         color={node.color || undefined}
         renderMode={this.props.document.displayConfig.nodeRenderMode}
-        position={node as Position}
-        simulation={this.simulationWrapper}
+        initialX={node.x || 0}
+        initialY={node.y || 0}
         isSelected={this.state.selectedNodes.has(node)}
         dragBehavior={this.drag}
       />
@@ -280,6 +283,14 @@ class SimulationViewport extends ListenerPureComponent<Props, State> {
   }
 
   private onSimulationTick = () => {
+    const nodes = this.simulation.nodes();
+    for (var i = 0; i < this.nodeRefs.length; ++i) {
+      const nodeRef = this.nodeRefs[i];
+      if (nodeRef !== null) {
+        const node = nodes[i];
+        nodeRef.setPosition(node.x || 0, node.y || 0);
+      }
+    }
     if (this.fpsView) {
       this.fpsView.onTick();
     }
