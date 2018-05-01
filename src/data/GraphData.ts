@@ -47,7 +47,7 @@ export type SerializedZoomStateV1 = {
 /**
  * @autogents validator
  */
-export type LayoutStateV1 = {
+export type SerializedLayoutStateV1 = {
   layoutType?: "force_simulation";
   forceSimulationConfig?: {
     originPullStrength?: number;
@@ -60,7 +60,7 @@ export type LayoutStateV1 = {
 /**
  * @autogents validator
  */
-export type NodeRenderModeV1 = (
+export type SerializedNodeRenderModeV1 = (
   "basic" |
   "raw_html"
 );
@@ -69,7 +69,7 @@ export type NodeRenderModeV1 = (
  * @autogents validator
  */
 export type SerializedDisplayConfigV1 = {
-  nodeRenderMode?: NodeRenderModeV1;
+  nodeRenderMode?: SerializedNodeRenderModeV1;
 };
 
 /**
@@ -80,7 +80,7 @@ export type SerializedDocumentV1 = {
   nodes?: SerializedNodeV1[];
   links?: SerializedLinkV1[];
   zoomState?: SerializedZoomStateV1;
-  layoutState?: LayoutStateV1;
+  layoutState?: SerializedLayoutStateV1;
   displayConfig?: SerializedDisplayConfigV1;
 };
 
@@ -101,8 +101,10 @@ export type SerializedLink = SerializedLinkV1;
 const REQUIRED_VALUE = Object.freeze(["<required value>"]) as any;
 
 export type Document = Defaults.DeepRequired<SerializedDocument>;
-export type ZoomState = Defaults.DeepRequired<SerializedZoomStateV1>;
-export type DisplayConfig = Defaults.DeepRequired<SerializedDisplayConfigV1>;
+export type ZoomState = Document["zoomState"];
+export type DisplayConfig = Document["displayConfig"];
+export type NodeRenderMode = DisplayConfig["nodeRenderMode"];
+
 export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<SerializedDocument>>({
   version: 1,
   nodes: [
