@@ -94,11 +94,20 @@ export class MiddleArrowDirectedLinkRenderer extends LinkRenderer {
     });
   }
 
-  updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[]) {
+  updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[], index?: number) {
     var linkElements: SVGLineElement[] = (parentElement.children as any);
-    links.forEach((link, index) => {
-      linkElements[index].setAttribute("d", MiddleArrowDirectedLinkRenderer.pathFor(link));
-    });
+    let start: number, end: number;
+    if (index === undefined) {
+      start = 0;
+      end = links.length;
+    } else {
+      start = index;
+      end = index + 1;
+    }
+    for (let i = start; i < end; ++i) {
+      const link = links[i];
+      linkElements[i].setAttribute("d", MiddleArrowDirectedLinkRenderer.pathFor(link));
+    }
   }
 }
 

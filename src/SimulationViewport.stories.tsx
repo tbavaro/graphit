@@ -68,9 +68,6 @@ addVariation("triangle", {
       "A": { x: 0, y: -100 },
       "B": { x: 100, y: 100 },
       "C": { x: -100, y: 100 }
-    },
-    {
-      isLocked: true
     }
   ),
   links: [

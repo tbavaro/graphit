@@ -36,7 +36,7 @@ class SVGLinesComponent extends React.PureComponent<SVGLinesComponentProps, {}> 
     );
   }
 
-  public updatePositions() {
+  public updatePositions(index?: number) {
     if (this._gRef) {
       this.linkRenderer.updateLinkElements(this._gRef, this.props.links);
     }
@@ -67,9 +67,6 @@ export class Component extends React.PureComponent<Props, State> {
     selectedNodes: new Set()
   };
 
-  private renderNodes = true;
-  private renderLinks = true;
-
   private linksViewRef: SVGLinesComponent | null = null;
   private svgRef: SVGGElement | null = null;
   private nodeRefs: Array<NodeView | null> = [];
@@ -87,51 +84,23 @@ export class Component extends React.PureComponent<Props, State> {
         node.fx = x;
         node.fy = y;
       }
-      this.onChange();
+      this.onChange(index);
     },
 
-    toggleIsLocked: (id: number) => {
-      var node = this.props.nodes[id];
+    toggleIsLocked: (index: number) => {
+      var node = this.props.nodes[index];
       node.isLocked = !node.isLocked;
       node.fx = (node.isLocked ? node.x : undefined);
       node.fy = (node.isLocked ? node.y : undefined);
-      this.onChange();
-      // this.forceUpdate();
+      this.onChange(index);
     }
   };
 
-  componentWillMount() {
-    this.reconfigure();
-    if (super.componentWillMount) {
-      super.componentWillMount();
-    }
-  }
-
-  componentWillReceiveProps?(nextProps: Readonly<Props>, nextContext: any): void {
-    this.reconfigure();
-    if (super.componentWillReceiveProps) {
-      super.componentWillReceiveProps(nextProps, nextContext);
-    }
-  }
-
   public render() {
-    var nodeViews = (!this.renderNodes ? "" : this.props.nodes.map(this.renderNode));
-
     return (
       <Viewport.Viewport
-        manuallyTransformedChildren={
-          this.renderLinks
-            ? (
-                <SVGLinesComponent
-                  ref={this.setLinksViewRef}
-                  links={this.props.links}
-                  onClick={this.deselectAll}
-                  gRef={this.setSvgRef}
-                />
-              )
-            : ""
-        }
-        autoTransformedChildren={nodeViews}
+        manuallyTransformedChildren={this.renderLinks()}
+        autoTransformedChildren={this.renderNodes()}
         onZoom={this.onViewportZoom}
         dragBehavior={this.drag}
         onDrag={this.onDrag}
@@ -143,15 +112,27 @@ export class Component extends React.PureComponent<Props, State> {
 
   private setLinksViewRef = (newRef: SVGLinesComponent | null) => this.linksViewRef = newRef;
 
-  private reconfigure() {
-    if (this.nodeRefs.length !== this.props.nodes.length) {
-      const oldNodeRefs = this.nodeRefs;
-      this.nodeRefs = this.props.nodes.map((_, i) => (i < oldNodeRefs.length ? oldNodeRefs[i] : null));
-    }
+  private renderLinks() {
+    return (
+      <SVGLinesComponent
+        ref={this.setLinksViewRef}
+        links={this.props.links}
+        onClick={this.deselectAll}
+        gRef={this.setSvgRef}
+      />
+    );
   }
 
-  private renderNode = (node: MyNodeDatum, index: number) => {
-    return (
+  private renderNodes() {
+    // if the number of nodes has changed, truncate/pad nodeRefs with nulls
+    if (this.nodeRefs.length !== this.props.nodes.length) {
+      const oldNodeRefs = this.nodeRefs;
+      this.nodeRefs = this.props.nodes.map(
+        (_, i) => (i < oldNodeRefs.length ? oldNodeRefs[i] : null)
+      );
+    }
+
+    return this.props.nodes.map((node: MyNodeDatum, index: number) => (
       <NodeView
         key={"node." + index}
         ref={(newRef) => this.nodeRefs[index] = newRef}
@@ -166,11 +147,19 @@ export class Component extends React.PureComponent<Props, State> {
         isSelected={this.state.selectedNodes.has(node)}
         dragBehavior={this.drag}
       />
-    );
+    ));
   }
 
-  public updatePositions() {
-    for (var i = 0; i < this.nodeRefs.length; ++i) {
+  public updatePositions(index?: number) {
+    let start: number, end: number;
+    if (index === undefined) {
+      start = 0;
+      end = this.nodeRefs.length;
+    } else {
+      start = index;
+      end = index + 1;
+    }
+    for (var i = start; i < end; ++i) {
       const nodeRef = this.nodeRefs[i];
       if (nodeRef !== null) {
         const node = this.props.nodes[i];
@@ -178,7 +167,7 @@ export class Component extends React.PureComponent<Props, State> {
       }
     }
     if (this.linksViewRef !== null) {
-      this.linksViewRef.updatePositions();
+      this.linksViewRef.updatePositions(index);
     }
   }
 
@@ -252,10 +241,10 @@ export class Component extends React.PureComponent<Props, State> {
     });
   }
 
-  private onChange = () => {
+  private onChange = (index?: number) => {
     if (this.props.onChange) {
       this.props.onChange();
     }
-    this.updatePositions();
+    this.updatePositions(index);
   }
 }
