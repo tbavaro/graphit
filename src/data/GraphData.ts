@@ -18,7 +18,7 @@ export const DEFAULT_LINK_DISTANCE = 100;
 /**
  * @autogents validator
  */
-export type NodeV1 = {
+export type SerializedNodeV1 = {
   id: Id;
   label: string;
   color?: string | null;
@@ -30,7 +30,7 @@ export type NodeV1 = {
 /**
  * @autogents validator
  */
-export type LinkV1 = {
+export type SerializedLinkV1 = {
   source: Id;
   target: Id;
 };
@@ -38,7 +38,7 @@ export type LinkV1 = {
 /**
  * @autogents validator
  */
-export type ZoomStateV1 = {
+export type SerializedZoomStateV1 = {
   centerX: number;
   centerY: number;
   scale: number;
@@ -68,7 +68,7 @@ export type NodeRenderModeV1 = (
 /**
  * @autogents validator
  */
-export type DisplayConfigV1 = {
+export type SerializedDisplayConfigV1 = {
   nodeRenderMode?: NodeRenderModeV1;
 };
 
@@ -77,11 +77,11 @@ export type DisplayConfigV1 = {
  */
 export type SerializedDocumentV1 = {
   version?: 1;
-  nodes?: NodeV1[];
-  links?: LinkV1[];
-  zoomState?: ZoomStateV1;
+  nodes?: SerializedNodeV1[];
+  links?: SerializedLinkV1[];
+  zoomState?: SerializedZoomStateV1;
   layoutState?: LayoutStateV1;
-  displayConfig?: DisplayConfigV1;
+  displayConfig?: SerializedDisplayConfigV1;
 };
 
 export const validateDocumentV1 =
@@ -95,12 +95,14 @@ export const validateDocumentV1 =
  */
 
 export type SerializedDocument = SerializedDocumentV1;
-export type SerializedNode = NodeV1;
-export type SerializedLink = LinkV1;
+export type SerializedNode = SerializedNodeV1;
+export type SerializedLink = SerializedLinkV1;
 
 const REQUIRED_VALUE = Object.freeze(["<required value>"]) as any;
 
 export type Document = Defaults.DeepRequired<SerializedDocument>;
+export type ZoomState = Defaults.DeepRequired<SerializedZoomStateV1>;
+export type DisplayConfig = Defaults.DeepRequired<SerializedDisplayConfigV1>;
 export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<SerializedDocument>>({
   version: 1,
   nodes: [

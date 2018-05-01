@@ -42,8 +42,8 @@ export const internals = {
     return results;
   },
 
-  nodeKey: (node: GraphData.NodeV1) => node.id,
-  linkKey: (link: GraphData.LinkV1) => JSON.stringify([link.source, link.target]),
+  nodeKey: (node: GraphData.SerializedNodeV1) => node.id,
+  linkKey: (link: GraphData.SerializedLinkV1) => JSON.stringify([link.source, link.target]),
 
   mergeSerializedDocuments: (
     originalDoc: GraphData.Document,
