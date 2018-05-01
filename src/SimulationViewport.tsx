@@ -7,7 +7,7 @@ import { GraphDocument } from "./data/GraphDocument";
 import { ListenerPureComponent, ListenerBinding } from "./ui-helpers/ListenerPureComponent";
 import { ListenableSimulationWrapper } from "./ListenableSimulation";
 import { SimpleListenable } from "./data/Listenable";
-import * as GraphViewport from "./GraphViwport";
+import * as GraphViewport from "./GraphViewport";
 
 export interface Props {
   document: GraphDocument;
@@ -140,7 +140,7 @@ export class Component extends ListenerPureComponent<Props, {}> {
         links={this.props.document.links}
         zoomState={this.props.document.zoomState}
         nodeRenderMode={this.props.document.displayConfig.nodeRenderMode}
-        restartSimulation={this.restartSimulation}
+        onChange={this.restartSimulation}
       />
     );
   }

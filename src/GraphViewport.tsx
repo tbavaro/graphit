@@ -55,7 +55,7 @@ export type Props = {
   links: MyLinkDatum[];
   zoomState: GraphData.ZoomState;
   nodeRenderMode: GraphData.NodeRenderMode;
-  restartSimulation: () => void;  // TODO rename to be more generic
+  onChange?: () => void;
 };
 
 type State = {
@@ -87,7 +87,7 @@ export class Component extends React.PureComponent<Props, State> {
         node.fx = x;
         node.fy = y;
       }
-      this.props.restartSimulation();
+      this.onChange();
     },
 
     toggleIsLocked: (id: number) => {
@@ -95,8 +95,8 @@ export class Component extends React.PureComponent<Props, State> {
       node.isLocked = !node.isLocked;
       node.fx = (node.isLocked ? node.x : undefined);
       node.fy = (node.isLocked ? node.y : undefined);
-      this.props.restartSimulation();
-      this.forceUpdate();
+      this.onChange();
+      // this.forceUpdate();
     }
   };
 
@@ -215,7 +215,7 @@ export class Component extends React.PureComponent<Props, State> {
     });
 
     if (dx !== 0 || dy !== 0) {
-      this.props.restartSimulation();
+      this.onChange();
     }
   }
 
@@ -250,5 +250,12 @@ export class Component extends React.PureComponent<Props, State> {
     this.setState({
       selectedNodes: new Set()
     });
+  }
+
+  private onChange = () => {
+    if (this.props.onChange) {
+      this.props.onChange();
+    }
+    this.updatePositions();
   }
 }
