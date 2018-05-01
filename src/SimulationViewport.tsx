@@ -81,7 +81,7 @@ function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
 
 type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
-class SimulationViewport extends ListenerPureComponent<Props, {}> {
+export class Component extends ListenerPureComponent<Props, {}> {
   bindings: ListenerBinding<Props>[] = [
     {
       propertyName: "simulationConfigListener",
@@ -167,5 +167,3 @@ class SimulationViewport extends ListenerPureComponent<Props, {}> {
     this.graphViewportRef = newRef;
   }
 }
-
-export default SimulationViewport;

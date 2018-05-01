@@ -1,5 +1,5 @@
 import * as React from 'react';
-import SimulationViewport from './SimulationViewport';
+import * as SimulationViewport from './SimulationViewport';
 import './App.css';
 import * as AppBar from './ui-helpers/AppBar';
 import * as FilesDrawerView from './FilesDrawerView';
@@ -95,7 +95,7 @@ class App extends React.Component<object, State> {
     if (this.state.document !== null) {
       title = this.state.document.name;
       viewportView = (
-        <SimulationViewport
+        <SimulationViewport.Component
           document={this.state.document}
           simulationConfigListener={this.simulationConfigListener}
         />
