@@ -59,12 +59,12 @@ export type Props = {
 };
 
 type State = {
-  selectedNodes: Set<MyNodeDatum>;
+  selectedNodeIndexes: Set<number>;
 };
 
 export class Component extends React.PureComponent<Props, State> {
   state: State = {
-    selectedNodes: new Set()
+    selectedNodeIndexes: new Set()
   };
 
   private linksViewRef: SVGLinesComponent | null = null;
@@ -144,7 +144,7 @@ export class Component extends React.PureComponent<Props, State> {
         renderMode={this.props.nodeRenderMode}
         initialX={node.x || 0}
         initialY={node.y || 0}
-        isSelected={this.state.selectedNodes.has(node)}
+        isSelected={this.state.selectedNodeIndexes.has(index)}
         dragBehavior={this.drag}
       />
     ));
@@ -187,7 +187,9 @@ export class Component extends React.PureComponent<Props, State> {
   }
 
   private onDrag = (index: number, dx: number, dy: number, isEnd: boolean) => {
-    this.state.selectedNodes.forEach((node) => {
+    this.state.selectedNodeIndexes.forEach(i => {
+      const node = this.props.nodes[i];
+
       if (dx !== 0 || dy !== 0) {
         node.isLocked = true;
       }
@@ -209,26 +211,24 @@ export class Component extends React.PureComponent<Props, State> {
   }
 
   private onDragStart = (index: number, metaKey: boolean) => {
-    var node = this.props.nodes[index];
-
-    var newSelectedNodes: Set<MyNodeDatum> | undefined;
+    var newSelectedNodeIndexes: Set<number> | undefined;
     if (!metaKey) {
       // if the node is already selected, don't do anything else
-      if (!this.state.selectedNodes.has(node)) {
-        newSelectedNodes = new Set([node]);
+      if (!this.state.selectedNodeIndexes.has(index)) {
+        newSelectedNodeIndexes = new Set([index]);
       }
     } else {
-      newSelectedNodes = new Set(this.state.selectedNodes);
-      if (newSelectedNodes.has(node) && newSelectedNodes.size > 1) {
-        newSelectedNodes.delete(node);
+      newSelectedNodeIndexes = new Set(this.state.selectedNodeIndexes);
+      if (newSelectedNodeIndexes.has(index) && newSelectedNodeIndexes.size > 1) {
+        newSelectedNodeIndexes.delete(index);
       } else {
-        newSelectedNodes.add(node);
+        newSelectedNodeIndexes.add(index);
       }
     }
 
-    if (newSelectedNodes) {
+    if (newSelectedNodeIndexes) {
       this.setState({
-        selectedNodes: newSelectedNodes
+        selectedNodeIndexes: newSelectedNodeIndexes
       });
     }
 
@@ -237,7 +237,7 @@ export class Component extends React.PureComponent<Props, State> {
 
   private deselectAll = () => {
     this.setState({
-      selectedNodes: new Set()
+      selectedNodeIndexes: new Set()
     });
   }
 
