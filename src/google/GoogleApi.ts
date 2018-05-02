@@ -49,9 +49,6 @@ const loadPickerApiSingleton = loadApiSingleton("picker");
 
 // the @types seem to be wrong here
 type ExtraClientTypes = {
-  drive: {
-    files: typeof gapi.client.files;
-  };
   sheets: {
     spreadsheets: typeof gapi.client.spreadsheets;
   }

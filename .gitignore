@@ -26,5 +26,3 @@ yarn-error.log*
 # scss
 /src/**/*.css
 
-/package-lock.json
-
