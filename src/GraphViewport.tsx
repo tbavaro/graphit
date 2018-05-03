@@ -7,6 +7,7 @@ import "./GraphViewport.css";
 import * as Viewport from "./ui-helpers/Viewport";
 import * as LinkRenderers from "./LinkRenderers";
 import * as GraphData from "./data/GraphData";
+import { forSome } from "./util/Utils";
 
 interface SVGLinesComponentProps {
   links: MyLinkDatum[];
@@ -36,7 +37,8 @@ class SVGLinesComponent extends React.PureComponent<SVGLinesComponentProps, {}> 
     );
   }
 
-  public updatePositions(index?: number) {
+  public updatePositions(indexes?: Iterable<number>) {
+    // xcxc use indexes
     if (this._gRef) {
       this.linkRenderer.updateLinkElements(this._gRef, this.props.links);
     }
@@ -84,7 +86,7 @@ export class Component extends React.PureComponent<Props, State> {
         node.fx = x;
         node.fy = y;
       }
-      this.onChange(index);
+      this.onChange([index]);
     },
 
     toggleIsLocked: (index: number) => {
@@ -92,7 +94,7 @@ export class Component extends React.PureComponent<Props, State> {
       node.isLocked = !node.isLocked;
       node.fx = (node.isLocked ? node.x : undefined);
       node.fy = (node.isLocked ? node.y : undefined);
-      this.onChange(index);
+      this.onChange([index]);
     }
   };
 
@@ -150,24 +152,19 @@ export class Component extends React.PureComponent<Props, State> {
     ));
   }
 
-  public updatePositions(index?: number) {
-    let start: number, end: number;
-    if (index === undefined) {
-      start = 0;
-      end = this.nodeRefs.length;
-    } else {
-      start = index;
-      end = index + 1;
-    }
-    for (var i = start; i < end; ++i) {
-      const nodeRef = this.nodeRefs[i];
-      if (nodeRef !== null) {
-        const node = this.props.nodes[i];
-        nodeRef.setPosition(node.x || 0, node.y || 0);
-      }
-    }
+  public updatePositions(indexes?: Iterable<number>) {
+    forSome(
+      this.nodeRefs,
+      (nodeRef, i) => {
+        if (nodeRef !== null) {
+          const node = this.props.nodes[i];
+          nodeRef.setPosition(node.x || 0, node.y || 0);
+        }
+      },
+      indexes
+    );
     if (this.linksViewRef !== null) {
-      this.linksViewRef.updatePositions(index);
+      this.linksViewRef.updatePositions(indexes);
     }
   }
 
@@ -206,7 +203,7 @@ export class Component extends React.PureComponent<Props, State> {
     });
 
     if (dx !== 0 || dy !== 0) {
-      this.onChange();
+      this.onChange(this.state.selectedNodeIndexes);
     }
   }
 
@@ -241,10 +238,10 @@ export class Component extends React.PureComponent<Props, State> {
     });
   }
 
-  private onChange = (index?: number) => {
+  private onChange = (indexes: Iterable<number>) => {
     if (this.props.onChange) {
       this.props.onChange();
     }
-    this.updatePositions(index);
+    this.updatePositions(indexes);
   }
 }
