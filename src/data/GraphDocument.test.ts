@@ -1,11 +1,11 @@
 import {
-  GraphDocument,
-  internals
-} from "./GraphDocument";
-import {
   DEFAULT_LAYOUT_TYPE,
   DEFAULT_PARTICLE_CHARGE,
 } from "./GraphData";
+import {
+  GraphDocument,
+  internals
+} from "./GraphDocument";
 
 const mergeValueSimple = internals.mergeValueSimple;
 

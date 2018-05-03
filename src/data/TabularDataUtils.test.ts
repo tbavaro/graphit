@@ -1,4 +1,4 @@
-import { tabularDataToPOJOs, pojosToTabularData } from "./TabularDataUtils";
+import { pojosToTabularData, tabularDataToPOJOs } from "./TabularDataUtils";
 
 function testTabularDataToPOJOs<T>(
   input: {

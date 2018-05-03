@@ -1,7 +1,8 @@
+import { createValidationFunction } from "tsvalidators";
 import * as DeepReadonly from "./DeepReadonly";
 import * as Defaults from "./Defaults";
+
 import * as GraphDataValidators from "../generated/GraphDataValidators";
-import { createValidationFunction } from "tsvalidators";
 
 export type Id = string;
 

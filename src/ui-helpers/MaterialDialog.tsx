@@ -1,6 +1,6 @@
+import * as classNames from "classnames";
 import * as React from "react";
 import "./MaterialDialog.css";
-import * as classNames from "classnames";
 import mdc from "./mdchack";
 
 // for scrollable regions, this is a proxy for vertical margin + header & button heights

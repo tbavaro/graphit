@@ -1,5 +1,5 @@
-import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
 import * as GraphData from "./GraphData";
+import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
 
 // TODO move merge logic out of here, now that the data is separated
 export const internals = {

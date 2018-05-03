@@ -1,8 +1,8 @@
 import { storiesOf } from "@storybook/react";
 
-import * as helpers from "./helpers.stories";
-import * as FilesDrawerView from "./FilesDrawerView";
 import { DatastoreStatus } from "./data/DatastoreStatus";
+import * as FilesDrawerView from "./FilesDrawerView";
+import * as helpers from "./helpers.stories";
 
 const DEFAULT_PROPS: FilesDrawerView.Props = {
   actionManager: helpers.stubActionManager,

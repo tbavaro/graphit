@@ -1,8 +1,8 @@
+import { Headers } from "request";
 import * as Request from "request-promise-native";
 import * as GoogleApi from "../google/GoogleApi";
-import { BasicListenable } from "./Listenable";
-import { Headers } from "request";
 import { DatastoreStatus } from "./DatastoreStatus";
+import { BasicListenable } from "./Listenable";
 
 type Maybe<T> = T | undefined;
 

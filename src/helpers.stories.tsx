@@ -1,8 +1,8 @@
-import * as React from "react";
-import { Story } from "@storybook/react";
 import { action } from "@storybook/addon-actions";
-import { AllActions } from "./App";
+import { Story } from "@storybook/react";
+import * as React from "react";
 import { isFunction } from "util";
+import { AllActions } from "./App";
 import { SimpleListenable } from "./data/Listenable";
 
 export function centerOnPage(node: React.ReactNode): React.ReactNode {

@@ -1,9 +1,9 @@
 import { storiesOf } from "@storybook/react";
 
+import * as GraphData from "./data/GraphData";
+import { GraphDocument } from "./data/GraphDocument";
 import * as helpers from "./helpers.stories";
 import * as SimulationViewport from "./SimulationViewport";
-import { GraphDocument } from "./data/GraphDocument";
-import * as GraphData from "./data/GraphData";
 
 const addVariationRaw = helpers.createVariations({
   storyGroup: storiesOf("SimulationViewport", module),

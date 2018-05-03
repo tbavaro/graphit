@@ -1,7 +1,9 @@
 import * as classNames from "classnames";
-import * as React from 'react';
 import * as D3 from "d3";
+import * as React from 'react';
+
 import './NodeView.css';
+
 import { Document } from './data/GraphData';
 import { sanitizeForDisplay } from './util/HtmlSanitization';
 

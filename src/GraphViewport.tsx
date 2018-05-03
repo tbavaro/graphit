@@ -1,13 +1,17 @@
-import * as React from "react";
 import * as D3 from "d3";
+import * as React from "react";
+import "./GraphViewport.css";
+
+import * as GraphData from "./data/GraphData";
 import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
+
+import * as Viewport from "./ui-helpers/Viewport";
+
+import { forSome } from "./util/Utils";
+
+import * as LinkRenderers from "./LinkRenderers";
 import { Component as NodeView } from "./NodeView";
 import { NodeActionManager } from "./NodeView";
-import "./GraphViewport.css";
-import * as Viewport from "./ui-helpers/Viewport";
-import * as LinkRenderers from "./LinkRenderers";
-import * as GraphData from "./data/GraphData";
-import { forSome } from "./util/Utils";
 
 interface SVGLinesComponentProps {
   links: MyLinkDatum[];

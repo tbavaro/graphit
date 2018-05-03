@@ -23,12 +23,7 @@
         "jsx-no-multiline-js": false,
         "label-position": true,
         "max-line-length": [ true, 120 ],
-        "member-ordering": [
-            false,
-            "public-before-private",
-            "static-before-instance",
-            "variables-before-functions"
-        ],
+        "member-ordering": false,
         "no-any": false,
         "no-arg": true,
         "no-bitwise": true,
@@ -61,6 +56,7 @@
             "check-open-brace",
             "check-whitespace"
         ],
+        "ordered-imports": true,
         "quotemark": [false, "single", "double", "jsx-double"],
         "radix": true,
         "semicolon": [true, "always"],

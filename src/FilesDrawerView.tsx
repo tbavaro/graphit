@@ -1,8 +1,9 @@
 import * as React from 'react';
 import './FilesDrawerView.css';
+
 import { DatastoreStatus } from "./data/DatastoreStatus";
-import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 import * as MaterialList from "./ui-helpers/MaterialList";
+import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
 
 export interface Actions {
   openFilePicker: () => void;

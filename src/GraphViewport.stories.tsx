@@ -1,9 +1,9 @@
 import { storiesOf } from "@storybook/react";
-
 import * as helpers from "./helpers.stories";
-import * as GraphViewport from "./GraphViewport";
-import { GraphDocument } from "./data/GraphDocument";
+
 import * as GraphData from "./data/GraphData";
+import { GraphDocument } from "./data/GraphDocument";
+import * as GraphViewport from "./GraphViewport";
 
 function propsForDocument(document: GraphDocument) {
   return {

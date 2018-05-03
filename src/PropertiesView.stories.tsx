@@ -1,8 +1,8 @@
 import { storiesOf } from "@storybook/react";
 
+import { GraphDocument } from "./data/GraphDocument";
 import * as helpers from "./helpers.stories";
 import * as PropertiesView from "./PropertiesView";
-import { GraphDocument } from "./data/GraphDocument";
 // import { action } from "@storybook/addon-actions";
 // import { linkTo } from "@storybook/addon-links";
 

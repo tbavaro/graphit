@@ -1,13 +1,15 @@
-import * as React from "react";
 import * as D3 from "d3";
 import * as D3Force from "d3-force";
-import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
+import * as React from "react";
+
 import "./SimulationViewport.css";
+
 import { GraphDocument } from "./data/GraphDocument";
-import { ListenerPureComponent, ListenerBinding } from "./ui-helpers/ListenerPureComponent";
-import { ListenableSimulationWrapper } from "./ListenableSimulation";
 import { SimpleListenable } from "./data/Listenable";
+import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
 import * as GraphViewport from "./GraphViewport";
+import { ListenableSimulationWrapper } from "./ListenableSimulation";
+import { ListenerBinding, ListenerPureComponent } from "./ui-helpers/ListenerPureComponent";
 
 export interface Props {
   document: GraphDocument;

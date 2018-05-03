@@ -1,9 +1,8 @@
+import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 
 import * as helpers from "./helpers.stories";
 import * as NodeView from "./NodeView";
-import { action } from "@storybook/addon-actions";
-// import { linkTo } from "@storybook/addon-links";
 
 const DEFAULT_PROPS: NodeView.InnerProps = {
   label: "Hey",

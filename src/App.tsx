@@ -1,18 +1,18 @@
-import * as React from 'react';
-import * as SimulationViewport from './SimulationViewport';
-import './App.css';
-import * as AppBar from './ui-helpers/AppBar';
-import * as FilesDrawerView from './FilesDrawerView';
-import { GraphDocument } from './data/GraphDocument';
-import { Datastore, DatastoreStatus } from "./data/Datastore";
+import "App.css";
+import { Datastore, DatastoreStatus } from "data/Datastore";
+import * as GraphData from "data/GraphData";
+import { GraphDocument } from "data/GraphDocument";
+import { SimpleListenable } from "data/Listenable";
+import * as SpreadsheetImporter from "data/SpreadsheetImporter";
+import * as FilesDrawerView from "FilesDrawerView";
+import * as GooglePickerHelper from "google/GooglePickerHelper";
+import * as LocalFiles from "localfiles/LocalFiles";
+import * as PropertiesView from "PropertiesView";
 import * as QueryString from "query-string";
-import * as PropertiesView from './PropertiesView';
-import { SimpleListenable } from './data/Listenable';
-import * as GooglePickerHelper from './google/GooglePickerHelper';
-import * as LocalFiles from './localfiles/LocalFiles';
-import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
-import * as MaterialDialog from "./ui-helpers/MaterialDialog";
-import * as GraphData from "./data/GraphData";
+import * as React from "react";
+import * as SimulationViewport from "SimulationViewport";
+import * as AppBar from "ui-helpers/AppBar";
+import * as MaterialDialog from "ui-helpers/MaterialDialog";
 
 export type AllActions =
   AppBar.Actions &
