@@ -180,12 +180,22 @@ class App extends React.Component<object, State> {
   }
 
   private updateUrlWithDocumentId() {
-    let documentId = this.state.loadedDocumentId;
-    history.replaceState(
-      {},
-      window.document.title,
-      documentId ? ("?doc=" + documentId) : "?"
-    );
+    const documentId = this.state.loadedDocumentId;
+    let url: string;
+
+    if (documentId === undefined) {
+      url = "?";
+    } else {
+      const encodedDocumentId = encodeURIComponent(documentId);
+
+      // hack; weird characters at the end of the url (like a hyphen)
+      // get past encodeURIComponent but are handled incorrectly by
+      // things like slack and asana
+      const needsExtraAmpersand = encodedDocumentId.match(/[^A-Za-z0-9]$/);
+      url = `?doc=${encodedDocumentId}${needsExtraAmpersand ? "&" : ""}`;
+    }
+
+    history.replaceState({}, window.document.title, url);
   }
 
   private setDocument = (
