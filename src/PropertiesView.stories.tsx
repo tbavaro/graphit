@@ -3,8 +3,6 @@ import { storiesOf } from "@storybook/react";
 import { GraphDocument } from "./data/GraphDocument";
 import * as helpers from "./helpers.stories";
 import * as PropertiesView from "./PropertiesView";
-// import { action } from "@storybook/addon-actions";
-// import { linkTo } from "@storybook/addon-links";
 
 const DEFAULT_PROPS = (): PropertiesView.Props => {
   const document = GraphDocument.empty();

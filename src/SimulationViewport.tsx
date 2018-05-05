@@ -14,6 +14,7 @@ import { ListenerBinding, ListenerPureComponent } from "./ui-helpers/ListenerPur
 export interface Props {
   document: GraphDocument;
   simulationConfigListener: SimpleListenable;
+  onChange?: () => void;
 }
 
 // TODO separate this out
@@ -142,13 +143,20 @@ export class Component extends ListenerPureComponent<Props, {}> {
         links={this.props.document.links}
         zoomState={this.props.document.zoomState}
         nodeRenderMode={this.props.document.displayConfig.nodeRenderMode}
-        onChange={this.restartSimulation}
+        onChange={this.onChange}
       />
     );
   }
 
   private initializeSimulation = (document: GraphDocument) => {
     this.simulation.nodes(document.nodes);
+  }
+
+  private onChange = () => {
+    this.restartSimulation();
+    if (this.props.onChange) {
+      this.props.onChange();
+    }
   }
 
   private restartSimulation = () => {

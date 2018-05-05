@@ -27,19 +27,27 @@ interface State {
   leftNavOpen: boolean;
   propertiesViewOpen: boolean;
   activeDialog?: any;
+
+  // these shouldn't be interacted with directly, but rather through get/set methods
+  _documentIsDirty: boolean;
 }
 
 class App extends React.Component<object, State> {
   datastore = new Datastore();
 
-  simulationConfigListener = new SimpleListenable();
+  simulationConfigListener = (() => {
+    const listener = new SimpleListenable();
+    listener.addListener("changed", () => { this.markDocumentDirty(); });
+    return listener;
+  })();
 
   state: State = {
     document: null,
     leftNavOpen: false,
     propertiesViewOpen: false,
     canSaveDocument: false,
-    modalOverlayText: "Loading..."
+    modalOverlayText: "Loading...",
+    _documentIsDirty: false
   };
 
   pendingDocumentLoadId?: string;
@@ -67,6 +75,8 @@ class App extends React.Component<object, State> {
     signOut: () => this.datastore.signOut()
   };
 
+  private oldWindowOnBeforeUnload: any | null = null;
+
   componentWillMount() {
     this.datastore.addListener("status_changed", this.onDatastoreStatusChanged);
     this.onDatastoreStatusChanged();
@@ -81,13 +91,23 @@ class App extends React.Component<object, State> {
       });
       this.hideModalOverlay();
     }
+
+    this.oldWindowOnBeforeUnload = window.onbeforeunload;
+    window.onbeforeunload = this.onBeforeUnload;
   }
 
   componentWillUnmount() {
     this.datastore.removeListener("status_changed", this.onDatastoreStatusChanged);
+    if (window.onbeforeunload === this.onBeforeUnload) {
+      window.onbeforeunload = this.oldWindowOnBeforeUnload;
+    }
+    this.oldWindowOnBeforeUnload = null;
   }
 
   render() {
+    // TODO consider triggering this only when needed
+    this.updateWindowTitle();
+
     var viewportView: any;
     var propertiesView: any = undefined;
     var title: string = "GraphIt";
@@ -98,6 +118,7 @@ class App extends React.Component<object, State> {
         <SimulationViewport.Component
           document={this.state.document}
           simulationConfigListener={this.simulationConfigListener}
+          onChange={this.markDocumentDirty}
         />
       );
       propertiesView = (
@@ -179,6 +200,16 @@ class App extends React.Component<object, State> {
     );
   }
 
+  private updateWindowTitle() {
+    window.document.title = [
+      this.isDocumentDirty() ? "\u2022 " : "",
+      this.state.document === null
+        ? ""
+        : `${this.state.document.name} - `,
+      "GraphIt",
+    ].join("");
+  }
+
   private updateUrlWithDocumentId() {
     const documentId = this.state.loadedDocumentId;
     let url: string;
@@ -192,6 +223,7 @@ class App extends React.Component<object, State> {
       // get past encodeURIComponent but are handled incorrectly by
       // things like slack and asana
       const needsExtraAmpersand = encodedDocumentId.match(/[^A-Za-z0-9]$/);
+
       url = `?doc=${encodedDocumentId}${needsExtraAmpersand ? "&" : ""}`;
     }
 
@@ -206,6 +238,7 @@ class App extends React.Component<object, State> {
     this.setState({
       loadedDocumentId: documentId,
       document: document,
+      _documentIsDirty: false,
       canSaveDocument: canSave
     });
     this.updateUrlWithDocumentId();
@@ -274,23 +307,28 @@ class App extends React.Component<object, State> {
     SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
       var document: GraphDocument;
       var documentId: string | undefined;
+      let merged: boolean;
       if (!shouldMerge || (this.state.document === null)) {
         document = new GraphDocument({
           name: fileResult.name,
           data: GraphData.applyDefaults(serializedDocument)
         });
         documentId = undefined;
+        merged = false;
       } else {
         document = this.state.document.merge(serializedDocument);
         documentId = this.state.loadedDocumentId;
+        merged = true;
       }
       this.setDocument(document, documentId, this.state.canSaveDocument);
+      if (merged) {
+        this.markDocumentDirty();
+      }
       this.closeLeftNav();
     });
   }
 
   private showSaveAsDialog() {
-    // alert("save as");
     var name = prompt("Save as", (this.state.document !== null) ? this.state.document.name : "Untitled");
     if (name === null) {
       return;
@@ -318,7 +356,9 @@ class App extends React.Component<object, State> {
       this.showModalOverlayDuring(
         "Saving...",
         this.datastore.updateFile(this.state.loadedDocumentId, data).then(
-          () => { /* */ },
+          () => {
+            this.markDocumentClean();
+          },
           (reason) => {
             alert("save failed!\n" + this.decodeErrorReason(reason));
           }
@@ -344,6 +384,7 @@ class App extends React.Component<object, State> {
             loadedDocumentId: id,
             canSaveDocument: true
           });
+          this.markDocumentClean();
           this.updateUrlWithDocumentId();
           this.closeLeftNav();
         },
@@ -431,6 +472,33 @@ class App extends React.Component<object, State> {
       selectable: true
     });
   }
+
+  private onBeforeUnload = () => {
+    if (this.isDocumentDirty()) {
+      // NB: most modern browsers don't actually show this specific text,
+      // but returning *something* makes it prompt the user before leaving.
+      return "There are unsaved changes.";
+    } else {
+      return undefined;
+    }
+  }
+
+  private isDocumentDirty() {
+    return this.state.document !== undefined && this.state._documentIsDirty;
+  }
+
+  private setDocumentIsDirty(value: boolean) {
+    // document can never be dirty if there's no document
+    value = value && (this.state.document !== undefined);
+
+    // only set the state if it's a change (TODO see if react is smart here)
+    if (this.state._documentIsDirty !== value) {
+      this.setState({ _documentIsDirty: value });
+    }
+  }
+
+  private markDocumentDirty = () => this.setDocumentIsDirty(true);
+  private markDocumentClean = () => this.setDocumentIsDirty(false);
 }
 
 export default App;
