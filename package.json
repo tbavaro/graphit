@@ -41,7 +41,7 @@
     "@storybook/addons": "^3.4.2",
     "@storybook/react": "^3.4.2",
     "@types/classnames": "^2.2.3",
-    "@types/d3": "^4.12.0",
+    "@types/d3": "^4.13.1",
     "@types/gapi": "0.0.35",
     "@types/gapi.auth2": "0.0.47",
     "@types/gapi.client.drive": "^3.0.0",
