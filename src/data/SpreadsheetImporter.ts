@@ -68,7 +68,7 @@ export const internals = {
       var result: GraphData.SerializedLink = {
         source: sourceId,
         target: targetId,
-        stroke: undefined
+        stroke: GraphData.DEFAULT_LINK_STROKE
       };
 
       if (attrs.linkStrokes !== undefined) {

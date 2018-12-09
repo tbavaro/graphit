@@ -36,6 +36,8 @@ export type LinkStroke = (
   "dashed"
 );
 
+export const DEFAULT_LINK_STROKE: LinkStroke = "solid";
+
 export const validateLinkStroke =
   createValidationFunction<LinkStroke>(
     GraphDataValidators.validatorForLinkStroke,
@@ -124,7 +126,7 @@ export type NodeRenderMode = DisplayConfig["nodeRenderMode"];
 const linkDefaults: Defaults.Defaults<SerializedLink> = {
   source: REQUIRED_VALUE,
   target: REQUIRED_VALUE,
-  stroke: "solid"
+  stroke: DEFAULT_LINK_STROKE
 };
 
 export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<SerializedDocument>>({

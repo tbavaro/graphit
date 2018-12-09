@@ -123,9 +123,10 @@ function testLinkStroke(
   });
 }
 
-testLinkStroke(undefined, undefined);
+testLinkStroke(undefined, "solid");
 testLinkStroke("solid", "solid");
-testLinkStroke("<bad value>", undefined);
+testLinkStroke("<bad value>", "solid");
+testLinkStroke("dashed", "dashed");
 
 function transpose(input: any[][]): any[][] {
   if (input.length === 0) {
