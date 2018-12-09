@@ -81,3 +81,20 @@ addVariation("triangle", {
     { source: "C", target: "A" }
   ]
 });
+
+// link strokes
+function addLinkStrokeVariation(stroke: GraphData.LinkStroke) {
+  addVariation(`link stroke: ${stroke}`, {
+    nodes: easyNodes(
+      {
+        "A": { x: -100, y: 0 },
+        "B": { x: 100, y: 0 }
+      }
+    ),
+    links: [
+      { source: "A", target: "B", stroke: stroke }
+    ]
+  });
+}
+addLinkStrokeVariation("solid");
+addLinkStrokeVariation("dashed");

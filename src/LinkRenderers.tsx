@@ -89,6 +89,7 @@ export class MiddleArrowDirectedLinkRenderer extends LinkRenderer {
         <path
           key={"link." + index}
           d={MiddleArrowDirectedLinkRenderer.pathFor(link)}
+          className={link.stroke === "dashed" ? "stroke-dashed" : undefined}
         />
       );
     });

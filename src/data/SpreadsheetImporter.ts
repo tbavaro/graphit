@@ -13,6 +13,7 @@ const NODE_COLOR_KEY = "color";
 const LINKS_SHEET = "links";
 const LINK_SOURCE_ID_KEY = "source";
 const LINK_TARGET_ID_KEY = "target";
+const LINK_STROKE_KEY = "stroke";
 
 const LOOKS_LIKE_HTML_REGEX = /<\s*\/[^>]*>|<[^>]*\/\s*>/;
 
@@ -38,7 +39,8 @@ export const internals = {
     nodeLabels: string[],
     nodeColors?: string[],
     linkSourceIds: string[],
-    linkTargetIds: string[]
+    linkTargetIds: string[],
+    linkStrokes?: string[]
   }): GraphData.SerializedDocument {
     const nodes = removeUndefineds(attrs.nodeIds.map((id, index) => {
       if (id === undefined) {
@@ -62,10 +64,25 @@ export const internals = {
       if (sourceId === undefined || targetId === undefined) {
         return undefined;
       }
-      return {
+
+      var result: GraphData.SerializedLink = {
         source: sourceId,
-        target: targetId
+        target: targetId,
+        stroke: undefined
       };
+
+      if (attrs.linkStrokes !== undefined) {
+        const linkStroke = nthIfDefinedElseDefault(attrs.linkStrokes, index, "") || undefined;
+        if (linkStroke !== undefined) {
+          try {
+            result.stroke = GraphData.validateLinkStroke(linkStroke);
+          } catch (e) {
+            // TODO record errors
+          }
+        }
+      }
+
+      return result;
     }));
 
     return {
@@ -84,9 +101,9 @@ export const internals = {
         NODE_ID_KEY, NODE_LABEL_KEY, NODE_COLOR_KEY
       ]
     );
-    var [linkSourceIds, linkTargetIds] = this.extractNamedColumnsToStringArrays(
+    var [linkSourceIds, linkTargetIds, linkStrokes] = this.extractNamedColumnsToStringArrays(
       attrs.linksData, [
-        LINK_SOURCE_ID_KEY, LINK_TARGET_ID_KEY
+        LINK_SOURCE_ID_KEY, LINK_TARGET_ID_KEY, LINK_STROKE_KEY
       ]
     );
     var result = this.createSGDFromDataColumns({
@@ -94,7 +111,8 @@ export const internals = {
       nodeLabels: assertDefined(nodeLabels, "nodeLabels"),
       nodeColors: nodeColors,
       linkSourceIds: assertDefined(linkSourceIds, "linkSourceIds"),
-      linkTargetIds: assertDefined(linkTargetIds, "linkTargetIds")
+      linkTargetIds: assertDefined(linkTargetIds, "linkTargetIds"),
+      linkStrokes: linkStrokes
     });
     return result;
   },

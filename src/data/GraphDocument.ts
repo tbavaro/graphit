@@ -135,7 +135,8 @@ export class GraphDocument {
     });
     this.links = this.data.links.map(sl => ({
       source: assertDefined(idToNodeMap.get(sl.source)),
-      target: assertDefined(idToNodeMap.get(sl.target))
+      target: assertDefined(idToNodeMap.get(sl.target)),
+      stroke: sl.stroke
     }));
   }
 
@@ -153,6 +154,7 @@ export class GraphDocument {
       const sl = this.data.links[i];
       sl.source = link.source.id;
       sl.target = link.target.id;
+      sl.stroke = link.stroke;
     });
   }
 

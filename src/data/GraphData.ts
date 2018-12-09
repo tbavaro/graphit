@@ -31,9 +31,24 @@ export type SerializedNodeV1 = {
 /**
  * @autogents validator
  */
+export type LinkStroke = (
+  "solid" |
+  "dashed"
+);
+
+export const validateLinkStroke =
+  createValidationFunction<LinkStroke>(
+    GraphDataValidators.validatorForLinkStroke,
+    "LinkStroke"
+  );
+
+/**
+ * @autogents validator
+ */
 export type SerializedLinkV1 = {
   source: Id;
   target: Id;
+  stroke?: LinkStroke;
 };
 
 /**
@@ -106,6 +121,12 @@ export type ZoomState = Document["zoomState"];
 export type DisplayConfig = Document["displayConfig"];
 export type NodeRenderMode = DisplayConfig["nodeRenderMode"];
 
+const linkDefaults: Defaults.Defaults<SerializedLink> = {
+  source: REQUIRED_VALUE,
+  target: REQUIRED_VALUE,
+  stroke: "solid"
+};
+
 export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<SerializedDocument>>({
   version: 1,
   nodes: [
@@ -119,10 +140,7 @@ export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<Serial
     }
   ],
   links: [
-    {
-      source: REQUIRED_VALUE,
-      target: REQUIRED_VALUE
-    }
+    linkDefaults
   ],
   zoomState: {
     centerX: 0,

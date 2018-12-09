@@ -9,6 +9,10 @@
   stroke: $linkColor;
   stroke-width: 2px;
   fill: none;
+
+  .stroke-dashed {
+    stroke-dasharray: 6;
+  }
 }
 
 .GraphViewport-linkLines marker#arrow {

@@ -1,5 +1,7 @@
 import { internals } from "./SpreadsheetImporter";
 
+import * as GraphData from "./GraphData";
+
 it("test empty spreadsheet", () => {
   const result = internals.createSGDFromDataColumns({
     nodeIds: [],
@@ -86,6 +88,44 @@ it("test simple spreadsheet with colors", () => {
     ]
   });
 });
+
+function testLinkStroke(
+  spreadsheetLinkStroke: string | undefined,
+  expectedLinkStroke: GraphData.LinkStroke | undefined
+) {
+  it(`test simple spreadsheet with link stroke: ${spreadsheetLinkStroke}`, () => {
+    const result = internals.createSGDFromDataColumns({
+      nodeIds: [ "a", "b" ],
+      nodeLabels: [ "node a", "node b" ],
+      linkSourceIds: [ "a" ],
+      linkTargetIds: [ "b" ],
+      linkStrokes: spreadsheetLinkStroke ? [ spreadsheetLinkStroke ] : []
+    });
+    expect(result).toMatchObject({
+      nodes: [
+        {
+          id: "a",
+          label: "node a"
+        },
+        {
+          id: "b",
+          label: "node b"
+        }
+      ],
+      links: [
+        {
+          source: "a",
+          target: "b",
+          stroke: expectedLinkStroke
+        }
+      ]
+    });
+  });
+}
+
+testLinkStroke(undefined, undefined);
+testLinkStroke("solid", "solid");
+testLinkStroke("<bad value>", undefined);
 
 function transpose(input: any[][]): any[][] {
   if (input.length === 0) {
