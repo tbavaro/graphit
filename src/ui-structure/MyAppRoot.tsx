@@ -4,27 +4,13 @@ import * as React from "react";
 import MyAppBar from "./MyAppBar";
 import MyLeftDrawer from "./MyLeftDrawer";
 import MyRightDrawer from "./MyRightDrawer";
+import * as UiStructureHelpers from "./UiStructureHelpers";
+
+import "./MyAppRoot.css";
 
 const styles = createStyles({
-  content: {
-    border: "5px dashed gray",
-    height: "100%",
-    position: "absolute",
-    width: "100%"
-  },
-  contentContainerInner: {
-    flex: 1,
-    position: "relative"
-  },
-  contentContainerOuter: {
-    display: "flex",
-    height: "100%",
-    paddingTop: 48,
-    position: "absolute",
-    width: "100%"
-  },
-  root: {
-    display: "flex"
+  contentContainerOuterPadding: {
+    paddingTop: UiStructureHelpers.DENSE_APP_BAR_HEIGHT
   }
 });
 
@@ -44,12 +30,8 @@ class MyAppRoot extends React.Component<Props, State> {
   };
 
   public render() {
-    const content = (
-      <div id="content" className={this.props.classes.content}/>
-    );
-
     return (
-      <div id="MyAppRoot" className={this.props.classes.root}>
+      <div className="MyAppRoot">
         <MyAppBar
           title="graphit"
           onClickEditButton={this.toggleRightDrawer}
@@ -64,10 +46,8 @@ class MyAppRoot extends React.Component<Props, State> {
         <MyRightDrawer
           open={this.state.rightDrawerOpen}
         />
-        <div className={this.props.classes.contentContainerOuter}>
-          <div className={this.props.classes.contentContainerInner}>
-            {content}
-          </div>
+        <div className={"MyAppRoot-contentContainerOuter " + this.props.classes.contentContainerOuterPadding}>
+          <div className="MyAppRoot-contentContainerInner" children={this.props.children}/>
         </div>
       </div>
     );

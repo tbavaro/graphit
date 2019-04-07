@@ -1,0 +1,15 @@
+.MyAppRoot {
+  display: flex;
+}
+
+.MyAppRoot-contentContainerInner {
+  flex: 1;
+  position: relative;
+}
+
+.MyAppRoot-contentContainerOuter {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}

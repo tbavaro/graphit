@@ -5,16 +5,11 @@ import {
   ListItem,
   ListItemText
 } from "@material-ui/core";
-import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
 import * as React from "react";
 
-const styles = createStyles({
-  list: {
-    width: 250
-  }
-});
+import "./MyLeftDrawer.css";
 
-export interface Props extends WithStyles<typeof styles> {
+export interface Props {
   isSignedIn: boolean;
   onClose: () => void;
   onSignIn: () => void;
@@ -35,7 +30,7 @@ class MyLeftDrawer extends React.Component<Props, {}> {
 
     return (
       <Drawer open={this.props.open} onClose={this.props.onClose}>
-        <div className={this.props.classes.list}>
+        <div className="MyLeftDrawer-list">
           <List disablePadding={true}>
             {
               this.props.isSignedIn
@@ -65,4 +60,4 @@ class MyLeftDrawer extends React.Component<Props, {}> {
   }
 }
 
-export default withStyles(styles)(MyLeftDrawer);
+export default MyLeftDrawer;

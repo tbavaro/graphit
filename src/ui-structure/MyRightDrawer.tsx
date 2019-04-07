@@ -4,22 +4,19 @@ import {
   ListItem,
   ListItemText
 } from "@material-ui/core";
-import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core/styles";
+import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
 import * as React from "react";
 
-const stylesFunc = (theme: Theme) => ({
-  list: {
-    width: 250
-  },
+import "./MyRightDrawer.css";
+import * as UiStructureHelpers from "./UiStructureHelpers";
+
+const styles = createStyles({
   toolbar: {
-    // backgroundColor: "red",
-    height: 48  // TODO: can I get the "dense" toolbar height from `theme`?
+    height: UiStructureHelpers.DENSE_APP_BAR_HEIGHT
   }
 });
 
-const styles = createStyles(stylesFunc);
-
-export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
+export interface Props extends WithStyles<typeof styles> {
   open: boolean;
 }
 
@@ -38,7 +35,7 @@ class MyRightDrawer extends React.Component<Props, {}> {
     return (
       <Drawer variant="persistent" open={this.props.open} anchor="right">
         <div className={this.props.classes.toolbar}/>
-        <div className={this.props.classes.list}>
+        <div className="MyRightDrawer-list">
           <List>
             {menuOptions.map((text, index) => (
               <ListItem button={true} key={text}>

@@ -1,0 +1,6 @@
+.App-content {
+  border: 5px dashed gray;
+  height: 100%;
+  position: absolute;
+  width: 100%;
+}
