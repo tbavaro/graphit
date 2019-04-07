@@ -1,12 +1,15 @@
+import CssBaseline from "@material-ui/core/CssBaseline";
 import * as React from "react";
-import "./App.css";
 
-import MyAppBase from "./ui-structure/MyAppBase";
+import MyAppRoot from "./ui-structure/MyAppRoot";
 
 class App extends React.Component {
   public render() {
     return (
-      <MyAppBase/>
+      <React.Fragment>
+        <CssBaseline/>
+        <MyAppRoot/>
+      </React.Fragment>
     );
   }
 }
