@@ -2,9 +2,9 @@ import { pojosToTabularData, tabularDataToPOJOs } from "./TabularDataUtils";
 
 function testTabularDataToPOJOs<T>(
   input: {
-    headers: string[], data: Array<T | undefined>[]
+    headers: string[], data: Array<Array<T | undefined>>
   },
-  expected: { [key: string]: T }[],
+  expected: Array<{ [key: string]: T }>,
   name?: string
 ) {
   name = ("tabularDataToPOJOs: " + (name || JSON.stringify(input)));
@@ -154,10 +154,10 @@ testTabularDataToPOJOs<any>(
 ////////////////////////////////////
 
 function testPOJOsToTabularData<T>(
-  input: { [key: string]: T }[],
+  input: Array<{ [key: string]: T }>,
   expected: {
     headers: string[],
-    rows: Array<T | undefined>[]
+    rows: Array<Array<T | undefined>>
   },
   name?: string
 ) {

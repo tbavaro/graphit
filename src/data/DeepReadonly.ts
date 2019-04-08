@@ -1,7 +1,7 @@
 
 export type DeepReadonly<T> = (
-  T extends (infer U)[]
-    ? Readonly<U>[]
+  T extends Array<infer U>
+    ? Array<Readonly<U>>
     : T extends object
       ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
       : Readonly<T>

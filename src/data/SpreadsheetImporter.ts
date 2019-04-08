@@ -17,7 +17,7 @@ const LINK_STROKE_KEY = "stroke";
 
 const LOOKS_LIKE_HTML_REGEX = /<\s*\/[^>]*>|<[^>]*\/\s*>/;
 
-function removeUndefineds<T>(values: (T | undefined)[]): T[] {
+function removeUndefineds<T>(values: Array<T | undefined>): T[] {
   return values.filter((v) => v !== undefined) as T[];
 }
 
@@ -47,7 +47,7 @@ export const internals = {
         return undefined;
       }
 
-      var result: GraphData.SerializedNode = {
+      const result: GraphData.SerializedNode = {
         id: id,
         label: nthIfDefinedElseDefault(attrs.nodeLabels, index, id)
       };
@@ -65,7 +65,7 @@ export const internals = {
         return undefined;
       }
 
-      var result: GraphData.SerializedLink = {
+      const result: GraphData.SerializedLink = {
         source: sourceId,
         target: targetId,
         stroke: GraphData.DEFAULT_LINK_STROKE
@@ -96,17 +96,17 @@ export const internals = {
     nodesData: any[][],
     linksData: any[][]
   }) {
-    var [nodeIds, nodeLabels, nodeColors] = this.extractNamedColumnsToStringArrays(
+    const [nodeIds, nodeLabels, nodeColors] = this.extractNamedColumnsToStringArrays(
       attrs.nodesData, [
         NODE_ID_KEY, NODE_LABEL_KEY, NODE_COLOR_KEY
       ]
     );
-    var [linkSourceIds, linkTargetIds, linkStrokes] = this.extractNamedColumnsToStringArrays(
+    const [linkSourceIds, linkTargetIds, linkStrokes] = this.extractNamedColumnsToStringArrays(
       attrs.linksData, [
         LINK_SOURCE_ID_KEY, LINK_TARGET_ID_KEY, LINK_STROKE_KEY
       ]
     );
-    var result = this.createSGDFromDataColumns({
+    const result = this.createSGDFromDataColumns({
       nodeIds: assertDefined(nodeIds, "nodeIds"),
       nodeLabels: assertDefined(nodeLabels, "nodeLabels"),
       nodeColors: nodeColors,
@@ -118,15 +118,15 @@ export const internals = {
   },
 
   // data should be loaded with COLUMNS as the major dimension
-  extractNamedColumnsToStringArrays(data: any[][], columnNames: string[]): (string[] | undefined)[] {
-    var columnNamesToIndex = new Map<String, number>();
+  extractNamedColumnsToStringArrays(data: any[][], columnNames: string[]): Array<string[] | undefined> {
+    const columnNamesToIndex = new Map<string, number>();
     columnNames.forEach((columnName, index) => {
       if (columnNamesToIndex.has(columnName)) {
         throw new Error("duplicate column name: " + columnName);
       }
       columnNamesToIndex.set(columnName, index);
     });
-    var columnIndexes = columnNames.map(() => -1);
+    const columnIndexes = columnNames.map(() => -1);
     data.forEach((columnData, sourceIndex) => {
       if (columnData.length > 0) {
         const columnName = extractValueAsString(columnData[0]);
@@ -162,13 +162,13 @@ function extractValuesAsStringSkipFirst(values: any[]): string[] {
   if (values.length < 2) {
     return [];
   }
-  var result = new Array(values.length - 1);
-  for (var i = 1; i < values.length; ++i) {
+  let result = new Array(values.length - 1);
+  for (let i = 1; i < values.length; ++i) {
     result[i - 1] = extractValueAsString(values[i]);
   }
 
   // trim any extra off the bottom
-  var j = result.length;
+  let j = result.length;
   while (j > 0 && (result[j - 1] === undefined || result[j - 1] === "")) {
     --j;
   }
@@ -197,15 +197,15 @@ export function loadDocumentFromSheet(sheetId: string): PromiseLike<GraphData.Se
           throw myError("incorrect response size");
         }
 
-        var sheetValues: any[][] = data.result.valueRanges.map((valueRange) => valueRange.values || []);
+        const sheetValues: any[][] = data.result.valueRanges.map((valueRange) => valueRange.values || []);
 
-        var sgd = internals.createSGDFromSheetData({
+        const sgd = internals.createSGDFromSheetData({
           nodesData: sheetValues[0],
           linksData: sheetValues[1]
         });
 
         // hack to use html rendering if it looks like the data has html
-        var usesHtml = ((sgd.nodes || []).map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
+        const usesHtml = ((sgd.nodes || []).map((node) => node.label).find(internals.looksLikeHtml) !== undefined);
         if (usesHtml) {
           sgd.displayConfig = sgd.displayConfig || {};
           sgd.displayConfig.nodeRenderMode = "raw_html";

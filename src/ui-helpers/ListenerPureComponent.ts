@@ -8,18 +8,18 @@ export interface ListenerBinding<Props> {
 }
 
 export abstract class ListenerPureComponent<Props, State> extends React.PureComponent<Props, State> {
-  protected abstract readonly bindings: ListenerBinding<Props>[];
-  private _boundCallbacks: (() => void)[] = [];
+  protected abstract readonly bindings: Array<ListenerBinding<Props>>;
+  private _boundCallbacks: Array<() => void> = [];
 
-  componentWillMount() {
+  public componentWillMount() {
     this._updateSubscriptions(null, this.props);
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this._updateSubscriptions(this.props, null);
   }
 
-  componentWillReceiveProps(newProps: Props) {
+  public componentWillReceiveProps(newProps: Props) {
     this._updateSubscriptions(this.props, newProps);
   }
 

@@ -20,11 +20,11 @@ interface SVGLinesComponentProps {
 }
 
 class SVGLinesComponent extends React.PureComponent<SVGLinesComponentProps, {}> {
-  linkRenderer = new LinkRenderers.MiddleArrowDirectedLinkRenderer();
+  private linkRenderer = new LinkRenderers.MiddleArrowDirectedLinkRenderer();
 
   private _gRef?: SVGGElement;
 
-  render() {
+  public render() {
     return (
       <svg
         key="linkLines"
@@ -69,7 +69,7 @@ type State = {
 };
 
 export class Component extends React.PureComponent<Props, State> {
-  state: State = {
+  public state: State = {
     selectedNodeIndexes: new Set()
   };
 
@@ -80,7 +80,7 @@ export class Component extends React.PureComponent<Props, State> {
 
   private nodeActionManager: NodeActionManager = {
     onNodeMoved: (index: number, x: number, y: number, stopped: boolean) => {
-      var node = this.props.nodes[index];
+      const node = this.props.nodes[index];
       node.x = x;
       node.y = y;
       if (stopped && !node.isLocked) {
@@ -94,7 +94,7 @@ export class Component extends React.PureComponent<Props, State> {
     },
 
     toggleIsLocked: (index: number) => {
-      var node = this.props.nodes[index];
+      const node = this.props.nodes[index];
       node.isLocked = !node.isLocked;
       node.fx = (node.isLocked ? node.x : undefined);
       node.fy = (node.isLocked ? node.y : undefined);
@@ -212,7 +212,7 @@ export class Component extends React.PureComponent<Props, State> {
   }
 
   private onDragStart = (index: number, metaKey: boolean) => {
-    var newSelectedNodeIndexes: Set<number> | undefined;
+    let newSelectedNodeIndexes: Set<number> | undefined;
     if (!metaKey) {
       // if the node is already selected, don't do anything else
       if (!this.state.selectedNodeIndexes.has(index)) {

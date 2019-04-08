@@ -1,6 +1,6 @@
-import * as React from 'react';
+import * as React from "react";
 import mdc from "./mdchack";
-import './TemporaryNavDrawer.css';
+import "./TemporaryNavDrawer.css";
 
 export interface Props {
   isOpen: boolean;
@@ -12,7 +12,7 @@ export class TemporaryNavDrawer extends React.Component<Props, object> {
   private ref?: HTMLDivElement;
   private mdcRef?: any;
 
-  componentDidMount() {
+  public componentDidMount() {
     if (!this.ref) {
       throw new Error("ref not set");
     }
@@ -26,13 +26,13 @@ export class TemporaryNavDrawer extends React.Component<Props, object> {
     });
   }
 
-  componentWillReceiveProps(newProps: Props) {
+  public componentWillReceiveProps(newProps: Props) {
     if (this.mdcRef) {
       this.mdcRef.open = newProps.isOpen;
     }
   }
 
-  render() {
+  public render() {
     return (
       <aside className="mdc-drawer mdc-drawer--temporary mdc-typography" ref={this.setRef}>
         <nav className="mdc-drawer__drawer">

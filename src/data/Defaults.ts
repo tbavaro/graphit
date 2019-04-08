@@ -10,8 +10,8 @@ import { DeepReadonly } from "./DeepReadonly";
  */
 
 export type DeepRequired<T> = (
-  T extends (infer U)[]
-    ? Required<U>[]  // TODO should be DeepRequired
+  T extends Array<infer U>
+    ? Array<Required<U>>  // TODO should be DeepRequired
     : T extends object
         ? { [P in keyof T]-?: DeepRequired<Exclude<T[P], undefined>> }
         : T
@@ -23,7 +23,7 @@ export type DeepRequired<T> = (
 // TODO i don't think typescript supports this yet, but if we could make it *only* require
 // the optional fields from T that would be ideal
 export type Defaults<T> = (
-  T extends (infer U)[]
+  T extends Array<infer U>
     ? [Required<U>]
     : T extends object
         ? { [P in keyof T]-?: Defaults<Exclude<T[P], undefined>> }
@@ -66,6 +66,6 @@ export function applyDefaults<T extends object>(
   return (object as DeepRequired<T>);
 }
 
-export function createFromDefaults<T extends object>(defaults: DeepRequired<T>): T {
-  return applyDefaults({} as any, defaults);
+export function createFromDefaults<T extends object>(defaults: Defaults<T> | DeepReadonly<Defaults<T>>): T {
+  return applyDefaults({} as any, defaults as any);
 }

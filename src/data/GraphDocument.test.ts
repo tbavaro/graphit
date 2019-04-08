@@ -10,7 +10,7 @@ import {
 const mergeValueSimple = internals.mergeValueSimple;
 
 it("test empty", () => {
-  var document = GraphDocument.empty();
+  const document = GraphDocument.empty();
   expect(document.name).toEqual("Untitled");
   expect(document.nodes.length).toEqual(0);
   expect(document.links.length).toEqual(0);
@@ -19,7 +19,7 @@ it("test empty", () => {
 });
 
 it("test load basic data only", () => {
-  var documentJSON = JSON.stringify({
+  const documentJSON = JSON.stringify({
     nodes: [
       {
         id: "a",
@@ -42,7 +42,7 @@ it("test load basic data only", () => {
     ]
   });
 
-  var document = GraphDocument.load(documentJSON);
+  const document = GraphDocument.load(documentJSON);
 
   // nodes
   expect(document.nodes.length).toEqual(3);
@@ -60,12 +60,12 @@ it("test load basic data only", () => {
 });
 
 it("test load name", () => {
-  var document = GraphDocument.load("{}", "my name");
+  const document = GraphDocument.load("{}", "my name");
   expect(document.name).toEqual("my name");
 });
 
 it("test load full data", () => {
-  var documentJSON = JSON.stringify({
+  const documentJSON = JSON.stringify({
     nodes: [],
     links: [],
     layoutState: {
@@ -73,14 +73,14 @@ it("test load full data", () => {
     }
   });
 
-  var document = GraphDocument.load(documentJSON);
+  const document = GraphDocument.load(documentJSON);
 
   expect(document.name).toEqual("Untitled");
   expect(document.layoutState.layoutType).toEqual(DEFAULT_LAYOUT_TYPE);
 });
 
 it("test clone", () => {
-  var documentJSON = JSON.stringify({
+  const documentJSON = JSON.stringify({
     nodes: [
       {
         id: "a",
@@ -103,8 +103,8 @@ it("test clone", () => {
     ]
   });
 
-  var document = GraphDocument.load(documentJSON, "named doc");
-  var clone = document.clone();
+  const document = GraphDocument.load(documentJSON, "named doc");
+  const clone = document.clone();
 
   expect(document.name).toEqual(clone.name);
   expect(document.nodes.length).toEqual(clone.nodes.length);

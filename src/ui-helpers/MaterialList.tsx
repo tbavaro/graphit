@@ -14,7 +14,7 @@ export interface Props {
 }
 
 export class Component extends React.PureComponent<Props, object> {
-  render() {
+  public render() {
     return (
       <ul className="MaterialList mdc-list">
         {this.props.items.map(this.renderItem)}
@@ -23,7 +23,7 @@ export class Component extends React.PureComponent<Props, object> {
   }
 
   private renderItem = (itemProps: ItemProps) => {
-    var result = (
+    let result = (
       <li
         className={"mdc-list-item" + (itemProps.disabled ? " disabled" : "")}
         key={itemProps.key}

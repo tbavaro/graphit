@@ -46,31 +46,31 @@ export class Datastore extends BasicListenable<"status_changed"> {
     });
   }
 
-  status() {
+  public status() {
     return this._status;
   }
 
-  signIn() {
+  public signIn() {
     if (this._status === DatastoreStatus.SignedOut) {
       GoogleApi.getAuthInstance().signIn();
     }
   }
 
-  signOut() {
+  public signOut() {
     if (this.isSignedIn()) {
       GoogleApi.getAuthInstance().signOut();
     }
   }
 
-  currentUserName(): Maybe<string> {
+  public currentUserName(): Maybe<string> {
     return this.maybeGetProfileData(p => p.getName());
   }
 
-  currentUserEmail(): Maybe<string> {
+  public currentUserEmail(): Maybe<string> {
     return this.maybeGetProfileData(p => p.getEmail());
   }
 
-  currentUserImageUrl(): Maybe<string> {
+  public currentUserImageUrl(): Maybe<string> {
     return this.maybeGetProfileData(p => p.getImageUrl());
   }
 
@@ -99,14 +99,14 @@ export class Datastore extends BasicListenable<"status_changed"> {
   }
 
   private loadFileContent(fileId: string): PromiseLike<string> {
-    var url = this.addQueryParams(
+    const url = this.addQueryParams(
       "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(fileId),
       {
         "alt": "media",
         "key": GoogleApi.config.API_KEY
       }
     );
-    var headers: Headers = {};
+    const headers: Headers = {};
     if (this._accessToken) {
       headers.Authorization = "Bearer " + this._accessToken;
     }
@@ -118,14 +118,14 @@ export class Datastore extends BasicListenable<"status_changed"> {
     return metadata.capabilities ? (metadata.capabilities.canEdit || false) : false;
   }
 
-  canSave(fileId: string): PromiseLike<boolean> {
+  public canSave(fileId: string): PromiseLike<boolean> {
     return this.getFileMetadata(fileId).then(
       (metadata) => this.interpretCanSave(metadata),
       () => false
     );
   }
 
-  loadFile(fileId: string): PromiseLike<DatastoreLoadFileResult<string>> {
+  public loadFile(fileId: string): PromiseLike<DatastoreLoadFileResult<string>> {
     return Promise.all([
       this.getFileMetadata(fileId),
       this.loadFileContent(fileId)
@@ -139,19 +139,19 @@ export class Datastore extends BasicListenable<"status_changed"> {
     });
   }
 
-  saveFileAs(name: string, data: string, mimeType: string): PromiseLike<string> {
+  public saveFileAs(name: string, data: string, mimeType: string): PromiseLike<string> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));
     }
 
-    var uri = this.addQueryParams(
+    const uri = this.addQueryParams(
       "https://www.googleapis.com/upload/drive/v3/files",
       {
         "uploadType": "multipart",
         "key": GoogleApi.config.API_KEY
       }
     );
-    var metadata: GoogleApi.DriveFile = {
+    const metadata: GoogleApi.DriveFile = {
       name: name,
       mimeType: mimeType
     };
@@ -177,7 +177,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
       if (typeof result !== "string") {
         throw new Error("unexpected save result");
       }
-      var resultData = JSON.parse(result);
+      const resultData = JSON.parse(result);
       if (resultData.id === undefined) {
         throw new Error("didn't receive id");
       }
@@ -185,8 +185,8 @@ export class Datastore extends BasicListenable<"status_changed"> {
     });
   }
 
-  updateFile(fileId: string, data: string): PromiseLike<void> {
-    var uri = this.addQueryParams(
+  public updateFile(fileId: string, data: string): PromiseLike<void> {
+    const uri = this.addQueryParams(
       "https://www.googleapis.com/upload/drive/v3/files/" + encodeURIComponent(fileId),
       {
         "key": GoogleApi.config.API_KEY
@@ -214,7 +214,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
   }
 
   private updateIsSignedIn = (newValue: boolean) => {
-    var newStatus = (newValue ? DatastoreStatus.SignedIn : DatastoreStatus.SignedOut);
+    const newStatus = (newValue ? DatastoreStatus.SignedIn : DatastoreStatus.SignedOut);
     if (this._status !== newStatus) {
       // clear caches and reload access token timer
       this._accessToken = undefined;
@@ -250,8 +250,8 @@ export class Datastore extends BasicListenable<"status_changed"> {
       this._reloadAccessTokenTimeoutId = undefined;
     }
 
-    var secondsToExpire = GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
-    var secondsToWaitBeforeReload = Math.max(1, secondsToExpire - 120);
+    const secondsToExpire = GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().expires_in;
+    const secondsToWaitBeforeReload = Math.max(1, secondsToExpire - 120);
     this._reloadAccessTokenTimeoutId = window.setTimeout(this.doAuthReload, secondsToWaitBeforeReload * 1000);
   }
 

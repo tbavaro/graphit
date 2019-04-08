@@ -26,12 +26,12 @@ function generatePrefix() {
 }
 
 export class Component extends React.PureComponent<Props, State> {
-  state: State = {};
+  public state: State = {};
 
   private readonly myPrefix = generatePrefix();
   private ref?: HTMLElement;
 
-  componentWillMount() {
+  public componentWillMount() {
     if (super.componentWillMount) {
       super.componentWillMount();
     }
@@ -40,7 +40,7 @@ export class Component extends React.PureComponent<Props, State> {
     this.measureWindow();
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     if (super.componentWillUnmount) {
       super.componentWillUnmount();
     }
@@ -48,7 +48,7 @@ export class Component extends React.PureComponent<Props, State> {
     window.removeEventListener("resize", this.measureWindow);
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
@@ -63,7 +63,7 @@ export class Component extends React.PureComponent<Props, State> {
     dialog.show();
   }
 
-  render() {
+  public render() {
     const titleId = `${this.myPrefix}-label`;
     const bodyId = `${this.myPrefix}-body`;
     return (

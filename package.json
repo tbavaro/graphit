@@ -5,24 +5,37 @@
   "dependencies": {
     "@material-ui/core": "^3.9.3",
     "@material-ui/icons": "^3.0.2",
+    "classnames": "^2.2.6",
+    "d3": "^4.13.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-scripts-ts": "3.1.0",
+    "request-promise-native": "^1.0.7",
+    "sanitize-html": "^1.20.0",
     "tsvalidators": "github:tbavaro/tsvalidators#dist"
   },
   "scripts": {
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts"
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.7",
+    "@types/d3": "^4.13.2",
+    "@types/gapi": "0.0.35",
+    "@types/gapi.auth2": "0.0.47",
+    "@types/gapi.client.drive": "^3.0.3",
+    "@types/gapi.client.sheets": "^4.0.1",
+    "@types/google.picker": "0.0.31",
     "@types/jest": "^24.0.11",
     "@types/node": "^11.13.0",
     "@types/react": "^16.8.12",
     "@types/react-dom": "^16.8.3",
+    "@types/request-promise-native": "^1.0.15",
+    "@types/sanitize-html": "^1.18.3",
     "autogents": "github:tbavaro/autogents#dist",
-    "tsdevtools": "github:tbavaro/tsdevtools#dist",
     "typescript": "^3.4.2"
   }
 }

@@ -132,7 +132,7 @@ function transpose(input: any[][]): any[][] {
   if (input.length === 0) {
     return [];
   }
-  var output = input[0].map((_, column) => input.map((__, row) => {
+  const output = input[0].map((_, column) => input.map((__, row) => {
     if (input.length <= row || input[row].length <= column) {
       return undefined;
     } else {
@@ -193,7 +193,7 @@ it("test transpose helper", () => {
 });
 
 it("test extractNamedColumnsToStringArrays", () => {
-  var wrapped = (data, columnNames) => {
+  const wrapped = (data: any[], columnNames: string[]) => {
     return internals.extractNamedColumnsToStringArrays(transpose(data), columnNames);
   };
 

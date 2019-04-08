@@ -1,7 +1,7 @@
 import { sanitizeForDisplay } from "./HtmlSanitization";
 
 it("test sanitizeForDisplay", () => {
-  const test = (input, output) => {
+  const test = (input: string, output: string) => {
     expect(sanitizeForDisplay(input)).toBe(output);
   };
 

@@ -9,8 +9,8 @@ export interface Listenable<EventType> {
 export class BasicListenable<EventType> implements Listenable<EventType> {
   private _listeners: Map<EventType, Set<ListenerCallback<EventType>>> = new Map();
 
-  addListener(eventType: EventType, func: ListenerCallback<EventType>) {
-    var listenersForEventType = this._listeners.get(eventType);
+  public addListener(eventType: EventType, func: ListenerCallback<EventType>) {
+    let listenersForEventType = this._listeners.get(eventType);
     if (listenersForEventType === undefined) {
       listenersForEventType = new Set();
       this._listeners.set(eventType, listenersForEventType);
@@ -18,8 +18,8 @@ export class BasicListenable<EventType> implements Listenable<EventType> {
     listenersForEventType.add(func);
   }
 
-  removeListener(eventType: EventType, func: ListenerCallback<EventType>) {
-    var listenersForEventType = this._listeners.get(eventType);
+  public removeListener(eventType: EventType, func: ListenerCallback<EventType>) {
+    const listenersForEventType = this._listeners.get(eventType);
     if (listenersForEventType !== undefined) {
       return listenersForEventType.delete(func);
     } else {
@@ -27,8 +27,8 @@ export class BasicListenable<EventType> implements Listenable<EventType> {
     }
   }
 
-  triggerListeners(eventType: EventType) {
-    var listenersForEventType = this._listeners.get(eventType);
+  public triggerListeners(eventType: EventType) {
+    const listenersForEventType = this._listeners.get(eventType);
     if (listenersForEventType !== undefined) {
       listenersForEventType.forEach((func) => func(eventType));
     }
@@ -36,7 +36,7 @@ export class BasicListenable<EventType> implements Listenable<EventType> {
 }
 
 export class SimpleListenable extends BasicListenable<"changed"> {
-  triggerListeners() {
+  public triggerListeners() {
     super.triggerListeners("changed");
   }
 }

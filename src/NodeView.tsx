@@ -1,11 +1,11 @@
 import * as classNames from "classnames";
 import * as D3 from "d3";
-import * as React from 'react';
+import * as React from "react";
 
-import './NodeView.css';
+import "./NodeView.css";
 
-import { Document } from './data/GraphData';
-import { sanitizeForDisplay } from './util/HtmlSanitization';
+import { Document } from "./data/GraphData";
+import { sanitizeForDisplay } from "./util/HtmlSanitization";
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;
@@ -34,9 +34,9 @@ type Props = SharedProps & {
 };
 
 export class InnerComponent extends React.Component<InnerProps, {}> {
-  render() {
-    var children: string | undefined;
-    var innerHTML: { __html: string } | undefined;
+  public render() {
+    let children: string | undefined;
+    let innerHTML: { __html: string } | undefined;
     switch (this.props.renderMode) {
       case "raw_html":
         innerHTML = { __html: sanitizeForDisplay(this.props.label) };
@@ -47,7 +47,7 @@ export class InnerComponent extends React.Component<InnerProps, {}> {
         children = this.props.label;
         break;
     }
-    var contentStyle = {
+    const contentStyle = {
       backgroundColor: this.props.isSelected ? undefined : this.props.color,
       ...this.props.extraStyle
     };
@@ -70,13 +70,13 @@ export class InnerComponent extends React.Component<InnerProps, {}> {
 }
 
 export class Component extends React.PureComponent<Props, {}> {
-  ref?: HTMLDivElement;
+  public ref?: HTMLDivElement;
 
   // not using State because we explicitly don't want to re-render
   private x: number = this.props.initialX;
   private y: number = this.props.initialY;
 
-  componentDidMount() {
+  public componentDidMount() {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
@@ -85,7 +85,7 @@ export class Component extends React.PureComponent<Props, {}> {
       throw new Error("ref not set");
     }
 
-    var sel = D3.select(this.ref);
+    const sel = D3.select(this.ref);
     sel.datum(this.props.id);
 
     if (this.props.dragBehavior) {
@@ -93,7 +93,7 @@ export class Component extends React.PureComponent<Props, {}> {
     }
   }
 
-  componentWillReceiveProps(newProps: Readonly<Props>, nextContext: any) {
+  public componentWillReceiveProps(newProps: Readonly<Props>, nextContext: any) {
     // clear old drag behavior if it's changing
     if (this.ref && this.props.dragBehavior !== newProps.dragBehavior) {
       D3.select(this.ref).on(".drag", null);
@@ -108,8 +108,8 @@ export class Component extends React.PureComponent<Props, {}> {
     }
   }
 
-  render() {
-    var style = { transform: "" };
+  public render() {
+    const style = { transform: "" };
     this.updateStyleForPosition(style);
     const innerComponent = React.createElement(InnerComponent, {
       ...this.props as InnerProps,

@@ -16,7 +16,7 @@ interface Props {
 export class Component extends React.PureComponent<Props, object> {
   private ref?: HTMLDivElement;
 
-  componentDidMount() {
+  public componentDidMount() {
     if (!this.ref) {
       throw new Error("ref not set");
     }
@@ -25,7 +25,7 @@ export class Component extends React.PureComponent<Props, object> {
     this.ref.addEventListener("MDCTopAppBar:nav", this.onClickNavButton);
   }
 
-  render() {
+  public render() {
     return (
       <div className="AppBar mdc-top-app-bar" ref={this.setRef}>
         <div className="mdc-top-app-bar__row">

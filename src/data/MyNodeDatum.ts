@@ -1,4 +1,4 @@
-import * as d3 from 'd3-force';
+import * as d3 from "d3-force";
 import * as GraphData from "./GraphData";
 
 export interface MyNodeDatum extends d3.SimulationNodeDatum {

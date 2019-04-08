@@ -1,8 +1,8 @@
 import * as Defaults from "./Defaults";
 
-type OptionalNumber = {
+interface OptionalNumber {
   aNumber?: number
-};
+}
 
 it("works with simple optional field", () => {
   expect(
@@ -20,10 +20,10 @@ it("works with simple optional field", () => {
   ).toEqual({ aNumber: 1 });
 });
 
-type OptionalNumberAndRequiredString = {
+interface OptionalNumberAndRequiredString {
   aNumber?: number,
   aString: string
-};
+}
 
 it("works with mixed optional and required fields", () => {
   expect(
@@ -41,9 +41,9 @@ it("works with mixed optional and required fields", () => {
   ).toEqual({ aNumber: 1, aString: "foo" });
 });
 
-type ArrayOfOptionalNumbers = {
+interface ArrayOfOptionalNumbers {
   items?: OptionalNumber[],
-};
+}
 
 it("provides empty array for unspecified arrays", () => {
   expect(
@@ -86,9 +86,9 @@ it("fills in defaults for array entries", () => {
   ).toEqual({ items: [ { aNumber: 100 }, { aNumber: 2 } ] });
 });
 
-type NullableValue = {
+interface NullableValue {
   value?: number | null;
-};
+}
 
 it("null works as a default value", () => {
   expect(

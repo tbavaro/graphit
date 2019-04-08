@@ -1,10 +1,10 @@
-export type FileResult = {
+export interface FileResult {
   name: string;
   data: string;
 };
 
 export function openLocalFile(callback: (result: FileResult) => void) {
-  var element = document.createElement("input");
+  const element = document.createElement("input");
   element.type = "file";
   element.accept = "application/json";
   element.style.display = "none";
@@ -17,7 +17,7 @@ export function openLocalFile(callback: (result: FileResult) => void) {
       reader.onload = () => {
         callback({
           name: file.name,
-          data: reader.result
+          data: reader.result as string
         });
       };
       reader.readAsText(file, "utf-8");

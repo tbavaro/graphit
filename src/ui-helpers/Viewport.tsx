@@ -1,6 +1,6 @@
 import * as D3 from "d3";
-import * as React from 'react';
-import './Viewport.css';
+import * as React from "react";
+import "./Viewport.css";
 
 export interface ZoomState {
   centerX: number;
@@ -30,13 +30,13 @@ interface Props<DragSubject> {
 }
 
 export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, object> {
-  outerRef?: HTMLDivElement;
-  innerRef?: HTMLDivElement;
-  zoom = D3.zoom();
+  public outerRef?: HTMLDivElement;
+  public innerRef?: HTMLDivElement;
+  public zoom = D3.zoom();
 
-  zoomState: ZoomState = this.props.initialZoomState || defaultZoomState();
+  public zoomState: ZoomState = this.props.initialZoomState || defaultZoomState();
 
-  componentDidMount() {
+  public componentDidMount() {
     if (!this.innerRef || !this.outerRef) {
       throw new Error("refs not set");
     }
@@ -49,17 +49,17 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
     this.configureDrag();
   }
 
-  componentDidUpdate(prevProps: Readonly<Props<DragSubject>>) {
+  public componentDidUpdate(prevProps: Readonly<Props<DragSubject>>) {
     this.configureDrag();
   }
 
-  componentWillReceiveProps(newProps: Props<DragSubject>) {
+  public componentWillReceiveProps(newProps: Props<DragSubject>) {
     if (this.props.initialZoomState !== newProps.initialZoomState) {
       this.setZoomState(newProps.initialZoomState || defaultZoomState());
     }
   }
 
-  render() {
+  public render() {
     return (
       <div className="Viewport" ref={this.setOuterRef}>
         {this.props.manuallyTransformedChildren}
@@ -83,14 +83,14 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
       throw new Error("refs not set");
     }
 
-    var ev = D3.event as D3.D3ZoomEvent<any, any>;
-    var t = ev.transform;
+    const ev = D3.event as D3.D3ZoomEvent<any, any>;
+    const t = ev.transform;
 
     this.zoomState.centerX = (this.outerRef.clientWidth / 2 - t.x) / t.k;
     this.zoomState.centerY = (this.outerRef.clientHeight / 2 - t.y) / t.k;
     this.zoomState.scale = t.k;
 
-    var transformString = "translate(" + t.x + "px, " + t.y + "px) scale(" + t.k + ")";
+    const transformString = "translate(" + t.x + "px, " + t.y + "px) scale(" + t.k + ")";
 
     if (this.innerRef) {
       this.innerRef.style.transform = transformString;
@@ -110,7 +110,7 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
   }
 
   private configureDrag() {
-    var drag = this.props.dragBehavior;
+    const drag = this.props.dragBehavior;
     if (drag) {
       drag.container(this.assertInnerRef());
       drag.on("start", this.onDragStart);
@@ -120,15 +120,15 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
   }
 
   private onDragEvent = (isEnd: boolean) => {
-    var ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
+    const ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
     if (this.props.onDrag) {
-      var scale = this.zoomState.scale;
+      const scale = this.zoomState.scale;
       this.props.onDrag(ev.subject, ev.dx / scale, ev.dy / scale, isEnd);
     }
   }
 
   private onDragStart = () => {
-    var ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
+    const ev = D3.event as D3.D3DragEvent<any, any, DragSubject>;
     if (this.props.onDragStart) {
       this.props.onDragStart(ev.subject, ev.sourceEvent.metaKey);
     }
@@ -150,8 +150,8 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
 
     this.zoomState = zoomState;
 
-    var sel = D3.select(this.outerRef);
-    var scale = zoomState.scale;
+    const sel = D3.select(this.outerRef);
+    const scale = zoomState.scale;
     this.zoom.translateTo(sel, zoomState.centerX, zoomState.centerY);
     this.zoom.scaleTo(sel, scale);
   }

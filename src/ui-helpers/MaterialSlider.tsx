@@ -15,12 +15,12 @@ export interface Props {
 export class Component extends React.PureComponent<Props, object> {
   private ref?: HTMLDivElement;
 
-  componentDidMount() {
+  public componentDidMount() {
     if (!this.ref) {
       throw new Error("ref not set");
     }
 
-    var mdcRef = mdc.slider.MDCSlider.attachTo(this.ref);
+    const mdcRef = mdc.slider.MDCSlider.attachTo(this.ref);
     mdcRef.listen("MDCSlider:input", () => {
       if (this.props.onChangeValue) {
         this.props.onChangeValue(this.adjustValue(mdcRef.value, true), /*isDone=*/false);
@@ -33,7 +33,7 @@ export class Component extends React.PureComponent<Props, object> {
     });
   }
 
-  render() {
+  public render() {
     return (
       <div
         className={classNames([

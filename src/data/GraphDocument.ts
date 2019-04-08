@@ -1,5 +1,5 @@
 import * as GraphData from "./GraphData";
-import { MyLinkDatum, MyNodeDatum } from './MyNodeDatum';
+import { MyLinkDatum, MyNodeDatum } from "./MyNodeDatum";
 
 // TODO move merge logic out of here, now that the data is separated
 export const internals = {
@@ -9,7 +9,7 @@ export const internals = {
     } else if (isArrayOrPrimitive(originalValue) || isArrayOrPrimitive(newValue)) {
       return cloneViaSerialization(newValue);
     } else {
-      var result = cloneViaSerialization(originalValue);
+      const result = cloneViaSerialization(originalValue);
       Object.keys(newValue).forEach((key) => {
         result[key] = internals.mergeValueSimple(originalValue[key], newValue[key]);
       });
@@ -26,13 +26,13 @@ export const internals = {
     newValues: T[],
     generateKey: (value: T) => string
   ): T[] => {
-    var results: T[] = [];
-    var originalValuesMap = buildKeyedMap(originalValues, generateKey);
+    const results: T[] = [];
+    const originalValuesMap = buildKeyedMap(originalValues, generateKey);
 
     newValues.forEach((newValue) => {
       const key = generateKey(newValue);
       if (originalValuesMap.has(key)) {
-        var originalValue = originalValuesMap.get(key) as T;
+        const originalValue = originalValuesMap.get(key) as T;
         results.push(internals.mergeValueSimple(originalValue, newValue));
       } else {
         results.push(cloneViaSerialization(newValue));
@@ -81,9 +81,9 @@ function assertDefined<T>(value: T | undefined): T {
 }
 
 export class GraphDocument {
-  name: string;
-  readonly nodes: MyNodeDatum[];
-  readonly links: MyLinkDatum[];
+  public name: string;
+  public readonly nodes: MyNodeDatum[];
+  public readonly links: MyLinkDatum[];
   private data: GraphData.Document;
   get layoutState() {
     return this.data.layoutState;
@@ -95,12 +95,12 @@ export class GraphDocument {
     return this.data.displayConfig;
   }
 
-  static empty() {
+  public static empty() {
     return this.load("{}");
   }
 
-  static load(jsonData: string, name?: string) {
-    var data = GraphData.load(JSON.parse(jsonData));
+  public static load(jsonData: string, name?: string) {
+    const data = GraphData.load(JSON.parse(jsonData));
     return new GraphDocument({
       name: name || "Untitled",
       data: data
@@ -158,11 +158,11 @@ export class GraphDocument {
     });
   }
 
-  clone(): GraphDocument {
+  public clone(): GraphDocument {
     return GraphDocument.load(this.save(), this.name);
   }
 
-  merge(serializedOtherDocument: GraphData.SerializedDocument): GraphDocument {
+  public merge(serializedOtherDocument: GraphData.SerializedDocument): GraphDocument {
     const serializedMergedDocument =
       internals.mergeSerializedDocuments(this.saveSGD(), serializedOtherDocument);
     return new GraphDocument({
@@ -176,7 +176,7 @@ export class GraphDocument {
     return this.data;
   }
 
-  save(): string {
+  public save(): string {
     return JSON.stringify(this.saveSGD(), null, 2);
   }
 }
@@ -193,9 +193,9 @@ function isArrayOrPrimitive<T>(object: T): boolean {
 }
 
 function buildKeyedMap<T>(values: T[], generateKey: (value: T) => string): Map<string, T> {
-  var map = new Map<string, T>();
+  const map = new Map<string, T>();
   values.forEach((value) => {
-    var key = generateKey(value);
+    const key = generateKey(value);
     if (map.get(key) !== undefined) {
       throw new Error("duplicate key generated from array: " + key);
     }

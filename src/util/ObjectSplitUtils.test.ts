@@ -46,7 +46,7 @@ it("splitObject: some top level properties", () => {
 
 it("splitObject: default top level property", () => {
   expect(splitObject(
-    {},
+    {} as { "a"?: number },
     [
       "a"
     ],

@@ -1,10 +1,10 @@
-import * as React from 'react';
+import * as React from "react";
 import * as MaterialSlider from "./ui-helpers/MaterialSlider";
 
-import './PropertiesView.css';
+import "./PropertiesView.css";
 
-import { GraphDocument } from './data/GraphDocument';
-import { SimpleListenable } from './data/Listenable';
+import { GraphDocument } from "./data/GraphDocument";
+import { SimpleListenable } from "./data/Listenable";
 import { ValueFormatter, ValueFormatters } from "./ValueFormatters";
 
 export interface Actions {
@@ -26,17 +26,17 @@ interface SliderPropertyState {
 }
 
 class SliderPropertyComponent extends React.PureComponent<SliderPropertyProps, SliderPropertyState> {
-  state = {
+  public state = {
     displayValue: this.props.value
   };
 
-  componentWillReceiveProps(newProps: SliderPropertyProps) {
+  public componentWillReceiveProps(newProps: SliderPropertyProps) {
     this.setState({
       displayValue: newProps.value
     });
   }
 
-  render() {
+  public render() {
     return (
       <div className="PropertiesView-content-property-container">
         <div className="PropertiesView-content-property-labelRow">
@@ -108,7 +108,7 @@ export class Component extends React.PureComponent<Props, object> {
     })
   ];
 
-  render() {
+  public render() {
     if (!this.props.isOpen) {
       return "";
     }
@@ -139,8 +139,8 @@ export class Component extends React.PureComponent<Props, object> {
     exponent?: number,
     formatter?: ValueFormatter<number>
   }) {
-    var onValueChange = (newValue: number) => {
-      attrs.getParentObject()[attrs.fieldName] = newValue;
+    const onValueChange = (newValue: number) => {
+      (attrs.getParentObject() as any)[attrs.fieldName] = newValue;
       this.props.simulationConfigListener.triggerListeners();
     };
     return {

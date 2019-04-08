@@ -33,7 +33,7 @@ class FPSView {
     this.intervalId = window.setInterval(this.update, 1000);
   }
 
-  destroy() {
+  public destroy() {
     if (this.element) {
       if (this.element.parentElement) {
         this.element.parentElement.removeChild(this.element);
@@ -46,14 +46,14 @@ class FPSView {
     }
   }
 
-  onTick() {
+  public onTick() {
     this.ticksSinceUpdate += 1;
   }
 
   private update = () => {
-    var now = new Date().getTime();
-    var diff = now - this.lastUpdateTime;
-    var fps = this.ticksSinceUpdate / (diff / 1000);
+    const now = new Date().getTime();
+    const diff = now - this.lastUpdateTime;
+    const fps = this.ticksSinceUpdate / (diff / 1000);
     if (this.element) {
       this.element.innerText = Math.floor(fps) + "fps";
     }
@@ -85,7 +85,7 @@ function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
 type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
 export class Component extends ListenerPureComponent<Props, {}> {
-  bindings: ListenerBinding<Props>[] = [
+  public bindings: Array<ListenerBinding<Props>> = [
     {
       propertyName: "simulationConfigListener",
       eventType: "changed",
@@ -96,28 +96,28 @@ export class Component extends ListenerPureComponent<Props, {}> {
     }
   ];
 
-  fpsView?: FPSView;
+  public fpsView?: FPSView;
 
-  simulation: MySimulation = D3.forceSimulation<MyNodeDatum, MyLinkDatum>();
-  simulationWrapper = new ListenableSimulationWrapper(this.simulation);
+  public simulation: MySimulation = D3.forceSimulation<MyNodeDatum, MyLinkDatum>();
+  public simulationWrapper = new ListenableSimulationWrapper(this.simulation);
 
   private graphViewportRef: GraphViewport.Component | null = null;
 
-  componentDidMount() {
+  public componentDidMount() {
     if (super.componentDidMount) {
       super.componentDidMount();
     }
     this.fpsView = new FPSView();
   }
 
-  componentWillMount() {
+  public componentWillMount() {
     super.componentWillMount();
     this.initializeSimulation(this.props.document);
     this.simulationWrapper.addListener("tick", this.onSimulationTick);
     updateForces(this.simulation, this.props);
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     super.componentWillUnmount();
     this.simulation.stop();
     if (this.fpsView) {
@@ -126,7 +126,7 @@ export class Component extends ListenerPureComponent<Props, {}> {
     }
   }
 
-  componentWillReceiveProps(newProps: Props) {
+  public componentWillReceiveProps(newProps: Props) {
     super.componentWillReceiveProps(newProps);
     if (this.props.document !== newProps.document) {
       this.initializeSimulation(newProps.document);
@@ -135,7 +135,7 @@ export class Component extends ListenerPureComponent<Props, {}> {
     }
   }
 
-  render() {
+  public render() {
     return (
       <GraphViewport.Component
         ref={this.setGraphViewportRef}

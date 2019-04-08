@@ -31,23 +31,23 @@ export default class GooglePickerHelper {
     configs: PickerConfig[];
     onPicked: (file: FileResult) => void;
   }) {
-    var callback = (data) => {
+    const callback = (data: any) => {
       if (data.action === "picked") {
         if (data.docs.length !== 1) {
           throw new Error("expected just one result, got " + data.docs.length);
         }
-        var docResult = data.docs[0];
+        const docResult = data.docs[0];
         attrs.onPicked({
-          id: docResult.id,
-          name: docResult.name,
           downloadUrl: docResult.url,
-          mimeType: docResult.mimeType
+          id: docResult.id,
+          mimeType: docResult.mimeType,
+          name: docResult.name
         });
       }
     };
 
     GoogleApi.pickerSingleton().then((Picker) => {
-      var builder = new Picker.PickerBuilder()
+      const builder = new Picker.PickerBuilder()
         .setCallback(callback)
         .setOAuthToken(GoogleApi.getAuthInstance().currentUser.get().getAuthResponse().access_token);
 
@@ -65,7 +65,7 @@ export default class GooglePickerHelper {
         }
       });
 
-      var picker = builder.build();
+      const picker = builder.build();
       picker.setVisible(true);
     });
   }
@@ -79,21 +79,21 @@ export default class GooglePickerHelper {
     type: "spreadsheets"
   };
 
-  createJsonFilePicker(onPicked: (file: FileResult) => void) {
+  public createJsonFilePicker(onPicked: (file: FileResult) => void) {
     this.createPicker({
       configs: [ this.FILES_CONFIG ],
       onPicked: onPicked
     });
   }
 
-  createGoogleSheetPicker(onPicked: (file: FileResult) => void) {
+  public createGoogleSheetPicker(onPicked: (file: FileResult) => void) {
     this.createPicker({
       configs: [ this.SHEETS_CONFIG ],
       onPicked: onPicked
     });
   }
 
-  createAnythingPicker(onPicked: (file: FileResult) => void) {
+  public createAnythingPicker(onPicked: (file: FileResult) => void) {
     this.createPicker({
       configs: [ this.FILES_CONFIG, this.SHEETS_CONFIG ],
       onPicked: onPicked

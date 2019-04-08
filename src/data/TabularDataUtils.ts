@@ -1,7 +1,7 @@
 export function tabularDataToPOJOs<T>(
   headers: string[],
-  input: Array<T | undefined>[]
-): { [key: string]: T }[] {
+  input: Array<Array<T | undefined>>
+): Array<{ [key: string]: T }> {
   return input.map(rowToPOJO(headers));
 }
 
@@ -19,14 +19,14 @@ function rowToPOJO<T>(headers: string[]): (row: Array<T | undefined>) => { [key:
 }
 
 export function pojosToTabularData<T>(
-  objects: { [key: string]: T }[]
+  objects: Array<{ [key: string]: T }>
 ): {
   headers: string[],
-  rows: Array<T | undefined>[]
+  rows: Array<Array<T | undefined>>
 } {
   const propertyToIndex = new Map<string, number>();
   let nextIndex = 0;
-  const rows: Array<T | undefined>[] = objects.map(obj => {
+  const rows: Array<Array<T | undefined>> = objects.map(obj => {
     const row: Array<T | undefined> = [];
     for (const key of Object.keys(obj)) {
       let index = propertyToIndex.get(key);

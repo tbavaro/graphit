@@ -9,7 +9,7 @@ export type EventType = (
 export type Simulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
 export class ListenableSimulationWrapper extends BasicListenable<EventType> {
-  readonly simulation: Simulation;
+  private readonly simulation: Simulation;
 
   constructor(simulation: Simulation) {
     super();

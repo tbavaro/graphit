@@ -1,9 +1,9 @@
-import * as React from 'react';
-import './FilesDrawerView.css';
+import * as React from "react";
+import "./FilesDrawerView.css";
 
 import { DatastoreStatus } from "./data/DatastoreStatus";
 import * as MaterialList from "./ui-helpers/MaterialList";
-import * as TemporaryNavDrawer from './ui-helpers/TemporaryNavDrawer';
+import * as TemporaryNavDrawer from "./ui-helpers/TemporaryNavDrawer";
 
 export interface Actions {
   openFilePicker: () => void;
@@ -26,9 +26,9 @@ export interface Props extends TemporaryNavDrawer.Props {
 }
 
 export class Component extends React.PureComponent<Props, {}> {
-  render() {
-    var headerContents: any;
-    var contents: any;
+  public render() {
+    let headerContents: any;
+    let contents: any;
 
     switch (this.props.datastoreStatus) {
       case DatastoreStatus.SignedIn:
@@ -57,7 +57,7 @@ export class Component extends React.PureComponent<Props, {}> {
   }
 
   private renderSignedInHeaderContents() {
-    var headerClassName = [
+    const headerClassName = [
       "mdc-list",
       "mdc-list--dense",
       "mdc-list--avatar-list",

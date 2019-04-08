@@ -16,7 +16,7 @@ export const config = {
 const DEFAULT_TIMEOUT_MS = 15000;
 
 function createSingletonWithPromise<T>(func: () => Promise<T>): () => Promise<T> {
-  var singletonPromise: Promise<T> | undefined;
+  let singletonPromise: Promise<T> | undefined;
   return () => {
     if (!singletonPromise) {
       singletonPromise = func();
@@ -27,12 +27,12 @@ function createSingletonWithPromise<T>(func: () => Promise<T>): () => Promise<T>
 
 const loadApiSingleton = (apiName: string, extraCallback?: () => void): () => Promise<void> => {
   return createSingletonWithPromise(() => {
-    var promise = new Promise<void>((resolve, reject) => {
+    let promise = new Promise<void>((resolve, reject) => {
       gapi.load(apiName, {
-        timeout: DEFAULT_TIMEOUT_MS,
         callback: resolve,
         onerror: () => reject("gapi failed to load api: " + apiName),
-        ontimeout: () => reject("gapi timed out loading api: " + apiName)
+        ontimeout: () => reject("gapi timed out loading api: " + apiName),
+        timeout: DEFAULT_TIMEOUT_MS
       });
     });
     if (extraCallback) {
@@ -42,13 +42,13 @@ const loadApiSingleton = (apiName: string, extraCallback?: () => void): () => Pr
   });
 };
 
-var authIsLoaded = false;
+let authIsLoaded = false;
 
 const loadClientAuth2ApiSingleton = loadApiSingleton("client:auth2", () => authIsLoaded = true);
 const loadPickerApiSingleton = loadApiSingleton("picker");
 
 // the @types seem to be wrong here
-type ExtraClientTypes = {
+interface ExtraClientTypes {
   sheets: {
     spreadsheets: typeof gapi.client.spreadsheets;
   }
@@ -79,12 +79,10 @@ export const filesSingleton = createSingletonWithPromise(() => {
 });
 
 // the @types seem to be wrong here
-type ExtraPickerTypes = {
-  DocsView: {
-    new (): google.picker.DocsView & {
+interface ExtraPickerTypes {
+  DocsView: new () => google.picker.DocsView & {
       setMimeTypes(mimeTypes: string): void;
     };
-  };
 };
 
 export const pickerSingleton = createSingletonWithPromise(() => {

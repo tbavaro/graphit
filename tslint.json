@@ -9,6 +9,14 @@
   },
   "rules": {
     "interface-name": false,
-    "quotemark": [true, "double"]
+    "interface-over-type-literal": false,
+    "max-classes-per-file": false,
+    "member-ordering": false,
+    "no-console": false,
+    "no-reference": false,
+    "object-literal-shorthand": false,
+    "object-literal-sort-keys": false,
+    "quotemark": [true, "double"],
+    "variable-name": false
   }
 }
