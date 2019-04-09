@@ -1,0 +1,68 @@
+@import "@material/drawer/temporary/mdc-temporary-drawer.scss";
+@import "./_all";
+
+$propertiesViewHeaderHeight: 15px;
+
+.PropertiesView {
+  @include mdc-rtl-reflexive-box(border, left, 1px solid #e4e4e4);
+
+  flex: none;
+  width: 300px;
+
+  display: none;
+  flex-direction: column;
+
+  &.open {
+    display: flex;
+  }
+}
+
+.PropertiesView-header {
+  @include mdc-typography(body2);
+
+  flex: none;
+  height: $propertiesViewHeaderHeight;
+  line-height: $propertiesViewHeaderHeight;
+  background-color: #616161;
+  color: white;
+  padding: 10px 12px 10px 20px;
+}
+
+.PropertiesView-header-closeButton {
+  float: right;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  line-height: $propertiesViewHeaderHeight;
+  cursor: pointer;
+}
+
+.PropertiesView-content {
+  flex: auto;
+  background-color: $propertiesDrawerBackgroundColor;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.PropertiesView-content-property-container {
+  padding: 12px 20px 12px 20px;
+}
+
+.PropertiesView-content-property-labelRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.PropertiesView-content-property-label {
+  @include mdc-typography(caption);
+  flex: auto;
+}
+
+.PropertiesView-content-property-value {
+  @include mdc-typography(caption);
+  flex: none;
+}
+
+.PropertiesView-content-property-slider {
+  margin-top: -10px;
+}

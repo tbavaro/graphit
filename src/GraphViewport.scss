@@ -1,0 +1,21 @@
+@import "_all";
+
+.GraphViewport-linkLines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  stroke: $linkColor;
+  stroke-width: 2px;
+  fill: none;
+
+  .stroke-dashed {
+    stroke-dasharray: 6;
+  }
+}
+
+.GraphViewport-linkLines marker#arrow {
+  stroke-width: 0;
+  fill: $linkColor;
+}

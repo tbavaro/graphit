@@ -1,0 +1,61 @@
+@import "@material/typography/mdc-typography.scss";
+@import "_all";
+
+$nodeMaxWidth: 150px;
+
+.NodeView {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+}
+
+.NodeView-content {
+  @include mdc-typography(body1);
+  // line-height: 1.1;
+  font-weight: bold;
+
+  width: max-content;
+  max-width: $nodeMaxWidth;
+
+  position: absolute;
+  background-color: $normalNodeBackgroundColor;
+  color: $nodeTextColor;
+  border: 1px solid white;
+  padding: $paddingNode;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  word-break: break-word;
+  // box-shadow: 1px 1px lightgray;
+
+  &.shape-oval {
+    border-radius: 50%;
+  }
+
+  &.shape-pill {
+    border-radius: 1000px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    max-width: $nodeMaxWidth !important;
+  }
+}
+
+.NodeView-content.locked {
+  border: 3px solid rgba(0, 0, 0, 0.25);
+}
+
+.NodeView-content.selected {
+  color: $selectionTextColor;;
+  background-color: $selectionColor !important;
+  border: 3px solid rgba(0, 0, 0, 0.25) !important;
+  z-index: 100;
+  box-shadow: 0px 0px 25px 5px rgba(0, 0, 0, 0.25);
+}

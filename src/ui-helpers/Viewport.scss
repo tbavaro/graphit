@@ -1,0 +1,15 @@
+@import "../_colors";
+
+.Viewport {
+  flex: auto;
+  background-color: $documentBackgroundColor;
+  overflow: hidden;
+  position: relative;
+}
+
+.Viewport-contents {
+  position: relative;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0 0;
+}

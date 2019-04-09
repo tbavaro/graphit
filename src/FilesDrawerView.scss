@@ -1,0 +1,71 @@
+@import "@material/button/mdc-button.scss";
+@import "@material/list/mdc-list.scss";
+@import "_all";
+
+.FilesDrawerView-contents {
+  width: 20em;
+  background-color: $leftDrawerBackgroundColor;
+  color: white;
+}
+
+.FilesDrawerView-button {
+  border-radius: 3px;
+  padding: $paddingButton;
+  text-align: center;
+  background-color: $leftDrawerButtonColor;
+  color: $leftDrawerButtonTextColor;
+}
+
+.FilesDrawerView-button:hover {
+  background-color: #777788;
+}
+
+.FilesDrawerView-button:active {
+  background-color: #555566;
+}
+
+.FilesDrawerView-filesList {
+  border: 1px solid black;
+  border-radius: 3px;
+  background-color: $leftDrawerListBackgroundColor;
+  padding: 0.3em;
+}
+
+.FilesDrawerView-filesList a {
+  display: block;
+  padding: 0.2em;
+  cursor: pointer;
+  color: white;
+  text-decoration: none;
+}
+
+.FilesDrawerView-filesList a:hover {
+  background-color: #444455;
+}
+
+.FilesDrawerView-filesList a:active {
+  background-color: black;
+}
+
+.FilesDrawerView-avatarList {
+  @include mdc-list-item-graphic-ink-color(white);
+  @include mdc-list-item-graphic-fill-color(text-icon-on-background);
+  width: 100%;
+}
+
+.FilesDrawerView-avatarList-name {
+  flex: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.FilesDrawerView-avatarList-expandButton {
+  @include mdc-button-ink-color(grey);
+  @include mdc-states-hover-opacity(0);
+  @include mdc-states-focus-opacity(0);
+  flex: none;
+  min-width: 0;
+  padding: 0 4px;
+  width: 26px;
+}
