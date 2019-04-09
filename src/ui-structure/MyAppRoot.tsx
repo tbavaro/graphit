@@ -34,7 +34,7 @@ interface State {
   rightDrawerOpen: boolean;
 }
 
-class MyAppRoot extends React.Component<Props, State> {
+export class MyAppRootInner extends React.Component<Props, State> {
   public state: State = {
     leftDrawerOpen: false,
     rightDrawerOpen: false
@@ -64,7 +64,7 @@ class MyAppRoot extends React.Component<Props, State> {
     );
   }
 
-  private closeLeftDrawer = () => {
+  public closeLeftDrawer = () => {
     this.setState({ leftDrawerOpen: false });
   }
 
@@ -77,4 +77,4 @@ class MyAppRoot extends React.Component<Props, State> {
   }
 }
 
-export default withStyles(styles)(MyAppRoot);
+export default withStyles(styles)(MyAppRootInner);

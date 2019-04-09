@@ -6,7 +6,7 @@ import "./App.css";
 import { Datastore, DatastoreStatus } from "./data/Datastore";
 
 import ActionManager from "./ActionManager";
-import MyAppRoot from "./ui-structure/MyAppRoot";
+import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import NavDrawerContents from "./ui-structure/NavDrawerContents";
 import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 
@@ -20,7 +20,12 @@ class App extends React.Component<{}, State> {
   };
 
   private datastore = new Datastore();
-  private actionManager = new ActionManager(this.datastore);
+  private actionManager = new ActionManager(this.datastore, {
+    loadDocumentById: (id: string) => {
+      alert(`load: ${id}`);
+      this.closeLeftDrawer();
+    }
+  });
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -55,6 +60,7 @@ class App extends React.Component<{}, State> {
         <MyAppRoot
           leftDrawerChildren={navDrawerContents}
           rightDrawerChildren={propertiesDrawerContents}
+          innerRef={this.setAppRootRef}
         >
           <div id="content" className="App-content"/>
         </MyAppRoot>
@@ -65,6 +71,17 @@ class App extends React.Component<{}, State> {
   private onDatastoreStatusChanged = () => {
     this.setState({ datastoreStatus: this.datastore.status() });
   }
+
+  // hacks to interact with drawer state; maybe not worth it?
+  private appRootRef?: MyAppRootInner;
+  private setAppRootRef = (newRef: MyAppRootInner) => {
+    this.appRootRef = newRef;
+  }
+  private closeLeftDrawer = () => {
+    if (this.appRootRef) {
+      this.appRootRef.closeLeftDrawer();
+    }
+  };
 }
 
 export default App;
