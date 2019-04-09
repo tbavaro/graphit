@@ -7,6 +7,7 @@ import { Datastore, DatastoreStatus } from "./data/Datastore";
 
 import MyAppRoot from "./ui-structure/MyAppRoot";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
+import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 
 interface State {
   datastoreStatus: DatastoreStatus
@@ -49,11 +50,16 @@ class App extends React.Component<{}, State> {
       />
     );
 
+    const propertiesDrawerContents = (
+      <PropertiesDrawerContents/>
+    );
+
     return (
       <React.Fragment>
         <CssBaseline/>
         <MyAppRoot
           leftDrawerChildren={navDrawerContents}
+          rightDrawerChildren={propertiesDrawerContents}
         >
           <div id="content" className="App-content"/>
         </MyAppRoot>

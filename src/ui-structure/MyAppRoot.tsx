@@ -9,19 +9,24 @@ import {
 import * as React from "react";
 
 import MyAppBar from "./MyAppBar";
-import MyRightDrawer from "./MyRightDrawer";
-import * as UiStructureHelpers from "./UiStructureHelpers";
 
 import "./MyAppRoot.css";
 
+// TODO: can I get the "dense" toolbar height from `theme`?
+const DENSE_APP_BAR_HEIGHT = 48;
+
 const styles = createStyles({
   contentContainerOuterPadding: {
-    paddingTop: UiStructureHelpers.DENSE_APP_BAR_HEIGHT
+    paddingTop: DENSE_APP_BAR_HEIGHT
+  },
+  toolbar: {
+    height: DENSE_APP_BAR_HEIGHT
   }
 });
 
 export interface Props extends WithStyles<typeof styles> {
   leftDrawerChildren: any;
+  rightDrawerChildren: any;
 }
 
 interface State {
@@ -48,9 +53,10 @@ class MyAppRoot extends React.Component<Props, State> {
           onClose={this.closeLeftDrawer}
           children={this.props.leftDrawerChildren}
         />
-        <MyRightDrawer
-          open={this.state.rightDrawerOpen}
-        />
+        <Drawer variant="persistent" open={this.state.rightDrawerOpen} anchor="right">
+          <div className={this.props.classes.toolbar}/>
+          {this.props.rightDrawerChildren}
+        </Drawer>
         <div className={"MyAppRoot-contentContainerOuter " + this.props.classes.contentContainerOuterPadding}>
           <div className="MyAppRoot-contentContainerInner" children={this.props.children}/>
         </div>
