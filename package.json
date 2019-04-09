@@ -20,7 +20,7 @@
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject",
-    "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts"
+    "codegen": "./node_modules/.bin/generate-validators --output src/old/generated/GraphDataValidators.ts src/old/data/GraphData.ts"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",

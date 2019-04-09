@@ -1,4 +1,4 @@
-import * as GoogleApi from "../google/GoogleApi";
+import * as GoogleApi from "./GoogleApi";
 
 export const GRAPHIT_MIME_TYPE = "application/me.timba.graphit+json";
 export const SPREADSHEET_MIME_TYPE = "application/vnd.google-apps.spreadsheet";
