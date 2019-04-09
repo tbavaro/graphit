@@ -1,8 +1,14 @@
-import { createStyles, withStyles, WithStyles } from "@material-ui/core/styles";
+import {
+  Drawer,
+} from "@material-ui/core";
+import {
+  createStyles,
+  withStyles,
+  WithStyles
+} from "@material-ui/core/styles";
 import * as React from "react";
 
 import MyAppBar from "./MyAppBar";
-import MyLeftDrawer from "./MyLeftDrawer";
 import MyRightDrawer from "./MyRightDrawer";
 import * as UiStructureHelpers from "./UiStructureHelpers";
 
@@ -14,17 +20,17 @@ const styles = createStyles({
   }
 });
 
-export interface Props extends WithStyles<typeof styles> {}
+export interface Props extends WithStyles<typeof styles> {
+  leftDrawerChildren: any;
+}
 
 interface State {
-  isSignedIn: boolean;
   leftDrawerOpen: boolean;
   rightDrawerOpen: boolean;
 }
 
 class MyAppRoot extends React.Component<Props, State> {
   public state: State = {
-    isSignedIn: false,
     leftDrawerOpen: false,
     rightDrawerOpen: false
   };
@@ -37,11 +43,10 @@ class MyAppRoot extends React.Component<Props, State> {
           onClickEditButton={this.toggleRightDrawer}
           onClickMenuButton={this.openLeftDrawer}
         />
-        <MyLeftDrawer
-          isSignedIn={this.state.isSignedIn}
+        <Drawer
           open={this.state.leftDrawerOpen}
           onClose={this.closeLeftDrawer}
-          onSignIn={this.signIn}
+          children={this.props.leftDrawerChildren}
         />
         <MyRightDrawer
           open={this.state.rightDrawerOpen}
@@ -63,12 +68,6 @@ class MyAppRoot extends React.Component<Props, State> {
 
   private toggleRightDrawer = () => {
     this.setState({ rightDrawerOpen: !this.state.rightDrawerOpen });
-  }
-
-  private signIn = () => {
-    alert("sign in!");
-    this.setState({ isSignedIn: true });
-    this.closeLeftDrawer();
   }
 }
 
