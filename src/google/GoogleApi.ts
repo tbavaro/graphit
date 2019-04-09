@@ -1,7 +1,7 @@
-/// <reference path="../../../node_modules/@types/gapi.client/index.d.ts"/>
-/// <reference path="../../../node_modules/@types/gapi.client.drive/index.d.ts"/>
-/// <reference path="../../../node_modules/@types/gapi.client.sheets/index.d.ts"/>
-/// <reference path="../../../node_modules/@types/google.picker/index.d.ts"/>
+/// <reference path="../../node_modules/@types/gapi.client/index.d.ts"/>
+/// <reference path="../../node_modules/@types/gapi.client.drive/index.d.ts"/>
+/// <reference path="../../node_modules/@types/gapi.client.sheets/index.d.ts"/>
+/// <reference path="../../node_modules/@types/google.picker/index.d.ts"/>
 
 export const config = {
   API_KEY: process.env.REACT_APP_GOOGLE_API_KEY as string,

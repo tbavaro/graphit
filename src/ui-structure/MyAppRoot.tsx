@@ -33,7 +33,7 @@ class MyAppRoot extends React.Component<Props, State> {
     return (
       <div className="MyAppRoot">
         <MyAppBar
-          title="graphit"
+          title="GraphIt"
           onClickEditButton={this.toggleRightDrawer}
           onClickMenuButton={this.openLeftDrawer}
         />

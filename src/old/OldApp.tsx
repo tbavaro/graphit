@@ -3,13 +3,14 @@ import * as QueryString from "query-string";
 import * as React from "react";
 
 // import "App.css";
-import { Datastore, DatastoreStatus } from "./data/Datastore";
+import { Datastore, DatastoreStatus } from "../data/Datastore";
+import { SimpleListenable } from "../data/Listenable";
+import * as GooglePickerHelper from "../google/GooglePickerHelper";
+
 import * as GraphData from "./data/GraphData";
 import { GraphDocument } from "./data/GraphDocument";
-import { SimpleListenable } from "./data/Listenable";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as FilesDrawerView from "./FilesDrawerView";
-import * as GooglePickerHelper from "./google/GooglePickerHelper";
 import * as LocalFiles from "./localfiles/LocalFiles";
 import * as PropertiesView from "./PropertiesView";
 import * as SimulationViewport from "./SimulationViewport";

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Listenable } from "../data/Listenable";
+import { Listenable } from "../../data/Listenable";
 
 export interface ListenerBinding<Props> {
   propertyName: string & keyof Props; // keyof Props;

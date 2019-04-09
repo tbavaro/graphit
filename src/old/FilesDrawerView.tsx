@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./FilesDrawerView.css";
 
-import { DatastoreStatus } from "./data/DatastoreStatus";
+import { DatastoreStatus } from "../data/DatastoreStatus";
 import * as MaterialList from "./ui-helpers/MaterialList";
 import * as TemporaryNavDrawer from "./ui-helpers/TemporaryNavDrawer";
 

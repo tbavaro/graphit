@@ -4,8 +4,8 @@ import * as React from "react";
 
 import "./SimulationViewport.css";
 
+import { SimpleListenable } from "../data/Listenable";
 import { GraphDocument } from "./data/GraphDocument";
-import { SimpleListenable } from "./data/Listenable";
 import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
 import * as GraphViewport from "./GraphViewport";
 import { ListenableSimulationWrapper } from "./ListenableSimulation";

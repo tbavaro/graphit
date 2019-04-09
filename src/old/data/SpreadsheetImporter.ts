@@ -1,4 +1,4 @@
-import * as GoogleApi from "../google/GoogleApi";
+import * as GoogleApi from "../../google/GoogleApi";
 
 import * as GraphData from "./GraphData";
 

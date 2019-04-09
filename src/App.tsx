@@ -4,6 +4,10 @@ import * as React from "react";
 import "./App.css";
 import MyAppRoot from "./ui-structure/MyAppRoot";
 
+// interface State {
+
+// }
+
 class App extends React.Component {
   public render() {
     return (
