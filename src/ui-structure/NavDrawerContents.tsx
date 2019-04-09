@@ -112,4 +112,4 @@ class NavDrawerContents extends React.Component<Props, {}> {
   }
 }
 
-export const Component = NavDrawerContents;
+export default NavDrawerContents;

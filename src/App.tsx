@@ -5,15 +5,14 @@ import "./App.css";
 
 import { Datastore, DatastoreStatus } from "./data/Datastore";
 
+import ActionManager from "./ActionManager";
 import MyAppRoot from "./ui-structure/MyAppRoot";
-import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
+import NavDrawerContents from "./ui-structure/NavDrawerContents";
 import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 
 interface State {
   datastoreStatus: DatastoreStatus
 }
-
-type Actions = NavDrawerContents.Actions;
 
 class App extends React.Component<{}, State> {
   public state: State = {
@@ -21,11 +20,7 @@ class App extends React.Component<{}, State> {
   };
 
   private datastore = new Datastore();
-
-  private actions: Actions = {
-    signIn: () => this.datastore.signIn(),
-    signOut: () => this.datastore.signOut()
-  };
+  private actionManager = new ActionManager(this.datastore);
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -44,8 +39,8 @@ class App extends React.Component<{}, State> {
 
   public render() {
     const navDrawerContents = (
-      <NavDrawerContents.Component
-        actions={this.actions}
+      <NavDrawerContents
+        actions={this.actionManager}
         datastoreStatus={this.datastore.status()}
       />
     );
