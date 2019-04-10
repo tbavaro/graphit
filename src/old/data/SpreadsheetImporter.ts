@@ -1,6 +1,5 @@
-import * as GoogleApi from "../../google/GoogleApi";
-
-import * as GraphData from "./GraphData";
+import * as GraphData from "src/data/GraphData";
+import * as GoogleApi from "src/google/GoogleApi";
 
 // TODO this whole file is kind of a mess, was rushed this week. should probably
 // rewrite if a lot more complexity is needed

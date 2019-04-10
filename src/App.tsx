@@ -4,6 +4,7 @@ import * as React from "react";
 import "./App.css";
 
 import { Datastore, DatastoreStatus } from "./data/Datastore";
+import { GraphDocument } from "./data/GraphDocument";
 
 import ActionManager from "./ActionManager";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
@@ -11,20 +12,27 @@ import NavDrawerContents from "./ui-structure/NavDrawerContents";
 import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 
 interface State {
-  datastoreStatus: DatastoreStatus
+  canSaveDocument: boolean;
+  datastoreStatus: DatastoreStatus;
+  document: GraphDocument | null,
+  documentIsDirty: boolean;
+  loadedDocumentId: string | null; // TODO move into GraphDocument?
+  modalOverlayText: string | null;
 }
 
 class App extends React.Component<{}, State> {
   public state: State = {
-    datastoreStatus: DatastoreStatus.Initializing
+    canSaveDocument: false,
+    datastoreStatus: DatastoreStatus.Initializing,
+    document: null,
+    documentIsDirty: false,
+    loadedDocumentId: null,
+    modalOverlayText: null
   };
 
   private datastore = new Datastore();
   private actionManager = new ActionManager(this.datastore, {
-    loadDocumentById: (id: string) => {
-      alert(`load: ${id}`);
-      this.closeLeftDrawer();
-    }
+    loadDocumentById: (id: string) => this.loadDocumentById(id)
   });
 
   public componentWillMount() {
@@ -43,6 +51,9 @@ class App extends React.Component<{}, State> {
   }
 
   public render() {
+    // TODO consider triggering this only when needed
+    this.updateWindowTitle();
+
     const navDrawerContents = (
       <NavDrawerContents
         actions={this.actionManager}
@@ -54,17 +65,37 @@ class App extends React.Component<{}, State> {
       <PropertiesDrawerContents/>
     );
 
+    // TODO render modal overlay
+
     return (
       <React.Fragment>
         <CssBaseline/>
         <MyAppRoot
           leftDrawerChildren={navDrawerContents}
           rightDrawerChildren={propertiesDrawerContents}
+          title={(this.state.document && this.state.document.name) || "GraphIt"}
           innerRef={this.setAppRootRef}
         >
           <div id="content" className="App-content"/>
         </MyAppRoot>
+        {
+          this.state.modalOverlayText !== null
+            ? this.renderModalOverlay(this.state.modalOverlayText)
+            : null
+        }
       </React.Fragment>
+    );
+  }
+
+  private renderModalOverlay(text: string) {
+    return (
+      <div className="App-modalOverlay">
+        <div className="App-modalOverlay-row">
+          <div className="App-modalOverlay-text">
+            {text}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -82,6 +113,116 @@ class App extends React.Component<{}, State> {
       this.appRootRef.closeLeftDrawer();
     }
   };
+
+  // load documents
+  private loadDocumentById = (id: string | null) => {
+    if (this.datastore.status() === DatastoreStatus.Initializing) {
+      // TODO old version deferred this until later
+      throw new Error("datastore isn't ready to load yet");
+    }
+
+    if (id === null) {
+      this.setDocument(GraphDocument.empty(), null, false);
+      this.closeLeftDrawer();
+    } else {
+      this.showModalOverlayDuring(
+        "Loading...",
+        this.datastore.loadFile(id).then(
+          (result) => {
+            const document = GraphDocument.load(result.content);
+            document.name = result.name;
+            this.setDocument(document, id, result.canSave);
+            this.closeLeftDrawer();
+          },
+          (reason) => {
+            alert("error loading document:\n" + this.decodeErrorReason(reason));
+          }
+        )
+      );
+    }
+  }
+
+  private setDocument = (
+    document: GraphDocument,
+    documentId: string | null,
+    canSave: boolean
+  ) => {
+    this.setState({
+      loadedDocumentId: documentId,
+      document: document,
+      documentIsDirty: false,
+      canSaveDocument: canSave
+    });
+    this.updateUrlWithDocumentId();
+    alert("loaded document:\n" + JSON.stringify(document, null, 2));
+  }
+
+  private updateUrlWithDocumentId() {
+    const documentId = this.state.loadedDocumentId;
+    let url: string;
+
+    if (documentId === null) {
+      url = "?";
+    } else {
+      const encodedDocumentId = encodeURIComponent(documentId);
+
+      // hack; weird characters at the end of the url (like a hyphen)
+      // get past encodeURIComponent but are handled incorrectly by
+      // things like slack and asana
+      const needsExtraAmpersand = encodedDocumentId.match(/[^A-Za-z0-9]$/);
+
+      url = `?doc=${encodedDocumentId}${needsExtraAmpersand ? "&" : ""}`;
+    }
+
+    history.replaceState({}, window.document.title, url);
+  }
+
+  private async showModalOverlayDuring<T>(text: string, promise: PromiseLike<T>): Promise<T> {
+    this.showModalOverlay(text);
+    try {
+      const result: T = await promise;
+      this.hideModalOverlay();
+      return result;
+    } catch (reason) {
+      this.hideModalOverlay();
+      throw reason;
+    }
+  }
+
+  private showModalOverlay = (text: string) => {
+    this.setState({ modalOverlayText: text });
+  }
+
+  private hideModalOverlay = () => {
+    this.setState({ modalOverlayText: null });
+  }
+
+  private decodeErrorReason(reason: any): string {
+    if (reason && reason.result && reason.result.error && reason.result.error.errors) {
+      const errors = reason.result.error.errors;
+      if (errors.length === 1) {
+        const onlyError = errors[0];
+        if (onlyError.message) {
+          return ("" + onlyError.message);
+        }
+      }
+    }
+    return JSON.stringify(reason);
+  }
+
+  private updateWindowTitle() {
+    window.document.title = [
+      this.isDocumentDirty() ? "\u2022 " : "",
+      this.state.document === null
+        ? ""
+        : `${this.state.document.name} - `,
+      "GraphIt",
+    ].join("");
+  }
+
+  private isDocumentDirty() {
+    return this.state.document !== undefined && this.state.documentIsDirty;
+  }
 }
 
 export default App;

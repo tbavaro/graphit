@@ -4,11 +4,11 @@ import * as React from "react";
 
 // import "App.css";
 import { Datastore, DatastoreStatus } from "../data/Datastore";
+import * as GraphData from "../data/GraphData";
+import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
 import * as GooglePickerHelper from "../google/GooglePickerHelper";
 
-import * as GraphData from "./data/GraphData";
-import { GraphDocument } from "./data/GraphDocument";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as FilesDrawerView from "./FilesDrawerView";
 import * as LocalFiles from "./localfiles/LocalFiles";
@@ -169,89 +169,6 @@ class App extends React.Component<object, State> {
     );
   }
 
-  private renderModalOverlay(text: string) {
-    return (
-      <div className="App-modalOverlay">
-        <div className="App-modalOverlay-row">
-          <div className="App-modalOverlay-text">
-            {text}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  private loadDocumentById = (id?: string) => {
-    // if the datastore isn't ready yet, don't try to load it yet
-    if (this.datastore.status() === DatastoreStatus.Initializing) {
-      this.pendingDocumentLoadId = id;
-      return;
-    }
-
-    if (id === undefined) {
-      this.setDocument(GraphDocument.empty(), undefined, false);
-      return;
-    }
-
-    this.showModalOverlayDuring(
-      "Loading...",
-      this.datastore.loadFile(id).then(
-        (result) => {
-          const document = GraphDocument.load(result.content);
-          document.name = result.name;
-          this.setDocument(document, id, result.canSave);
-        },
-        (reason) => {
-          alert("error loading document:\n" + this.decodeErrorReason(reason));
-        }
-      )
-    );
-  }
-
-  private updateWindowTitle() {
-    window.document.title = [
-      this.isDocumentDirty() ? "\u2022 " : "",
-      this.state.document === null
-        ? ""
-        : `${this.state.document.name} - `,
-      "GraphIt",
-    ].join("");
-  }
-
-  private updateUrlWithDocumentId() {
-    const documentId = this.state.loadedDocumentId;
-    let url: string;
-
-    if (documentId === undefined) {
-      url = "?";
-    } else {
-      const encodedDocumentId = encodeURIComponent(documentId);
-
-      // hack; weird characters at the end of the url (like a hyphen)
-      // get past encodeURIComponent but are handled incorrectly by
-      // things like slack and asana
-      const needsExtraAmpersand = encodedDocumentId.match(/[^A-Za-z0-9]$/);
-
-      url = `?doc=${encodedDocumentId}${needsExtraAmpersand ? "&" : ""}`;
-    }
-
-    history.replaceState({}, window.document.title, url);
-  }
-
-  private setDocument = (
-    document: GraphDocument,
-    documentId: string | undefined,
-    canSave: boolean
-  ) => {
-    this.setState({
-      loadedDocumentId: documentId,
-      document: document,
-      _documentIsDirty: false,
-      canSaveDocument: canSave
-    });
-    this.updateUrlWithDocumentId();
-  }
-
   private onDatastoreStatusChanged = () => {
     if (this.datastore.status() !== DatastoreStatus.Initializing) {
       // assume we can't save it; we'll check in just a sec
@@ -272,18 +189,6 @@ class App extends React.Component<object, State> {
       }
     }
     this.forceUpdate();
-  }
-
-  private openLeftNav = () => {
-    this.setState({
-      leftNavOpen: true
-    });
-  }
-
-  private closeLeftNav = () => {
-    this.setState({
-      leftNavOpen: false
-    });
   }
 
   private openFile = () => {
@@ -403,41 +308,6 @@ class App extends React.Component<object, State> {
     );
   }
 
-  private showModalOverlay = (text: string) => {
-    this.setState({ modalOverlayText: text });
-  }
-
-  private hideModalOverlay = () => {
-    this.setState({ modalOverlayText: undefined });
-  }
-
-  private showModalOverlayDuring<T>(text: string, promise: PromiseLike<T>): PromiseLike<T> {
-    this.showModalOverlay(text);
-    return promise.then(
-      (value) => {
-        this.hideModalOverlay();
-        return value;
-      },
-      (reason) => {
-        this.hideModalOverlay();
-        throw reason;
-      }
-    );
-  }
-
-  private decodeErrorReason(reason: any): string {
-    if (reason && reason.result && reason.result.error && reason.result.error.errors) {
-      const errors = reason.result.error.errors;
-      if (errors.length === 1) {
-        const onlyError = errors[0];
-        if (onlyError.message) {
-          return ("" + onlyError.message);
-        }
-      }
-    }
-    return JSON.stringify(reason);
-  }
-
   private showDialog(props: MaterialDialog.Props) {
     props = { ...props };
     const oldDismissDialog = props.dismissDialog;
@@ -491,10 +361,6 @@ class App extends React.Component<object, State> {
     }
   }
 
-  private isDocumentDirty() {
-    return this.state.document !== undefined && this.state._documentIsDirty;
-  }
-
   private setDocumentIsDirty(value: boolean) {
     // document can never be dirty if there's no document
     value = value && (this.state.document !== undefined);
@@ -507,6 +373,148 @@ class App extends React.Component<object, State> {
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
   private markDocumentClean = () => this.setDocumentIsDirty(false);
+
+  private openLeftNav = () => {
+    this.setState({
+      leftNavOpen: true
+    });
+  }
+
+  ////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////
+  // FULLY MERGED BELOW THIS LINE
+  ////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////
+
+  private closeLeftNav = () => {
+    this.setState({
+      leftNavOpen: false
+    });
+  }
+
+  private isDocumentDirty() {
+    return this.state.document !== undefined && this.state._documentIsDirty;
+  }
+
+  private showModalOverlay = (text: string) => {
+    this.setState({ modalOverlayText: text });
+  }
+
+  private hideModalOverlay = () => {
+    this.setState({ modalOverlayText: undefined });
+  }
+
+  private showModalOverlayDuring<T>(text: string, promise: PromiseLike<T>): PromiseLike<T> {
+    this.showModalOverlay(text);
+    return promise.then(
+      (value) => {
+        this.hideModalOverlay();
+        return value;
+      },
+      (reason) => {
+        this.hideModalOverlay();
+        throw reason;
+      }
+    );
+  }
+
+  private decodeErrorReason(reason: any): string {
+    if (reason && reason.result && reason.result.error && reason.result.error.errors) {
+      const errors = reason.result.error.errors;
+      if (errors.length === 1) {
+        const onlyError = errors[0];
+        if (onlyError.message) {
+          return ("" + onlyError.message);
+        }
+      }
+    }
+    return JSON.stringify(reason);
+  }
+
+  private setDocument = (
+    document: GraphDocument,
+    documentId: string | undefined,
+    canSave: boolean
+  ) => {
+    this.setState({
+      loadedDocumentId: documentId,
+      document: document,
+      _documentIsDirty: false,
+      canSaveDocument: canSave
+    });
+    this.updateUrlWithDocumentId();
+  }
+
+  private updateWindowTitle() {
+    window.document.title = [
+      this.isDocumentDirty() ? "\u2022 " : "",
+      this.state.document === null
+        ? ""
+        : `${this.state.document.name} - `,
+      "GraphIt",
+    ].join("");
+  }
+
+  private updateUrlWithDocumentId() {
+    const documentId = this.state.loadedDocumentId;
+    let url: string;
+
+    if (documentId === undefined) {
+      url = "?";
+    } else {
+      const encodedDocumentId = encodeURIComponent(documentId);
+
+      // hack; weird characters at the end of the url (like a hyphen)
+      // get past encodeURIComponent but are handled incorrectly by
+      // things like slack and asana
+      const needsExtraAmpersand = encodedDocumentId.match(/[^A-Za-z0-9]$/);
+
+      url = `?doc=${encodedDocumentId}${needsExtraAmpersand ? "&" : ""}`;
+    }
+
+    history.replaceState({}, window.document.title, url);
+  }
+
+  private loadDocumentById = (id?: string) => {
+    // if the datastore isn't ready yet, don't try to load it yet
+    if (this.datastore.status() === DatastoreStatus.Initializing) {
+      this.pendingDocumentLoadId = id;
+      return;
+    }
+
+    if (id === undefined) {
+      this.setDocument(GraphDocument.empty(), undefined, false);
+      return;
+    }
+
+    this.showModalOverlayDuring(
+      "Loading...",
+      this.datastore.loadFile(id).then(
+        (result) => {
+          const document = GraphDocument.load(result.content);
+          document.name = result.name;
+          this.setDocument(document, id, result.canSave);
+        },
+        (reason) => {
+          alert("error loading document:\n" + this.decodeErrorReason(reason));
+        }
+      )
+    );
+  }
+
+  private renderModalOverlay(text: string) {
+    return (
+      <div className="App-modalOverlay">
+        <div className="App-modalOverlay-row">
+          <div className="App-modalOverlay-text">
+            {text}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 export default App;

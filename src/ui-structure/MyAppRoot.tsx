@@ -27,6 +27,7 @@ const styles = createStyles({
 export interface Props extends WithStyles<typeof styles> {
   leftDrawerChildren: any;
   rightDrawerChildren: any;
+  title: string;
 }
 
 interface State {
@@ -44,7 +45,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
     return (
       <div className="MyAppRoot">
         <MyAppBar
-          title="GraphIt"
+          title={this.props.title}
           onClickEditButton={this.toggleRightDrawer}
           onClickMenuButton={this.openLeftDrawer}
         />

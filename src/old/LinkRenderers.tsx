@@ -1,5 +1,6 @@
 import * as React from "react";
-import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
+
+import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
 
 export abstract class LinkRenderer {
   public renderDefs(): any {

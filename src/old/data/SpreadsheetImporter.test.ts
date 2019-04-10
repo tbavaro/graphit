@@ -1,6 +1,5 @@
-import { internals } from "./SpreadsheetImporter";
-
-import * as GraphData from "./GraphData";
+import * as GraphData from "src/data/GraphData";
+import { internals } from "src/old/data/SpreadsheetImporter";
 
 it("test empty spreadsheet", () => {
   const result = internals.createSGDFromDataColumns({

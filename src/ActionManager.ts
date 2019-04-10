@@ -1,5 +1,5 @@
 import { Datastore } from "src/data/Datastore";
-import GooglePickerHelper from "src/google/GooglePickerHelper";
+import GooglePickerHelper, { SPREADSHEET_MIME_TYPE } from "src/google/GooglePickerHelper";
 import * as NavDrawerContents from "src/ui-structure/NavDrawerContents";
 
 export type Actions = NavDrawerContents.Actions;
@@ -24,8 +24,11 @@ export default class ActionManager implements Actions {
   // open things
   public openFromGoogle = () => {
     new GooglePickerHelper().createAnythingPicker((fileResult) => {
-      alert("open from google");
-      this.sideEffects.loadDocumentById(fileResult.id);
+      if (fileResult.mimeType === SPREADSHEET_MIME_TYPE) {
+        alert("loading spreadsheets not yet supported");
+      } else {
+        this.sideEffects.loadDocumentById(fileResult.id);
+      }
     });
   }
 }

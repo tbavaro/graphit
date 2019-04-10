@@ -4,3 +4,31 @@
   position: absolute;
   width: 100%;
 }
+
+.App-modalOverlay {
+  position: absolute;
+  z-index: 10000;
+  background-color: rgba(0, 0, 0, 0.8);
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.App-modalOverlay-row {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  bottom: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.App-modalOverlay-text {
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+  text-align: center;
+}

@@ -4,9 +4,9 @@ import * as React from "react";
 
 import "./SimulationViewport.css";
 
+import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
-import { GraphDocument } from "./data/GraphDocument";
-import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
+import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
 import * as GraphViewport from "./GraphViewport";
 import { ListenableSimulationWrapper } from "./ListenableSimulation";
 import { ListenerBinding, ListenerPureComponent } from "./ui-helpers/ListenerPureComponent";

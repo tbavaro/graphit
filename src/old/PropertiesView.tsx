@@ -3,8 +3,9 @@ import * as MaterialSlider from "./ui-helpers/MaterialSlider";
 
 import "./PropertiesView.css";
 
+import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
-import { GraphDocument } from "./data/GraphDocument";
+
 import { ValueFormatter, ValueFormatters } from "./ValueFormatters";
 
 export interface Actions {

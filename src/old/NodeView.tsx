@@ -4,7 +4,8 @@ import * as React from "react";
 
 import "./NodeView.css";
 
-import { Document } from "./data/GraphData";
+import { Document } from "../data/GraphData";
+
 import { sanitizeForDisplay } from "./util/HtmlSanitization";
 
 export interface NodeActionManager {
