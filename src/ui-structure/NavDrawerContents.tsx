@@ -6,7 +6,7 @@ import {
 } from "@material-ui/core";
 import * as React from "react";
 
-import { DatastoreStatus } from "src/data/Datastore";
+import { DatastoreStatus } from "../data/Datastore";
 
 import "./NavDrawerContents.css";
 

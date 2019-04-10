@@ -83,8 +83,6 @@ class App extends React.Component<{}, State> {
       <PropertiesDrawerContents/>
     );
 
-    // TODO render modal overlay
-
     return (
       <React.Fragment>
         <CssBaseline/>

@@ -1,6 +1,6 @@
-import { Datastore } from "src/data/Datastore";
-import GooglePickerHelper, { SPREADSHEET_MIME_TYPE } from "src/google/GooglePickerHelper";
-import * as NavDrawerContents from "src/ui-structure/NavDrawerContents";
+import { Datastore } from "./data/Datastore";
+import GooglePickerHelper, { SPREADSHEET_MIME_TYPE } from "./google/GooglePickerHelper";
+import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 
 export type Actions = NavDrawerContents.Actions;
 
