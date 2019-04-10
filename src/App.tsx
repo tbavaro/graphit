@@ -1,4 +1,5 @@
 import CssBaseline from "@material-ui/core/CssBaseline";
+import * as QueryString from "query-string";
 import * as React from "react";
 
 import "./App.css";
@@ -27,8 +28,10 @@ class App extends React.Component<{}, State> {
     document: null,
     documentIsDirty: false,
     loadedDocumentId: null,
-    modalOverlayText: null
+    modalOverlayText: "Loading..."
   };
+
+  private pendingDocumentLoadId: string | null = null;
 
   private datastore = new Datastore();
   private actionManager = new ActionManager(this.datastore, {
@@ -41,6 +44,21 @@ class App extends React.Component<{}, State> {
     }
     this.datastore.addListener("status_changed", this.onDatastoreStatusChanged);
     this.onDatastoreStatusChanged();
+
+    // open doc if its id is specified in the url query params
+    const queryParams = QueryString.parse(location.search);
+    let documentId: string | null = null;
+    if (queryParams.doc instanceof Array && queryParams.doc.length >= 1) {
+      documentId = queryParams.doc[0];
+    } else if (typeof queryParams.doc === "string") {
+      documentId = queryParams.doc;
+    }
+    if (documentId) {
+      this.loadDocumentById(documentId);
+    } else {
+      // TODO in the old version this would automatically open the left nav
+      this.hideModalOverlay();
+    }
   }
 
   public componentWillUnmount() {
@@ -100,7 +118,13 @@ class App extends React.Component<{}, State> {
   }
 
   private onDatastoreStatusChanged = () => {
-    this.setState({ datastoreStatus: this.datastore.status() });
+    const newStatus = this.datastore.status();
+    this.setState({ datastoreStatus: newStatus });
+    if (newStatus !== DatastoreStatus.Initializing && this.pendingDocumentLoadId !== null) {
+      const documentId = this.pendingDocumentLoadId;
+      this.pendingDocumentLoadId = null;
+      this.loadDocumentById(documentId);
+    }
   }
 
   // hacks to interact with drawer state; maybe not worth it?
@@ -117,8 +141,8 @@ class App extends React.Component<{}, State> {
   // load documents
   private loadDocumentById = (id: string | null) => {
     if (this.datastore.status() === DatastoreStatus.Initializing) {
-      // TODO old version deferred this until later
-      throw new Error("datastore isn't ready to load yet");
+      this.pendingDocumentLoadId = id;
+      return;
     }
 
     if (id === null) {
