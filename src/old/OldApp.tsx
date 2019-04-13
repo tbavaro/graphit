@@ -8,12 +8,12 @@ import * as GraphData from "../data/GraphData";
 import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
 import * as GooglePickerHelper from "../google/GooglePickerHelper";
+import * as SimulationViewport from "../ui-structure/SimulationViewport";
 
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as FilesDrawerView from "./FilesDrawerView";
 import * as LocalFiles from "./localfiles/LocalFiles";
 import * as PropertiesView from "./PropertiesView";
-import * as SimulationViewport from "./SimulationViewport";
 import * as AppBar from "./ui-helpers/AppBar";
 import * as MaterialDialog from "./ui-helpers/MaterialDialog";
 

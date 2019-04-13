@@ -7,8 +7,9 @@ import "./SimulationViewport.css";
 import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
 import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
+import { ListenableSimulationWrapper } from "../ListenableSimulation";
+
 import * as GraphViewport from "./GraphViewport";
-import { ListenableSimulationWrapper } from "./ListenableSimulation";
 import { ListenerBinding, ListenerPureComponent } from "./ListenerPureComponent";
 
 export interface Props {

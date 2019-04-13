@@ -5,8 +5,7 @@ import * as React from "react";
 import "./NodeView.css";
 
 import { Document } from "../data/GraphData";
-
-import { sanitizeForDisplay } from "./util/HtmlSanitization";
+import { sanitizeForDisplay } from "../util/HtmlSanitization";
 
 export interface NodeActionManager {
   onNodeMoved: (id: number, x: number, y: number, stopped: boolean) => void;

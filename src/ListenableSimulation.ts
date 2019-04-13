@@ -1,6 +1,7 @@
 import * as D3 from "d3";
-import { BasicListenable } from "../data/Listenable";
-import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
+
+import { BasicListenable } from "./data/Listenable";
+import { MyLinkDatum, MyNodeDatum } from "./data/MyNodeDatum";
 
 export type EventType = (
   "tick"
