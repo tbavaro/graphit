@@ -90,7 +90,9 @@ class App extends React.Component<{}, State> {
     );
 
     const propertiesDrawerContents = (
-      <PropertiesDrawerContents/>
+      <PropertiesDrawerContents
+        document={this.state.document}
+      />
     );
 
     return (

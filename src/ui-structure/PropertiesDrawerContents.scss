@@ -1,3 +1,25 @@
-.PropertiesDrawerContents-list {
+.PropertiesDrawerContents {
   width: 250px;
+}
+
+.PropertiesDrawerContents-header {
+  background-color: #616161;
+
+  span {
+    color: white;
+  }
+}
+
+.PropertiesDrawerContents-closeIcon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.PropertiesDrawerContents-sliderContainer {
+  padding-right: 0 !important;
+}
+
+.PropertiesDrawerContents-sliderValue {
+  display: block;
+  float: right;
 }
