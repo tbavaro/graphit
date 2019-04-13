@@ -84,7 +84,9 @@ class App extends React.Component<{}, State> {
         actions={this.actionManager}
         canSave={this.state.canSaveDocument}
         datastoreStatus={this.datastore.status()}
-      />
+        currentUserImageUrl={this.datastore.currentUserImageUrl()}
+        currentUserName={this.datastore.currentUserName()}
+    />
     );
 
     const propertiesDrawerContents = (

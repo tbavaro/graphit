@@ -1,9 +1,11 @@
 import {
+  Avatar,
   Divider,
   List,
   ListItem,
   ListItemText
 } from "@material-ui/core";
+import PersonIcon from "@material-ui/icons/Person";
 import * as React from "react";
 
 import { DatastoreStatus } from "../data/Datastore";
@@ -14,6 +16,8 @@ export interface Props {
   actions: Actions;
   canSave: boolean;
   datastoreStatus: DatastoreStatus;
+  currentUserImageUrl?: string;
+  currentUserName?: string;
 }
 
 export interface Actions {
@@ -57,9 +61,21 @@ class NavDrawerContents extends React.Component<Props, {}> {
         </ListItem>
       );
     } else if (isSignedIn) {
+      const avatar = (
+        this.props.currentUserImageUrl
+          ? <Avatar className="NavDrawerContents-currentUserAvatar" src={this.props.currentUserImageUrl}/>
+          : <Avatar className="NavDrawerContents-currentUserAvatar"><PersonIcon/></Avatar>
+      );
+
+      const text = (this.props.currentUserName || "Signed in");
       headerItem = (
         <ListItem button={false}>
-          <ListItemText primary="Signed in"/>
+          {avatar}
+          <ListItemText
+            className="NavDrawerContents-currentUserName"
+            primary={text}
+            primaryTypographyProps={{ noWrap: true }}
+          />
         </ListItem>
       );
     } else {
