@@ -12,14 +12,17 @@ import "./NavDrawerContents.css";
 
 export interface Props {
   actions: Actions;
+  canSave: boolean;
   datastoreStatus: DatastoreStatus;
 }
 
 export interface Actions {
-  openFromGoogle: () => void;
-  mergeGoogleSheet: () => void;
   signIn: () => void;
   signOut: () => void;
+
+  openFromGoogle: () => void;
+  mergeGoogleSheet: () => void;
+  save: () => void;
 }
 
 function renderMenuOption(attrs: {
@@ -82,7 +85,8 @@ class NavDrawerContents extends React.Component<Props, {}> {
                   }),
                   renderMenuOption({
                     label: "Save",
-                    disabled: true
+                    disabled: !this.props.canSave,
+                    action: this.props.actions.save
                   }),
                   renderMenuOption({
                     label: "Save as...",

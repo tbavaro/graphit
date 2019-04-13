@@ -39,14 +39,6 @@ class App extends React.Component<{}, State> {
   private pendingDocumentLoadId: string | null = null;
 
   private datastore = new Datastore();
-  private actionManager = new ActionManager(this.datastore, {
-    loadDocumentById: (id: string) => this.loadDocumentById(id),
-    importOrMergeGoogleSheet:
-      (
-        fileResult: GooglePickerHelper.FileResult,
-        shouldMerge: boolean
-      ) => this.importOrMergeGoogleSheet(fileResult, shouldMerge)
-  });
   private simulationConfigListener = (() => {
     const listener = new SimpleListenable();
     listener.addListener("changed", () => { this.markDocumentDirty(); });
@@ -90,6 +82,7 @@ class App extends React.Component<{}, State> {
     const navDrawerContents = (
       <NavDrawerContents
         actions={this.actionManager}
+        canSave={this.state.canSaveDocument}
         datastoreStatus={this.datastore.status()}
       />
     );
@@ -288,6 +281,7 @@ class App extends React.Component<{}, State> {
   }
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
+  private markDocumentClean = () => this.setDocumentIsDirty(false);
 
   private importOrMergeGoogleSheet = (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => {
     this.showModalOverlayDuring(
@@ -296,6 +290,7 @@ class App extends React.Component<{}, State> {
         let document: GraphDocument;
         let documentId: string | null;
         let merged: boolean;
+        let canSave: boolean;
         if (!shouldMerge || (this.state.document === null)) {
           document = new GraphDocument({
             name: fileResult.name,
@@ -303,12 +298,14 @@ class App extends React.Component<{}, State> {
           });
           documentId = null;
           merged = false;
+          canSave = false;
         } else {
           document = this.state.document.merge(serializedDocument);
           documentId = this.state.loadedDocumentId;
           merged = true;
+          canSave = this.state.canSaveDocument;
         }
-        this.setDocument(document, documentId, this.state.canSaveDocument);
+        this.setDocument(document, documentId, canSave);
         if (merged) {
           this.markDocumentDirty();
         }
@@ -316,6 +313,38 @@ class App extends React.Component<{}, State> {
       })
     )
   }
+
+  private save = () => {
+    if (this.state.document !== null) {
+      if (!this.state.loadedDocumentId) {
+        alert("can't save document without id (yet)");
+        return;
+      }
+
+      if (!this.state.canSaveDocument) {
+        alert("saving probably won't work due to permissions");
+      }
+
+      const data = this.state.document.save();
+      this.showModalOverlayDuring(
+        "Saving...",
+        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
+          () => {
+            this.markDocumentClean();
+          },
+          (reason) => {
+            alert("save failed!\n" + this.decodeErrorReason(reason));
+          }
+        )
+      );
+    }
+  }
+
+  private actionManager = new ActionManager(this.datastore, {
+    loadDocumentById: this.loadDocumentById,
+    importOrMergeGoogleSheet: this.importOrMergeGoogleSheet,
+    save: this.save
+  });
 }
 
 export default App;

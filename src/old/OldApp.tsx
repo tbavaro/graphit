@@ -210,12 +210,6 @@ class App extends React.Component<object, State> {
     });
   }
 
-  private promptForMergeGoogleSheet() {
-    new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
-      this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
-    });
-  }
-
   private showSaveAsDialog() {
     let name = prompt("Save as", (this.state.document !== null) ? this.state.document.name : "Untitled");
     if (name === null) {
@@ -227,32 +221,6 @@ class App extends React.Component<object, State> {
       return;
     }
     this.saveAs(name);
-  }
-
-  private save() {
-    if (this.state.document !== null) {
-      if (!this.state.loadedDocumentId) {
-        alert("can't save document without id (yet)");
-        return;
-      }
-
-      if (!this.state.canSaveDocument) {
-        alert("saving probably won't work due to permissions");
-      }
-
-      const data = this.state.document.save();
-      this.showModalOverlayDuring(
-        "Saving...",
-        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
-          () => {
-            this.markDocumentClean();
-          },
-          (reason) => {
-            alert("save failed!\n" + this.decodeErrorReason(reason));
-          }
-        )
-      );
-    }
   }
 
   private saveAs(name: string) {
@@ -335,8 +303,6 @@ class App extends React.Component<object, State> {
       return undefined;
     }
   }
-
-  private markDocumentClean = () => this.setDocumentIsDirty(false);
 
   private openLeftNav = () => {
     this.setState({
@@ -491,6 +457,7 @@ class App extends React.Component<object, State> {
   }
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
+  private markDocumentClean = () => this.setDocumentIsDirty(false);
 
   private importOrMergeGoogleSheet(fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) {
     SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
@@ -515,6 +482,38 @@ class App extends React.Component<object, State> {
       }
       this.closeLeftNav();
     });
+  }
+
+  private promptForMergeGoogleSheet() {
+    new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
+      this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+    });
+  }
+
+  private save() {
+    if (this.state.document !== null) {
+      if (!this.state.loadedDocumentId) {
+        alert("can't save document without id (yet)");
+        return;
+      }
+
+      if (!this.state.canSaveDocument) {
+        alert("saving probably won't work due to permissions");
+      }
+
+      const data = this.state.document.save();
+      this.showModalOverlayDuring(
+        "Saving...",
+        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
+          () => {
+            this.markDocumentClean();
+          },
+          (reason) => {
+            alert("save failed!\n" + this.decodeErrorReason(reason));
+          }
+        )
+      );
+    }
   }
 }
 

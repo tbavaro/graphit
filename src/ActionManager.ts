@@ -7,6 +7,7 @@ export type Actions = NavDrawerContents.Actions;
 export interface SideEffects {
   loadDocumentById: (id: string) => void;
   importOrMergeGoogleSheet: (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => void;
+  save: () => void;
 }
 
 export default class ActionManager implements Actions {
@@ -38,4 +39,7 @@ export default class ActionManager implements Actions {
       this.sideEffects.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
     });
   }
+
+  // save things
+  public save = () => this.sideEffects.save()
 }
