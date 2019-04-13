@@ -89,16 +89,8 @@ class NavDrawerContents extends React.Component<Props, {}> {
                     disabled: true
                   }),
                   renderMenuOption({
-                    label: "Import file...",
-                    disabled: true
-                  }),
-                  renderMenuOption({
                     label: "Merge spreadsheet...",
                     action: this.props.actions.mergeGoogleSheet
-                  }),
-                  renderMenuOption({
-                    label: "View as JSON",
-                    disabled: true
                   }),
                   <Divider key="div1"/>,
                   renderMenuOption({
