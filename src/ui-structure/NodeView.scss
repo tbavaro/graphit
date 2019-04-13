@@ -1,7 +1,8 @@
 /* @import "@material/typography/mdc-typography.scss"; */
-@import "../_all";
+@import "../_colors";
 
 $nodeMaxWidth: 150px;
+$nodePadding: 7px;
 
 .NodeView {
   position: absolute;
@@ -22,7 +23,7 @@ $nodeMaxWidth: 150px;
   background-color: $normalNodeBackgroundColor;
   color: $nodeTextColor;
   border: 1px solid white;
-  padding: $paddingNode;
+  padding: $nodePadding;
   transform: translate(-50%, -50%);
   cursor: pointer;
   user-select: none;

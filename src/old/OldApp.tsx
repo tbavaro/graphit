@@ -4,22 +4,15 @@ import * as React from "react";
 
 // import "App.css";
 import { Datastore, DatastoreStatus } from "../data/Datastore";
-import * as GraphData from "../data/GraphData";
 import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
-import * as SpreadsheetImporter from "../data/SpreadsheetImporter";
-import * as GooglePickerHelper from "../google/GooglePickerHelper";
 import * as SimulationViewport from "../ui-structure/SimulationViewport";
 
-import * as FilesDrawerView from "./FilesDrawerView";
-import * as LocalFiles from "./localfiles/LocalFiles";
 import * as PropertiesView from "./PropertiesView";
 import * as AppBar from "./ui-helpers/AppBar";
-import * as MaterialDialog from "./ui-helpers/MaterialDialog";
 
 export type AllActions =
   AppBar.Actions &
-  FilesDrawerView.Actions &
   PropertiesView.Actions;
 
 interface State {
@@ -66,16 +59,7 @@ class App extends React.Component<object, State> {
       this.setState({
         propertiesViewOpen: !this.state.propertiesViewOpen
       });
-    },
-
-    openFilePicker: () => this.openFile(),
-    save: () => this.save(),
-    saveAs: () => this.showSaveAsDialog(),
-    importUploadedFile: () => this.importUploadedFile(),
-    mergeGoogleSheet: () => this.promptForMergeGoogleSheet(),
-    viewAsJSON: () => this.viewAsJSON(),
-    signIn: () => this.datastore.signIn(),
-    signOut: () => this.datastore.signOut()
+    }
   };
 
   private oldWindowOnBeforeUnload: any | null = null;
@@ -149,16 +133,6 @@ class App extends React.Component<object, State> {
           actionManager={this.actionManager}
           isDocumentLoaded={!!this.state.document}
         />
-        <FilesDrawerView.Component
-          actionManager={this.actionManager}
-          canSave={this.state.canSaveDocument}
-          isDocumentLoaded={!!this.state.document}
-          isOpen={this.state.leftNavOpen}
-          onClosed={this.closeLeftNav}
-          datastoreStatus={this.datastore.status()}
-          currentUserImageUrl={this.datastore.currentUserImageUrl()}
-          currentUserName={this.datastore.currentUserName()}
-        />
         <div className="App-content">
           {viewportView}
           {propertiesView}
@@ -191,109 +165,6 @@ class App extends React.Component<object, State> {
     this.forceUpdate();
   }
 
-  private openFile = () => {
-    new GooglePickerHelper.default().createAnythingPicker((fileResult) => {
-      if (fileResult.mimeType === GooglePickerHelper.SPREADSHEET_MIME_TYPE) {
-        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/false);
-      } else {
-        this.loadDocumentById(fileResult.id);
-        this.closeLeftNav();
-      }
-    });
-  }
-
-  private importUploadedFile() {
-    LocalFiles.openLocalFile((result: LocalFiles.FileResult) => {
-      const document = GraphDocument.load(result.data, result.name);
-      this.setDocument(document, /*documentId=*/undefined, false);
-      this.closeLeftNav();
-    });
-  }
-
-  private showSaveAsDialog() {
-    let name = prompt("Save as", (this.state.document !== null) ? this.state.document.name : "Untitled");
-    if (name === null) {
-      return;
-    }
-    name = name.trim();
-    if (name === "") {
-      alert("empty name");
-      return;
-    }
-    this.saveAs(name);
-  }
-
-  private saveAs(name: string) {
-    if (this.state.document === null) {
-      return;
-    }
-
-    this.state.document.name = name;
-    this.forceUpdate(); // because we changed the name
-
-    const data = this.state.document.save();
-    this.showModalOverlayDuring(
-      "Saving...",
-      this.datastore.saveFileAs(name, data, GooglePickerHelper.GRAPHIT_MIME_TYPE).then(
-        (id) => {
-          this.setState({
-            loadedDocumentId: id,
-            canSaveDocument: true
-          });
-          this.markDocumentClean();
-          this.updateUrlWithDocumentId();
-          this.closeLeftNav();
-        },
-        (reason) => {
-          alert("save failed!\n" + this.decodeErrorReason(reason));
-        }
-      )
-    );
-  }
-
-  private showDialog(props: MaterialDialog.Props) {
-    props = { ...props };
-    const oldDismissDialog = props.dismissDialog;
-    props.dismissDialog = () => {
-      this.dismissDialog();
-      if (oldDismissDialog) {
-        oldDismissDialog();
-      }
-    };
-    this.dismissDialog();
-    this.setState({
-      activeDialog: React.createElement(MaterialDialog.Component, props)
-    });
-  }
-
-  private dismissDialog = () => {
-    console.log("dismissed");
-    this.setState({
-      activeDialog: undefined
-    });
-  }
-
-  private viewAsJSON() {
-    let contents = "(no document loaded)";
-    let isValid = true;
-    if (this.state.document) {
-      contents = this.state.document.save();
-      try {
-        GraphData.validateDocumentV1(JSON.parse(contents));
-      } catch (e) {
-        alert("e: " + e);
-        isValid = false;
-      }
-    }
-    this.showDialog({
-      title: "View as JSON (" + (isValid ? "" : "in") + "valid)",
-      body: contents,
-      preformattedBody: true,
-      scrollable: true,
-      selectable: true
-    });
-  }
-
   private onBeforeUnload = () => {
     if (this.isDocumentDirty()) {
       // NB: most modern browsers don't actually show this specific text,
@@ -317,12 +188,6 @@ class App extends React.Component<object, State> {
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////
-
-  private closeLeftNav = () => {
-    this.setState({
-      leftNavOpen: false
-    });
-  }
 
   private isDocumentDirty() {
     return this.state.document !== undefined && this.state._documentIsDirty;
@@ -457,64 +322,6 @@ class App extends React.Component<object, State> {
   }
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
-  private markDocumentClean = () => this.setDocumentIsDirty(false);
-
-  private importOrMergeGoogleSheet(fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) {
-    SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
-      let document: GraphDocument;
-      let documentId: string | undefined;
-      let merged: boolean;
-      if (!shouldMerge || (this.state.document === null)) {
-        document = new GraphDocument({
-          name: fileResult.name,
-          data: GraphData.applyDefaults(serializedDocument)
-        });
-        documentId = undefined;
-        merged = false;
-      } else {
-        document = this.state.document.merge(serializedDocument);
-        documentId = this.state.loadedDocumentId;
-        merged = true;
-      }
-      this.setDocument(document, documentId, this.state.canSaveDocument);
-      if (merged) {
-        this.markDocumentDirty();
-      }
-      this.closeLeftNav();
-    });
-  }
-
-  private promptForMergeGoogleSheet() {
-    new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
-      this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
-    });
-  }
-
-  private save() {
-    if (this.state.document !== null) {
-      if (!this.state.loadedDocumentId) {
-        alert("can't save document without id (yet)");
-        return;
-      }
-
-      if (!this.state.canSaveDocument) {
-        alert("saving probably won't work due to permissions");
-      }
-
-      const data = this.state.document.save();
-      this.showModalOverlayDuring(
-        "Saving...",
-        this.datastore.updateFile(this.state.loadedDocumentId, data).then(
-          () => {
-            this.markDocumentClean();
-          },
-          (reason) => {
-            alert("save failed!\n" + this.decodeErrorReason(reason));
-          }
-        )
-      );
-    }
-  }
 }
 
 export default App;
