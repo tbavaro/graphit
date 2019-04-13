@@ -1,6 +1,4 @@
-import {
-  Drawer,
-} from "@material-ui/core";
+import Drawer from "@material-ui/core/Drawer";
 import {
   createStyles,
   withStyles,

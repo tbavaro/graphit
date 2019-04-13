@@ -1,10 +1,8 @@
-import {
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemText
-} from "@material-ui/core";
+import Avatar from "@material-ui/core/Avatar";
+import Divider from "@material-ui/core/Divider";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
 import PersonIcon from "@material-ui/icons/Person";
 import * as React from "react";
 
