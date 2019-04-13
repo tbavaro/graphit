@@ -361,17 +361,6 @@ class App extends React.Component<object, State> {
     }
   }
 
-  private setDocumentIsDirty(value: boolean) {
-    // document can never be dirty if there's no document
-    value = value && (this.state.document !== undefined);
-
-    // only set the state if it's a change (TODO see if react is smart here)
-    if (this.state._documentIsDirty !== value) {
-      this.setState({ _documentIsDirty: value });
-    }
-  }
-
-  private markDocumentDirty = () => this.setDocumentIsDirty(true);
   private markDocumentClean = () => this.setDocumentIsDirty(false);
 
   private openLeftNav = () => {
@@ -515,6 +504,18 @@ class App extends React.Component<object, State> {
       </div>
     );
   }
+
+  private setDocumentIsDirty(value: boolean) {
+    // document can never be dirty if there's no document
+    value = value && (this.state.document !== undefined);
+
+    // only set the state if it's a change (TODO see if react is smart here)
+    if (this.state._documentIsDirty !== value) {
+      this.setState({ _documentIsDirty: value });
+    }
+  }
+
+  private markDocumentDirty = () => this.setDocumentIsDirty(true);
 }
 
 export default App;

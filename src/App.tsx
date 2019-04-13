@@ -6,11 +6,13 @@ import "./App.css";
 
 import { Datastore, DatastoreStatus } from "./data/Datastore";
 import { GraphDocument } from "./data/GraphDocument";
-
-import ActionManager from "./ActionManager";
+import { SimpleListenable } from "./data/Listenable";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import NavDrawerContents from "./ui-structure/NavDrawerContents";
 import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
+import * as SimulationViewport from "./ui-structure/SimulationViewport";
+
+import ActionManager from "./ActionManager";
 
 interface State {
   canSaveDocument: boolean;
@@ -37,6 +39,11 @@ class App extends React.Component<{}, State> {
   private actionManager = new ActionManager(this.datastore, {
     loadDocumentById: (id: string) => this.loadDocumentById(id)
   });
+  private simulationConfigListener = (() => {
+    const listener = new SimpleListenable();
+    listener.addListener("changed", () => { this.markDocumentDirty(); });
+    return listener;
+  })();
 
   public componentWillMount() {
     if (super.componentWillMount) {
@@ -92,7 +99,7 @@ class App extends React.Component<{}, State> {
           title={(this.state.document && this.state.document.name) || "GraphIt"}
           innerRef={this.setAppRootRef}
         >
-          <div id="content" className="App-content"/>
+          {this.renderBody()}
         </MyAppRoot>
         {
           this.state.modalOverlayText !== null
@@ -101,6 +108,22 @@ class App extends React.Component<{}, State> {
         }
       </React.Fragment>
     );
+  }
+
+  private renderBody() {
+    if (this.state.document === null) {
+      return (
+        <div id="content" className="App-content"/>
+      );
+    } else {
+      return (
+        <SimulationViewport.Component
+          document={this.state.document}
+          simulationConfigListener={this.simulationConfigListener}
+          onChange={this.markDocumentDirty}
+        />
+      );
+    }
   }
 
   private renderModalOverlay(text: string) {
@@ -176,7 +199,7 @@ class App extends React.Component<{}, State> {
       canSaveDocument: canSave
     });
     this.updateUrlWithDocumentId();
-    alert("loaded document:\n" + JSON.stringify(document, null, 2));
+    // alert("loaded document:\n" + JSON.stringify(document, null, 2));
   }
 
   private updateUrlWithDocumentId() {
@@ -245,6 +268,18 @@ class App extends React.Component<{}, State> {
   private isDocumentDirty() {
     return this.state.document !== undefined && this.state.documentIsDirty;
   }
+
+  private setDocumentIsDirty(value: boolean) {
+    // document can never be dirty if there's no document
+    value = value && (this.state.document !== undefined);
+
+    // only set the state if it's a change (TODO see if react is smart here)
+    if (this.state.documentIsDirty !== value) {
+      this.setState({ documentIsDirty: value });
+    }
+  }
+
+  private markDocumentDirty = () => this.setDocumentIsDirty(true);
 }
 
 export default App;
