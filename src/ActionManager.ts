@@ -8,6 +8,7 @@ export interface SideEffects {
   loadDocumentById: (id: string) => void;
   importOrMergeGoogleSheet: (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => void;
   save: () => void;
+  saveAs: () => void;
 }
 
 export default class ActionManager implements Actions {
@@ -42,4 +43,5 @@ export default class ActionManager implements Actions {
 
   // save things
   public save = () => this.sideEffects.save()
+  public saveAs = () => this.sideEffects.saveAs()
 }

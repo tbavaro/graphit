@@ -23,6 +23,7 @@ export interface Actions {
   openFromGoogle: () => void;
   mergeGoogleSheet: () => void;
   save: () => void;
+  saveAs: () => void;
 }
 
 function renderMenuOption(attrs: {
@@ -90,7 +91,7 @@ class NavDrawerContents extends React.Component<Props, {}> {
                   }),
                   renderMenuOption({
                     label: "Save as...",
-                    disabled: true
+                    action: this.props.actions.saveAs
                   }),
                   renderMenuOption({
                     label: "Merge spreadsheet...",

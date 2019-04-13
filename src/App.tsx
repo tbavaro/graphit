@@ -340,10 +340,49 @@ class App extends React.Component<{}, State> {
     }
   }
 
+  private showSaveAsDialog = () => {
+    let name = prompt("Save as", (this.state.document !== null) ? this.state.document.name : "Untitled");
+    if (name === null) {
+      return;
+    }
+    name = name.trim();
+    if (name === "") {
+      alert("empty name");
+      return;
+    }
+
+    if (this.state.document === null) {
+      return;
+    }
+
+    this.state.document.name = name;
+    this.forceUpdate(); // because we changed the name
+
+    const data = this.state.document.save();
+    this.showModalOverlayDuring(
+      "Saving...",
+      this.datastore.saveFileAs(name, data, GooglePickerHelper.GRAPHIT_MIME_TYPE).then(
+        (id) => {
+          this.setState({
+            loadedDocumentId: id,
+            canSaveDocument: true
+          });
+          this.markDocumentClean();
+          this.updateUrlWithDocumentId();
+          this.closeLeftDrawer();
+        },
+        (reason) => {
+          alert("save failed!\n" + this.decodeErrorReason(reason));
+        }
+      )
+    );
+  };
+
   private actionManager = new ActionManager(this.datastore, {
     loadDocumentById: this.loadDocumentById,
     importOrMergeGoogleSheet: this.importOrMergeGoogleSheet,
-    save: this.save
+    save: this.save,
+    saveAs: this.showSaveAsDialog
   });
 }
 
