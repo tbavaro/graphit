@@ -17,6 +17,7 @@ export interface Props {
 
 export interface Actions {
   openFromGoogle: () => void;
+  mergeGoogleSheet: () => void;
   signIn: () => void;
   signOut: () => void;
 }
@@ -93,7 +94,7 @@ class NavDrawerContents extends React.Component<Props, {}> {
                   }),
                   renderMenuOption({
                     label: "Merge spreadsheet...",
-                    disabled: true
+                    action: this.props.actions.mergeGoogleSheet
                   }),
                   renderMenuOption({
                     label: "View as JSON",

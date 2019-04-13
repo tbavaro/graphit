@@ -7,10 +7,10 @@ import { Datastore, DatastoreStatus } from "../data/Datastore";
 import * as GraphData from "../data/GraphData";
 import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
+import * as SpreadsheetImporter from "../data/SpreadsheetImporter";
 import * as GooglePickerHelper from "../google/GooglePickerHelper";
 import * as SimulationViewport from "../ui-structure/SimulationViewport";
 
-import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as FilesDrawerView from "./FilesDrawerView";
 import * as LocalFiles from "./localfiles/LocalFiles";
 import * as PropertiesView from "./PropertiesView";
@@ -213,31 +213,6 @@ class App extends React.Component<object, State> {
   private promptForMergeGoogleSheet() {
     new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
       this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
-    });
-  }
-
-  private importOrMergeGoogleSheet(fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) {
-    SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
-      let document: GraphDocument;
-      let documentId: string | undefined;
-      let merged: boolean;
-      if (!shouldMerge || (this.state.document === null)) {
-        document = new GraphDocument({
-          name: fileResult.name,
-          data: GraphData.applyDefaults(serializedDocument)
-        });
-        documentId = undefined;
-        merged = false;
-      } else {
-        document = this.state.document.merge(serializedDocument);
-        documentId = this.state.loadedDocumentId;
-        merged = true;
-      }
-      this.setDocument(document, documentId, this.state.canSaveDocument);
-      if (merged) {
-        this.markDocumentDirty();
-      }
-      this.closeLeftNav();
     });
   }
 
@@ -516,6 +491,31 @@ class App extends React.Component<object, State> {
   }
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
+
+  private importOrMergeGoogleSheet(fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) {
+    SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
+      let document: GraphDocument;
+      let documentId: string | undefined;
+      let merged: boolean;
+      if (!shouldMerge || (this.state.document === null)) {
+        document = new GraphDocument({
+          name: fileResult.name,
+          data: GraphData.applyDefaults(serializedDocument)
+        });
+        documentId = undefined;
+        merged = false;
+      } else {
+        document = this.state.document.merge(serializedDocument);
+        documentId = this.state.loadedDocumentId;
+        merged = true;
+      }
+      this.setDocument(document, documentId, this.state.canSaveDocument);
+      if (merged) {
+        this.markDocumentDirty();
+      }
+      this.closeLeftNav();
+    });
+  }
 }
 
 export default App;

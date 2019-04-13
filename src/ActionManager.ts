@@ -1,11 +1,12 @@
 import { Datastore } from "./data/Datastore";
-import GooglePickerHelper, { SPREADSHEET_MIME_TYPE } from "./google/GooglePickerHelper";
+import * as GooglePickerHelper from "./google/GooglePickerHelper";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 
 export type Actions = NavDrawerContents.Actions;
 
 export interface SideEffects {
   loadDocumentById: (id: string) => void;
+  importOrMergeGoogleSheet: (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => void;
 }
 
 export default class ActionManager implements Actions {
@@ -23,12 +24,18 @@ export default class ActionManager implements Actions {
 
   // open things
   public openFromGoogle = () => {
-    new GooglePickerHelper().createAnythingPicker((fileResult) => {
-      if (fileResult.mimeType === SPREADSHEET_MIME_TYPE) {
-        alert("loading spreadsheets not yet supported");
+    new GooglePickerHelper.default().createAnythingPicker((fileResult) => {
+      if (fileResult.mimeType === GooglePickerHelper.SPREADSHEET_MIME_TYPE) {
+        this.sideEffects.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/false);
       } else {
         this.sideEffects.loadDocumentById(fileResult.id);
       }
+    });
+  }
+
+  public mergeGoogleSheet = () => {
+    new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
+      this.sideEffects.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
     });
   }
 }

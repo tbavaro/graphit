@@ -5,8 +5,11 @@ import * as React from "react";
 import "./App.css";
 
 import { Datastore, DatastoreStatus } from "./data/Datastore";
+import * as GraphData from "./data/GraphData";
 import { GraphDocument } from "./data/GraphDocument";
 import { SimpleListenable } from "./data/Listenable";
+import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
+import * as GooglePickerHelper from "./google/GooglePickerHelper";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import NavDrawerContents from "./ui-structure/NavDrawerContents";
 import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
@@ -37,7 +40,12 @@ class App extends React.Component<{}, State> {
 
   private datastore = new Datastore();
   private actionManager = new ActionManager(this.datastore, {
-    loadDocumentById: (id: string) => this.loadDocumentById(id)
+    loadDocumentById: (id: string) => this.loadDocumentById(id),
+    importOrMergeGoogleSheet:
+      (
+        fileResult: GooglePickerHelper.FileResult,
+        shouldMerge: boolean
+      ) => this.importOrMergeGoogleSheet(fileResult, shouldMerge)
   });
   private simulationConfigListener = (() => {
     const listener = new SimpleListenable();
@@ -280,6 +288,34 @@ class App extends React.Component<{}, State> {
   }
 
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
+
+  private importOrMergeGoogleSheet = (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => {
+    this.showModalOverlayDuring(
+      shouldMerge ? "Merging..." : "Loading...",
+      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
+        let document: GraphDocument;
+        let documentId: string | null;
+        let merged: boolean;
+        if (!shouldMerge || (this.state.document === null)) {
+          document = new GraphDocument({
+            name: fileResult.name,
+            data: GraphData.applyDefaults(serializedDocument)
+          });
+          documentId = null;
+          merged = false;
+        } else {
+          document = this.state.document.merge(serializedDocument);
+          documentId = this.state.loadedDocumentId;
+          merged = true;
+        }
+        this.setDocument(document, documentId, this.state.canSaveDocument);
+        if (merged) {
+          this.markDocumentDirty();
+        }
+        this.closeLeftDrawer();
+      })
+    )
+  }
 }
 
 export default App;

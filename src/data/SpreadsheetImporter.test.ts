@@ -1,4 +1,5 @@
-import * as GraphData from "../../data/GraphData";
+import * as GraphData from "../data/GraphData";
+
 import { internals } from "./SpreadsheetImporter";
 
 it("test empty spreadsheet", () => {
