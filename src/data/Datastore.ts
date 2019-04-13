@@ -1,6 +1,5 @@
-import { Headers } from "request";
-import * as Request from "request-promise-native";
 import * as GoogleApi from "../google/GoogleApi";
+import * as GooglePickerHelper from "../google/GooglePickerHelper";
 import { DatastoreStatus } from "./DatastoreStatus";
 import { BasicListenable } from "./Listenable";
 
@@ -26,6 +25,10 @@ export interface DatastoreLoadFileResult<T> {
 //     canSave: original.canSave
 //   };
 // }
+
+function isSuccessful(response: ResponseInit) {
+  return response.status === undefined || (response.status >= 200 && response.status < 300);
+}
 
 export class Datastore extends BasicListenable<"status_changed"> {
   private _status = DatastoreStatus.Initializing;
@@ -98,7 +101,17 @@ export class Datastore extends BasicListenable<"status_changed"> {
     return url + queryParts.join("&");
   }
 
-  private loadFileContent(fileId: string): PromiseLike<string> {
+  private authHeaders(): Record<string, string> {
+    if (this._accessToken) {
+      return {
+        Authorization: `Bearer ${this._accessToken}`
+      };
+    } else {
+      return {};
+    }
+  }
+
+  private async loadFileContent(fileId: string): Promise<string> {
     const url = this.addQueryParams(
       "https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(fileId),
       {
@@ -106,12 +119,17 @@ export class Datastore extends BasicListenable<"status_changed"> {
         "key": GoogleApi.config.API_KEY
       }
     );
-    const headers: Headers = {};
-    if (this._accessToken) {
-      headers.Authorization = "Bearer " + this._accessToken;
+
+    const options: RequestInit = {
+      headers: this.authHeaders()
     }
 
-    return Request.get(url, { headers: headers });
+    const response = await window.fetch(url, options);
+    if (!isSuccessful(response)) {
+      throw new Error(`error ${response.status}: ${response.statusText}`);
+    }
+
+    return response.text();
   }
 
   private interpretCanSave(metadata: GoogleApi.DriveFile) {
@@ -125,21 +143,21 @@ export class Datastore extends BasicListenable<"status_changed"> {
     );
   }
 
-  public loadFile(fileId: string): PromiseLike<DatastoreLoadFileResult<string>> {
-    return Promise.all([
+  public async loadFile(fileId: string): Promise<DatastoreLoadFileResult<string>> {
+    const [metadata, content] = await Promise.all([
       this.getFileMetadata(fileId),
       this.loadFileContent(fileId)
-    ]).then(([metadata, content]) => {
-      return {
-        id: fileId,
-        name: metadata.name || "Untitled",
-        content: content,
-        canSave: this.interpretCanSave(metadata)
-      };
-    });
+    ]);
+
+    return {
+      id: fileId,
+      name: metadata.name || "Untitled",
+      content: content,
+      canSave: this.interpretCanSave(metadata)
+    };
   }
 
-  public saveFileAs(name: string, data: string, mimeType: string): PromiseLike<string> {
+  public async saveFileAs(name: string, data: string, mimeType: string): Promise<string> {
     if (!this.isSignedIn()) {
       return Promise.reject(new Error("not logged in"));
     }
@@ -155,37 +173,41 @@ export class Datastore extends BasicListenable<"status_changed"> {
       name: name,
       mimeType: mimeType
     };
-    return Request({
-      uri: uri,
+
+    const formData = new FormData();
+    formData.append(
+      "metadata",
+      new Blob(
+        [JSON.stringify(metadata)],
+        { type: "application/json" }
+      )
+    );
+    formData.append(
+      "file",
+      new Blob(
+        [data],
+        { type: GooglePickerHelper.GRAPHIT_MIME_TYPE }
+      )
+    );
+
+    const response = await window.fetch(uri, {
       method: "POST",
-      headers: {
-        "Authorization": "Bearer " + this._accessToken
-      },
-      multipart: {
-        data: [
-          {
-            "content-type": "application/json",
-            body: JSON.stringify(metadata)
-          },
-          {
-            "content-type": "application/json",
-            body: data
-          }
-        ]
-      }
-    }).then((result) => {
-      if (typeof result !== "string") {
-        throw new Error("unexpected save result");
-      }
-      const resultData = JSON.parse(result);
-      if (resultData.id === undefined) {
-        throw new Error("didn't receive id");
-      }
-      return resultData.id;
+      headers: this.authHeaders(),
+      body: formData
     });
+
+    if (!isSuccessful(response)) {
+      throw new Error(`error saving (${response.status}): ${response.statusText}`);
+    }
+
+    const resultData = await response.json();
+    if (resultData.id === undefined) {
+      throw new Error("didn't receive id");
+    }
+    return resultData.id;
   }
 
-  public updateFile(fileId: string, data: string): PromiseLike<void> {
+  public async updateFile(fileId: string, data: string): Promise<void> {
     const uri = this.addQueryParams(
       "https://www.googleapis.com/upload/drive/v3/files/" + encodeURIComponent(fileId),
       {
@@ -193,13 +215,15 @@ export class Datastore extends BasicListenable<"status_changed"> {
       }
     );
 
-    return Request.patch({
-      uri: uri,
-      headers: {
-        "Authorization": "Bearer " + this._accessToken
-      },
-      body: data
-    }) as PromiseLike<void>;
+    const response = await window.fetch(uri, {
+      method: "PATCH",
+      headers: this.authHeaders(),
+      body: new Blob([data], { type: GooglePickerHelper.GRAPHIT_MIME_TYPE })
+    });
+
+    if (!isSuccessful(response)) {
+      throw new Error(`error updating (${response.status}): ${response.statusText}`);
+    }
   }
 
   private filesResource() {

@@ -248,7 +248,9 @@ class App extends React.Component<{}, State> {
   }
 
   private decodeErrorReason(reason: any): string {
-    if (reason && reason.result && reason.result.error && reason.result.error.errors) {
+    if (reason instanceof Error) {
+      return reason.message;
+    } else if (reason && reason.result && reason.result.error && reason.result.error.errors) {
       const errors = reason.result.error.errors;
       if (errors.length === 1) {
         const onlyError = errors[0];
@@ -257,7 +259,7 @@ class App extends React.Component<{}, State> {
         }
       }
     }
-    return JSON.stringify(reason);
+    return JSON.stringify({ reason: reason });
   }
 
   private updateWindowTitle() {
@@ -376,7 +378,7 @@ class App extends React.Component<{}, State> {
           this.closeLeftDrawer();
         },
         (reason) => {
-          alert("save failed!\n" + this.decodeErrorReason(reason));
+          alert("save-as failed!\n" + this.decodeErrorReason(reason));
         }
       )
     );
