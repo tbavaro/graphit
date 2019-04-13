@@ -1,4 +1,4 @@
-@import "_all";
+/* linkColor = #d1c7c7*/
 
 .GraphViewport-linkLines {
   position: absolute;
@@ -6,16 +6,16 @@
   top: 0;
   width: 100%;
   height: 100%;
-  stroke: $linkColor;
+  stroke: #d1c7c7;
   stroke-width: 2px;
   fill: none;
+}
 
-  .stroke-dashed {
-    stroke-dasharray: 6;
-  }
+.GraphViewport-linkLines .stroke-dashed {
+  stroke-dasharray: 6;
 }
 
 .GraphViewport-linkLines marker#arrow {
   stroke-width: 0;
-  fill: $linkColor;
+  fill: #d1c7c7;
 }

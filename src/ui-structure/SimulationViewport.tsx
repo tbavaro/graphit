@@ -9,7 +9,7 @@ import { SimpleListenable } from "../data/Listenable";
 import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
 import * as GraphViewport from "./GraphViewport";
 import { ListenableSimulationWrapper } from "./ListenableSimulation";
-import { ListenerBinding, ListenerPureComponent } from "./ui-helpers/ListenerPureComponent";
+import { ListenerBinding, ListenerPureComponent } from "./ListenerPureComponent";
 
 export interface Props {
   document: GraphDocument;

@@ -1,5 +1,5 @@
-@import "@material/typography/mdc-typography.scss";
-@import "_all";
+/* @import "@material/typography/mdc-typography.scss"; */
+@import "../_all";
 
 $nodeMaxWidth: 150px;
 
@@ -11,7 +11,7 @@ $nodeMaxWidth: 150px;
 }
 
 .NodeView-content {
-  @include mdc-typography(body1);
+  // @include mdc-typography(body1);
   // line-height: 1.1;
   font-weight: bold;
 

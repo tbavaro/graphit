@@ -5,13 +5,13 @@ import "./GraphViewport.css";
 import * as GraphData from "../data/GraphData";
 import { MyLinkDatum, MyNodeDatum } from "../data/MyNodeDatum";
 
-import * as Viewport from "./ui-helpers/Viewport";
 
-import { forSome } from "./util/Utils";
+import { forSome } from "../util/Utils";
 
 import * as LinkRenderers from "./LinkRenderers";
 import { Component as NodeView } from "./NodeView";
 import { NodeActionManager } from "./NodeView";
+import * as Viewport from "./Viewport";
 
 interface SVGLinesComponentProps {
   links: MyLinkDatum[];
