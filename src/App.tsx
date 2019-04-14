@@ -45,6 +45,8 @@ class App extends React.Component<{}, State> {
     return listener;
   })();
 
+  private oldWindowOnBeforeUnload: any | null = null;
+
   public componentWillMount() {
     if (super.componentWillMount) {
       super.componentWillMount();
@@ -66,6 +68,10 @@ class App extends React.Component<{}, State> {
       // TODO in the old version this would automatically open the left nav
       this.hideModalOverlay();
     }
+
+    // override window.onBeforeUnload so we can ask the user if they are ok with unsaved changes
+    this.oldWindowOnBeforeUnload = window.onbeforeunload;
+    window.onbeforeunload = this.onBeforeUnload;
   }
 
   public componentWillUnmount() {
@@ -73,6 +79,12 @@ class App extends React.Component<{}, State> {
       super.componentWillUnmount();
     }
     this.datastore.removeListener("status_changed", this.onDatastoreStatusChanged);
+
+    // restore window.onBeforeUnload that we overrode
+    if (window.onbeforeunload === this.onBeforeUnload) {
+      window.onbeforeunload = this.oldWindowOnBeforeUnload;
+    }
+    this.oldWindowOnBeforeUnload = null;
   }
 
   public render() {
@@ -400,6 +412,16 @@ class App extends React.Component<{}, State> {
     saveAs: this.showSaveAsDialog,
     closeRightDrawer: this.closeRightDrawer
   });
+
+  private onBeforeUnload = () => {
+    if (this.isDocumentDirty()) {
+      // NB: most modern browsers don't actually show this specific text,
+      // but returning *something* makes it prompt the user before leaving.
+      return "There are unsaved changes.";
+    } else {
+      return undefined;
+    }
+  }
 }
 
 export default App;
