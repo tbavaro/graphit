@@ -27,6 +27,7 @@ const styles = createStyles(stylesFunc);
 
 export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
   title: string;
+  documentIsLoaded: boolean;
   onClickEditButton: () => void;
   onClickMenuButton: () => void;
 }
@@ -43,7 +44,13 @@ function MyAppBar(props: Props) {
           {props.title}
         </Typography>
         <div>
-          <IconButton className={classes.editButton} color="inherit" aria-label="Edit" onClick={props.onClickEditButton}>
+          <IconButton
+            className={classes.editButton}
+            color="inherit"
+            aria-label="Edit"
+            disabled={!props.documentIsLoaded}
+            onClick={props.onClickEditButton}
+          >
             <EditIcon/>
           </IconButton>
         </div>

@@ -26,6 +26,7 @@ export interface Props extends WithStyles<typeof styles> {
   leftDrawerChildren: any;
   rightDrawerChildren: any;
   title: string;
+  documentIsLoaded: boolean;
 }
 
 interface State {
@@ -44,6 +45,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
       <div className="MyAppRoot">
         <MyAppBar
           title={this.props.title}
+          documentIsLoaded={this.props.documentIsLoaded}
           onClickEditButton={this.toggleRightDrawer}
           onClickMenuButton={this.openLeftDrawer}
         />

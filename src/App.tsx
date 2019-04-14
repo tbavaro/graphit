@@ -106,6 +106,7 @@ class App extends React.Component<{}, State> {
           rightDrawerChildren={propertiesDrawerContents}
           title={(this.state.document && this.state.document.name) || "GraphIt"}
           innerRef={this.setAppRootRef}
+          documentIsLoaded={this.state.document !== null}
         >
           {this.renderBody()}
         </MyAppRoot>
