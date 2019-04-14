@@ -8,12 +8,9 @@ import { GraphDocument } from "../data/GraphDocument";
 import { SimpleListenable } from "../data/Listenable";
 import * as SimulationViewport from "../ui-structure/SimulationViewport";
 
-import * as PropertiesView from "./PropertiesView";
 import * as AppBar from "./ui-helpers/AppBar";
 
-export type AllActions =
-  AppBar.Actions &
-  PropertiesView.Actions;
+export type AllActions = AppBar.Actions;
 
 interface State {
   document: GraphDocument | null;
@@ -49,12 +46,6 @@ class App extends React.Component<object, State> {
   private pendingDocumentLoadId?: string;
 
   private actionManager: AllActions = {
-    closePropertiesView: () => {
-      this.setState({
-        propertiesViewOpen: false
-      });
-    },
-
     togglePropertiesView: () => {
       this.setState({
         propertiesViewOpen: !this.state.propertiesViewOpen
@@ -101,7 +92,6 @@ class App extends React.Component<object, State> {
     this.updateWindowTitle();
 
     let viewportView: any;
-    let propertiesView: any;
     let title: string = "GraphIt";
 
     if (this.state.document !== null) {
@@ -111,14 +101,6 @@ class App extends React.Component<object, State> {
           document={this.state.document}
           simulationConfigListener={this.simulationConfigListener}
           onChange={this.markDocumentDirty}
-        />
-      );
-      propertiesView = (
-        <PropertiesView.Component
-          actionManager={this.actionManager}
-          isOpen={this.state.propertiesViewOpen}
-          document={this.state.document}
-          simulationConfigListener={this.simulationConfigListener}
         />
       );
     } else {
@@ -135,7 +117,6 @@ class App extends React.Component<object, State> {
         />
         <div className="App-content">
           {viewportView}
-          {propertiesView}
         </div>
         {this.state.modalOverlayText ? this.renderModalOverlay(this.state.modalOverlayText) : null}
         {this.state.activeDialog}
