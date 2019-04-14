@@ -73,7 +73,12 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
   }
 }
 
+export interface Actions {
+  closePropertiesDrawer: () => void;
+}
+
 interface Props {
+  actions: Actions;
   document: GraphDocument | null;
   simulationConfigListener: SimpleListenable;
 }
@@ -94,7 +99,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
           <ListItem button={false}>
             <ListItemText primary="Simulation Properties"/>
             <ListItemSecondaryAction>
-              <IconButton aria-label="Close">
+              <IconButton aria-label="Close" onClick={this.props.actions.closePropertiesDrawer}>
                 <CloseIcon className="PropertiesDrawerContents-closeIcon"/>
               </IconButton>
             </ListItemSecondaryAction>

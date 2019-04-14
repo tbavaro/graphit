@@ -1,14 +1,16 @@
 import { Datastore } from "./data/Datastore";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
+import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 
-export type Actions = NavDrawerContents.Actions;
+export type Actions = NavDrawerContents.Actions & PropertiesDrawerContents.Actions;
 
 export interface SideEffects {
   loadDocumentById: (id: string) => void;
   importOrMergeGoogleSheet: (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => void;
   save: () => void;
   saveAs: () => void;
+  closeRightDrawer: () => void;
 }
 
 export default class ActionManager implements Actions {
@@ -44,4 +46,7 @@ export default class ActionManager implements Actions {
   // save things
   public save = () => this.sideEffects.save()
   public saveAs = () => this.sideEffects.saveAs()
+
+  // trigger UI events
+  public closePropertiesDrawer = () => this.sideEffects.closeRightDrawer()
 }

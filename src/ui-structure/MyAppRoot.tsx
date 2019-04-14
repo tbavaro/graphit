@@ -67,6 +67,10 @@ export class MyAppRootInner extends React.Component<Props, State> {
     this.setState({ leftDrawerOpen: false });
   }
 
+  public closeRightDrawer = () => {
+    this.setState({ rightDrawerOpen: false });
+  }
+
   private openLeftDrawer = () => {
     this.setState({ leftDrawerOpen: true });
   }

@@ -93,6 +93,7 @@ class App extends React.Component<{}, State> {
       <PropertiesDrawerContents
         document={this.state.document}
         simulationConfigListener={this.simulationConfigListener}
+        actions={this.actionManager}
       />
     );
 
@@ -162,6 +163,11 @@ class App extends React.Component<{}, State> {
   private closeLeftDrawer = () => {
     if (this.appRootRef) {
       this.appRootRef.closeLeftDrawer();
+    }
+  };
+  private closeRightDrawer = () => {
+    if (this.appRootRef) {
+      this.appRootRef.closeRightDrawer();
     }
   };
 
@@ -389,7 +395,8 @@ class App extends React.Component<{}, State> {
     loadDocumentById: this.loadDocumentById,
     importOrMergeGoogleSheet: this.importOrMergeGoogleSheet,
     save: this.save,
-    saveAs: this.showSaveAsDialog
+    saveAs: this.showSaveAsDialog,
+    closeRightDrawer: this.closeRightDrawer
   });
 }
 
