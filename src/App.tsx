@@ -83,6 +83,7 @@ class App extends React.Component<{}, State> {
       <NavDrawerContents
         actions={this.actionManager}
         canSave={this.state.canSaveDocument}
+        documentIsLoaded={this.state.document !== null}
         datastoreStatus={this.datastore.status()}
         currentUserImageUrl={this.datastore.currentUserImageUrl()}
         currentUserName={this.datastore.currentUserName()}

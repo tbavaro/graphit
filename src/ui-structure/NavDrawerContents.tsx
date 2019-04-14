@@ -13,6 +13,7 @@ import "./NavDrawerContents.css";
 export interface Props {
   actions: Actions;
   canSave: boolean;
+  documentIsLoaded: boolean;
   datastoreStatus: DatastoreStatus;
   currentUserImageUrl?: string;
   currentUserName?: string;
@@ -105,10 +106,12 @@ class NavDrawerContents extends React.Component<Props, {}> {
                   }),
                   renderMenuOption({
                     label: "Save as...",
+                    disabled: !this.props.documentIsLoaded,
                     action: this.props.actions.saveAs
                   }),
                   renderMenuOption({
                     label: "Merge spreadsheet...",
+                    disabled: !this.props.documentIsLoaded,
                     action: this.props.actions.mergeGoogleSheet
                   }),
                   <Divider key="div1"/>,
