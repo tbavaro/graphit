@@ -92,6 +92,7 @@ class App extends React.Component<{}, State> {
     const propertiesDrawerContents = (
       <PropertiesDrawerContents
         document={this.state.document}
+        simulationConfigListener={this.simulationConfigListener}
       />
     );
 
