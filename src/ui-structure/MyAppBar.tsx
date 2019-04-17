@@ -14,7 +14,7 @@ const stylesFunc = (theme: Theme) => ({
   editButton: {
     marginRight: -16
   },
-  grow: {
+  title: {
     flexGrow: 1
   },
   menuButton: {
@@ -40,7 +40,7 @@ function MyAppBar(props: Props) {
         <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={props.onClickMenuButton}>
           <MenuIcon/>
         </IconButton>
-        <Typography className={classes.grow} variant="h6" color="inherit">
+        <Typography className={classes.title} variant="h6" color="inherit" noWrap={true}>
           {props.title}
         </Typography>
         <div>
