@@ -6,7 +6,7 @@ import "./App.css";
 
 import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as GraphData from "./data/GraphData";
-import { GraphDocument } from "./data/GraphDocument";
+import { GraphDocument, SimulationPropertyField } from "./data/GraphDocument";
 import { SimpleListenable } from "./data/Listenable";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
@@ -107,7 +107,6 @@ class App extends React.Component<{}, State> {
     const propertiesDrawerContents = (
       <PropertiesDrawerContents.default
         document={this.state.document}
-        simulationConfigListener={this.simulationConfigListener}
         actions={this.actionManager}
       />
     );
@@ -433,18 +432,17 @@ class App extends React.Component<{}, State> {
     saveAs: this.showSaveAsDialog,
 
     // trigger UI events
-    closePropertiesDrawer: this.closeRightDrawer
-  };
+    closePropertiesDrawer: this.closeRightDrawer,
 
-/*
-  new ActionManager(this.datastore, {
-    loadDocumentById: this.loadDocumentById,
-    importOrMergeGoogleSheet: this.importOrMergeGoogleSheet,
-    save: this.save,
-    saveAs: this.showSaveAsDialog,
-    closeRightDrawer: this.closeRightDrawer
-  });
-  */
+    // update doc
+    setSimulationProperty: (field: SimulationPropertyField, value: number) => {
+      const document = this.state.document;
+      if (document !== null) {
+        document.layoutState.forceSimulationConfig[field] = value;
+        this.simulationConfigListener.triggerListeners();
+      }
+    }
+  };
 
   private onBeforeUnload = () => {
     if (this.isDocumentDirty()) {

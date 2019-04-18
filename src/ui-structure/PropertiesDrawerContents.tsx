@@ -1,15 +1,11 @@
-import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
-import CloseIcon from "@material-ui/icons/Close";
 import Slider from "@material-ui/lab/Slider";
 
 import * as React from "react";
 
-import { GraphDocument } from "../data/GraphDocument";
-import { SimpleListenable } from "../data/Listenable";
+import { GraphDocument, SimulationPropertyField } from "../data/GraphDocument";
 import { ValueFormatter, ValueFormatters } from "../ValueFormatters";
 
 import "./PropertiesDrawerContents.css";
@@ -17,12 +13,12 @@ import "./PropertiesDrawerContents.css";
 interface MySliderListItemProps<F extends string> {
   label: string;
   field: F;
-  object: { [K in F]: number };
+  object: Readonly<{ [K in F]: number }>;
   formatter: ValueFormatter<number>;
   minValue?: number;
   maxValue: number;
   exponent?: number;
-  listener: SimpleListenable;
+  setValue: (field: F, value: number) => void;
 }
 
 class MySliderListItem<F extends string> extends React.PureComponent<MySliderListItemProps<F>, {}> {
@@ -59,9 +55,8 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
   }
 
   private onChange = (event: any, value: number) => {
-    this.props.object[this.props.field] = this.adjustValue(value, true);
+    this.props.setValue(this.props.field, this.adjustValue(value, true));
     this.forceUpdate();
-    this.props.listener.triggerListeners();
   }
 
   private adjustValue(value: number, reverse: boolean) {
@@ -75,12 +70,12 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
 
 export interface Actions {
   closePropertiesDrawer: () => void;
+  setSimulationProperty: (field: SimulationPropertyField, value: number) => void;
 }
 
 interface Props {
   actions: Actions;
   document: GraphDocument | null;
-  simulationConfigListener: SimpleListenable;
 }
 
 const FORMATTER_PRECISION_5 = ValueFormatters.fixedPrecision(5);
@@ -95,33 +90,23 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
 
     return (
       <div className="PropertiesDrawerContents">
-        <List className="PropertiesDrawerContents-header" dense={true}>
-          <ListItem button={false}>
-            <ListItemText primary="Simulation Properties"/>
-            <ListItemSecondaryAction>
-              <IconButton aria-label="Close" onClick={this.props.actions.closePropertiesDrawer}>
-                <CloseIcon className="PropertiesDrawerContents-closeIcon"/>
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        </List>
         <List dense={true}>
           <MySliderListItem
             label="Origin pull strength"
             object={values}
-            field={"originPullStrength"}
+            field="originPullStrength"
             formatter={FORMATTER_PRECISION_5}
             maxValue={0.1}
             exponent={2}
-            listener={this.props.simulationConfigListener}
+            setValue={this.props.actions.setSimulationProperty}
           />
           <MySliderListItem
             label="Particle charge"
             object={values}
-            field={"particleCharge"}
+            field="particleCharge"
             formatter={ValueFormatters.roundedInt}
             maxValue={10000}
-            listener={this.props.simulationConfigListener}
+            setValue={this.props.actions.setSimulationProperty}
           />
           <MySliderListItem
             label="Charge distance max"
@@ -129,7 +114,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
             field={"chargeDistanceMax"}
             formatter={ValueFormatters.roundedInt}
             maxValue={10000}
-            listener={this.props.simulationConfigListener}
+            setValue={this.props.actions.setSimulationProperty}
           />
           <MySliderListItem
             label="Link distance"
@@ -137,7 +122,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
             field={"linkDistance"}
             formatter={ValueFormatters.roundedInt}
             maxValue={1000}
-            listener={this.props.simulationConfigListener}
+            setValue={this.props.actions.setSimulationProperty}
           />
         </List>
       </div>

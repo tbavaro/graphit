@@ -80,6 +80,9 @@ function assertDefined<T>(value: T | undefined): T {
   return value;
 }
 
+type ForceSimulationConfig = GraphData.Document["layoutState"]["forceSimulationConfig"];
+export type SimulationPropertyField = keyof ForceSimulationConfig;
+
 export class GraphDocument {
   public name: string;
   public readonly nodes: MyNodeDatum[];
