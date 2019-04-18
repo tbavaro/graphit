@@ -11,11 +11,13 @@ import { SimpleListenable } from "./data/Listenable";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
-import NavDrawerContents from "./ui-structure/NavDrawerContents";
-import PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
+import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
+import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 import * as SimulationViewport from "./ui-structure/SimulationViewport";
 
-import ActionManager from "./ActionManager";
+type AllActions =
+  NavDrawerContents.Actions &
+  PropertiesDrawerContents.Actions;
 
 interface State {
   canSaveDocument: boolean;
@@ -92,7 +94,7 @@ class App extends React.Component<{}, State> {
     this.updateWindowTitle();
 
     const navDrawerContents = (
-      <NavDrawerContents
+      <NavDrawerContents.default
         actions={this.actionManager}
         canSave={this.state.canSaveDocument}
         documentIsLoaded={this.state.document !== null}
@@ -103,7 +105,7 @@ class App extends React.Component<{}, State> {
     );
 
     const propertiesDrawerContents = (
-      <PropertiesDrawerContents
+      <PropertiesDrawerContents.default
         document={this.state.document}
         simulationConfigListener={this.simulationConfigListener}
         actions={this.actionManager}
@@ -405,13 +407,44 @@ class App extends React.Component<{}, State> {
     );
   };
 
-  private actionManager = new ActionManager(this.datastore, {
+  private actionManager: AllActions = {
+    // sign in/out
+    signIn: () => this.datastore.signIn(),
+    signOut: () => this.datastore.signOut(),
+
+    // open things
+    openFromGoogle: () => {
+      new GooglePickerHelper.default().createAnythingPicker((fileResult) => {
+        if (fileResult.mimeType === GooglePickerHelper.SPREADSHEET_MIME_TYPE) {
+          this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/false);
+        } else {
+          this.loadDocumentById(fileResult.id);
+        }
+      });
+    },
+    mergeGoogleSheet: () => {
+      new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
+        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+      });
+    },
+
+    // save things
+    save: this.save,
+    saveAs: this.showSaveAsDialog,
+
+    // trigger UI events
+    closePropertiesDrawer: this.closeRightDrawer
+  };
+
+/*
+  new ActionManager(this.datastore, {
     loadDocumentById: this.loadDocumentById,
     importOrMergeGoogleSheet: this.importOrMergeGoogleSheet,
     save: this.save,
     saveAs: this.showSaveAsDialog,
     closeRightDrawer: this.closeRightDrawer
   });
+  */
 
   private onBeforeUnload = () => {
     if (this.isDocumentDirty()) {
