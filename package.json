@@ -27,7 +27,7 @@
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "codegen": "./node_modules/.bin/generate-validators --output src/generated/GraphDataValidators.ts src/data/GraphData.ts",
     "push": "./node_modules/.bin/tsdevtools deploy --branch gh-pages --subtreeDir build",
-    "pushbeta": "./node_modules/.bin/tsdevtools deploy --branch gh-pages-beta --subtreeDir build --version-bump beta && git fetch origin gh-pages gh-pages-beta && git checkout gh-pages && rm -rf beta && git clone .git beta --branch gh-pages-beta --single-branch && rm -rf beta/.git && git add -A && git commit -m \"beta\" && git push && git checkout master"
+    "pushbeta": "./node_modules/.bin/tsdevtools deploy --branch gh-pages-beta --subtreeDir build --version-bump beta && git fetch origin gh-pages gh-pages-beta && git checkout gh-pages-beta && git checkout gh-pages && rm -rf beta && git clone .git beta --branch gh-pages-beta --single-branch && rm -rf beta/.git && git add -A beta && git commit -m \"beta\" && git push && git checkout master && git branch -D gh-pages gh-pages-beta"
   },
   "devDependencies": {
     "@types/classnames": "^2.2.7",
