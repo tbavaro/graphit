@@ -1,7 +1,7 @@
 {
   "name": "graphit",
   "homepage": ".",
-  "version": "0.10.2-beta.0",
+  "version": "0.10.2-beta.1",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.9.3",
