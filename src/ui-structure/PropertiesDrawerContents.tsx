@@ -79,6 +79,8 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
 export interface Actions {
   closePropertiesDrawer: () => void;
   setSimulationProperty: (field: SimulationPropertyField, value: number) => void;
+  connectSpreadsheet: () => void;
+  disconnectSpreadsheet: () => void;
 }
 
 interface Props {
@@ -86,17 +88,9 @@ interface Props {
   document: GraphDocument | null;
 }
 
-interface State {
-  spreadsheetName: string | null;
-}
-
 const FORMATTER_PRECISION_5 = ValueFormatters.fixedPrecision(5);
 
-class PropertiesDrawerContents extends React.PureComponent<Props, State> {
-  public state: State = {
-    spreadsheetName: null
-  };
-
+class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
   public render() {
     return (
       <div className="PropertiesDrawerContents">
@@ -106,7 +100,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
             : (
               <React.Fragment>
                 {this.renderSimulationProperties(this.props.document)}
-                {this.renderDataSourceProperties()}
+                {this.renderDataSourceProperties(this.props.document)}
               </React.Fragment>
             )
         }
@@ -160,16 +154,17 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderDataSourceProperties() {
+  private renderDataSourceProperties(document: GraphDocument) {
+    const dataSource = document.dataSource;
     return (
       <List
         dense={true}
         subheader={<ListSubheader>Data source</ListSubheader>}
       >
         {
-          this.state.spreadsheetName === null
+          dataSource.connectedSpreadsheetId === null
             ? this.renderConnectSpreadsheetButtonListItem()
-            : this.renderConnectedSpreadsheetListItem(this.state.spreadsheetName)
+            : this.renderConnectedSpreadsheetListItem(dataSource.connectedSpreadsheetId)
         }
       </List>
     );
@@ -177,7 +172,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
 
   private renderConnectSpreadsheetButtonListItem() {
     return (
-      <ListItem button={true} onClick={this.handleConnectSpreadsheet}>
+      <ListItem button={true} onClick={this.props.actions.connectSpreadsheet}>
         <ListItemText
           primary="Connect spreadsheet..."
           primaryTypographyProps={{
@@ -188,37 +183,25 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderConnectedSpreadsheetListItem(spreadsheetName: string) {
+  private renderConnectedSpreadsheetListItem(spreadsheetId: string) {
     return (
       <ListItem button={false}>
         <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
           <InsertDriveFileIcon />
         </ListItemIcon>
         <ListItemText
-          primary={spreadsheetName}
+          primary={spreadsheetId}
           primaryTypographyProps={{ noWrap: true }}
-          secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
-          secondaryTypographyProps={{ noWrap: true }}
+          // secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
+          // secondaryTypographyProps={{ noWrap: true }}
         />
         <ListItemSecondaryAction>
-          <IconButton aria-label="disconnect" onClick={this.handleDisconnectSpreadsheet}>
+          <IconButton aria-label="disconnect" onClick={this.props.actions.disconnectSpreadsheet}>
             <CloseIcon />
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>
     );
-  }
-
-  private handleConnectSpreadsheet = () => {
-    this.setState({
-      spreadsheetName: "foo aeou nthaoeu ntaoehunthaeouns thaoeunthaesnuth"
-    });
-  }
-
-  private handleDisconnectSpreadsheet = () => {
-    this.setState({
-      spreadsheetName: null
-    });
   }
 }
 

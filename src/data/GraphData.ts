@@ -94,6 +94,14 @@ export type SerializedDisplayConfigV1 = {
 /**
  * @autogents validator
  */
+export type SerializedDataSourceV1 = {
+  connectedSpreadsheetId?: string | null;
+  lastMergeTime?: string | null; // UTC timestamp
+};
+
+/**
+ * @autogents validator
+ */
 export type SerializedDocumentV1 = {
   version?: 1;
   nodes?: SerializedNodeV1[];
@@ -101,6 +109,7 @@ export type SerializedDocumentV1 = {
   zoomState?: SerializedZoomStateV1;
   layoutState?: SerializedLayoutStateV1;
   displayConfig?: SerializedDisplayConfigV1;
+  dataSource?: SerializedDataSourceV1;
 };
 
 export const validateDocumentV1 =
@@ -161,6 +170,10 @@ export const documentDefaults = DeepReadonly.deepFreeze<Defaults.Defaults<Serial
   },
   displayConfig: {
     nodeRenderMode: "basic"
+  },
+  dataSource: {
+    connectedSpreadsheetId: null,
+    lastMergeTime: null
   }
 });
 

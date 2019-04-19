@@ -97,6 +97,9 @@ export class GraphDocument {
   get displayConfig() {
     return this.data.displayConfig;
   }
+  get dataSource() {
+    return this.data.dataSource;
+  }
 
   public static empty() {
     return this.load("{}");

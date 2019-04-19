@@ -108,6 +108,7 @@ class App extends React.Component<{}, State> {
       <PropertiesDrawerContents.default
         document={this.state.document}
         actions={this.actionManager}
+        ref={this.setPropertiesDrawerContentsRef}
       />
     );
 
@@ -185,6 +186,16 @@ class App extends React.Component<{}, State> {
       this.appRootRef.closeRightDrawer();
     }
   };
+
+  private propertiesDrawerContentsRef?: PropertiesDrawerContents.default;
+  private setPropertiesDrawerContentsRef = (newRef: PropertiesDrawerContents.default) => {
+    this.propertiesDrawerContentsRef = newRef;
+  }
+  private refreshPropertiesDrawerContents = () => {
+    if (this.propertiesDrawerContentsRef) {
+      this.propertiesDrawerContentsRef.forceUpdate();
+    }
+  }
 
   // load documents
   private loadDocumentById = (id: string | null) => {
@@ -440,6 +451,20 @@ class App extends React.Component<{}, State> {
       if (document !== null) {
         document.layoutState.forceSimulationConfig[field] = value;
         this.simulationConfigListener.triggerListeners();
+      }
+    },
+
+    // data source
+    connectSpreadsheet: () => {
+      if (this.state.document !== null) {
+        this.state.document.dataSource.connectedSpreadsheetId = "foo";
+        this.refreshPropertiesDrawerContents();
+      }
+    },
+    disconnectSpreadsheet: () => {
+      if (this.state.document !== null) {
+        this.state.document.dataSource.connectedSpreadsheetId = null;
+        this.refreshPropertiesDrawerContents();
       }
     }
   };
