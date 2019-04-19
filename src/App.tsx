@@ -344,10 +344,12 @@ class App extends React.Component<{}, State> {
           merged = true;
           canSave = this.state.canSaveDocument;
         }
+        document.dataSource.connectedSpreadsheetId = fileResult.id;
         this.setDocument(document, documentId, canSave);
         if (merged) {
           this.markDocumentDirty();
         }
+        this.refreshPropertiesDrawerContents();
         this.closeLeftDrawer();
       })
     )
@@ -456,10 +458,9 @@ class App extends React.Component<{}, State> {
 
     // data source
     connectSpreadsheet: () => {
-      if (this.state.document !== null) {
-        this.state.document.dataSource.connectedSpreadsheetId = "foo";
-        this.refreshPropertiesDrawerContents();
-      }
+      new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
+        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+      });
     },
     disconnectSpreadsheet: () => {
       if (this.state.document !== null) {
