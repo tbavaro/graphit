@@ -1,5 +1,6 @@
 .PropertiesDrawerContents {
   overflow-x: hidden;
+  padding-top: 8px;
   width: 250px;
 }
 
@@ -18,6 +19,7 @@
 
 .PropertiesDrawerContents-sliderItem {
   padding-right: 0 !important;
+  margin-bottom: 12px !important;
 }
 
 .PropertiesDrawerContents-sliderContainer {
@@ -27,4 +29,8 @@
 .PropertiesDrawerContents-sliderValue {
   display: block;
   float: right;
+}
+
+.PropertiesDrawerContents-spreadsheetIcon {
+  margin-right: -6px !important;
 }

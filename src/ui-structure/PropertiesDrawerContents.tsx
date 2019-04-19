@@ -1,6 +1,13 @@
+import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
+import ListSubheader from "@material-ui/core/ListSubheader";
+import CloseIcon from "@material-ui/icons/Close";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
+
 import Slider from "@material-ui/lab/Slider";
 
 import * as React from "react";
@@ -26,7 +33,8 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
     const value = this.props.object[this.props.field];
 
     return (
-      <ListItem className="PropertiesDrawerContents-sliderItem" button={false}>
+      <ListItem
+        className="PropertiesDrawerContents-sliderItem" button={false}>
         <ListItemText
           primary={
             <React.Fragment>
@@ -78,55 +86,139 @@ interface Props {
   document: GraphDocument | null;
 }
 
+interface State {
+  spreadsheetName: string | null;
+}
+
 const FORMATTER_PRECISION_5 = ValueFormatters.fixedPrecision(5);
 
-class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
+class PropertiesDrawerContents extends React.PureComponent<Props, State> {
+  public state: State = {
+    spreadsheetName: null
+  };
+
   public render() {
-    if (this.props.document === null) {
-      return <div className="PropertiesDrawerContents"/>;
-    }
-
-    const values = this.props.document.layoutState.forceSimulationConfig;
-
     return (
       <div className="PropertiesDrawerContents">
-        <List dense={true}>
-          <MySliderListItem
-            label="Origin pull strength"
-            object={values}
-            field="originPullStrength"
-            formatter={FORMATTER_PRECISION_5}
-            maxValue={0.1}
-            exponent={2}
-            setValue={this.props.actions.setSimulationProperty}
-          />
-          <MySliderListItem
-            label="Particle charge"
-            object={values}
-            field="particleCharge"
-            formatter={ValueFormatters.roundedInt}
-            maxValue={10000}
-            setValue={this.props.actions.setSimulationProperty}
-          />
-          <MySliderListItem
-            label="Charge distance max"
-            object={values}
-            field={"chargeDistanceMax"}
-            formatter={ValueFormatters.roundedInt}
-            maxValue={10000}
-            setValue={this.props.actions.setSimulationProperty}
-          />
-          <MySliderListItem
-            label="Link distance"
-            object={values}
-            field={"linkDistance"}
-            formatter={ValueFormatters.roundedInt}
-            maxValue={1000}
-            setValue={this.props.actions.setSimulationProperty}
-          />
-        </List>
+        {
+          this.props.document === null
+            ? null
+            : (
+              <React.Fragment>
+                {this.renderSimulationProperties(this.props.document)}
+                {this.renderDataSourceProperties()}
+              </React.Fragment>
+            )
+        }
       </div>
     );
+  }
+
+  private renderSimulationProperties(document: GraphDocument) {
+    const values = document.layoutState.forceSimulationConfig;
+    return (
+      <List
+        dense={true}
+        subheader={(
+          <ListSubheader>Simulation properties</ListSubheader>
+        )}
+      >
+        <MySliderListItem
+          label="Origin pull strength"
+          object={values}
+          field="originPullStrength"
+          formatter={FORMATTER_PRECISION_5}
+          maxValue={0.1}
+          exponent={2}
+          setValue={this.props.actions.setSimulationProperty}
+        />
+        <MySliderListItem
+          label="Particle charge"
+          object={values}
+          field="particleCharge"
+          formatter={ValueFormatters.roundedInt}
+          maxValue={10000}
+          setValue={this.props.actions.setSimulationProperty}
+        />
+        <MySliderListItem
+          label="Charge distance max"
+          object={values}
+          field={"chargeDistanceMax"}
+          formatter={ValueFormatters.roundedInt}
+          maxValue={10000}
+          setValue={this.props.actions.setSimulationProperty}
+        />
+        <MySliderListItem
+          label="Link distance"
+          object={values}
+          field={"linkDistance"}
+          formatter={ValueFormatters.roundedInt}
+          maxValue={1000}
+          setValue={this.props.actions.setSimulationProperty}
+        />
+      </List>
+    );
+  }
+
+  private renderDataSourceProperties() {
+    return (
+      <List
+        dense={true}
+        subheader={<ListSubheader>Data source</ListSubheader>}
+      >
+        {
+          this.state.spreadsheetName === null
+            ? this.renderConnectSpreadsheetButtonListItem()
+            : this.renderConnectedSpreadsheetListItem(this.state.spreadsheetName)
+        }
+      </List>
+    );
+  }
+
+  private renderConnectSpreadsheetButtonListItem() {
+    return (
+      <ListItem button={true} onClick={this.handleConnectSpreadsheet}>
+        <ListItemText
+          primary="Connect spreadsheet..."
+          primaryTypographyProps={{
+            color: "secondary"
+          }}
+        />
+      </ListItem>
+    );
+  }
+
+  private renderConnectedSpreadsheetListItem(spreadsheetName: string) {
+    return (
+      <ListItem button={false}>
+        <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
+          <InsertDriveFileIcon />
+        </ListItemIcon>
+        <ListItemText
+          primary={spreadsheetName}
+          primaryTypographyProps={{ noWrap: true }}
+          secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
+          secondaryTypographyProps={{ noWrap: true }}
+        />
+        <ListItemSecondaryAction>
+          <IconButton aria-label="disconnect" onClick={this.handleDisconnectSpreadsheet}>
+            <CloseIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    );
+  }
+
+  private handleConnectSpreadsheet = () => {
+    this.setState({
+      spreadsheetName: "foo aeou nthaoeu ntaoehunthaeouns thaoeunthaesnuth"
+    });
+  }
+
+  private handleDisconnectSpreadsheet = () => {
+    this.setState({
+      spreadsheetName: null
+    });
   }
 }
 
