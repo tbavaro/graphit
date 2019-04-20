@@ -7,6 +7,7 @@ import {
 import * as React from "react";
 
 import MyAppBar from "./MyAppBar";
+import MySnackbarHelper from "./MySnackbarHelper";
 
 import "./MyAppRoot.css";
 
@@ -61,6 +62,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
         <div className={"MyAppRoot-contentContainerOuter " + this.props.classes.contentContainerOuterPadding}>
           <div className="MyAppRoot-contentContainerInner" children={this.props.children}/>
         </div>
+        <MySnackbarHelper ref={this.setSnackbarHelperRef}/>
       </div>
     );
   }
@@ -79,6 +81,16 @@ export class MyAppRootInner extends React.Component<Props, State> {
 
   private toggleRightDrawer = () => {
     this.setState({ rightDrawerOpen: !this.state.rightDrawerOpen });
+  }
+
+  private snackbarHelperRef?: MySnackbarHelper;
+  private setSnackbarHelperRef = (newRef: MySnackbarHelper) => {
+    this.snackbarHelperRef = newRef;
+  }
+  public showSnackbarMessage(message: string) {
+    if (this.snackbarHelperRef) {
+      this.snackbarHelperRef.showSnackbarMessage(message);
+    }
   }
 }
 

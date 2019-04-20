@@ -124,11 +124,7 @@ class App extends React.Component<{}, State> {
         >
           {this.renderBody()}
         </MyAppRoot>
-        {
-          this.state.modalOverlayText !== null
-            ? this.renderModalOverlay(this.state.modalOverlayText)
-            : null
-        }
+        {this.maybeRenderModalOverlay()}
       </React.Fragment>
     );
   }
@@ -149,12 +145,16 @@ class App extends React.Component<{}, State> {
     }
   }
 
-  private renderModalOverlay(text: string) {
+  private maybeRenderModalOverlay() {
+    if (this.state.modalOverlayText === null) {
+      return null;
+    }
+
     return (
       <div className="App-modalOverlay">
         <div className="App-modalOverlay-row">
           <div className="App-modalOverlay-text">
-            {text}
+            {this.state.modalOverlayText}
           </div>
         </div>
       </div>
@@ -469,7 +469,7 @@ class App extends React.Component<{}, State> {
       }
     },
     mergeConnectedSpreadsheetData: () => {
-      alert("ok");
+      this.showSnackbarMessage("Attempted to merge spreadsheet");
     }
   };
 
@@ -480,6 +480,12 @@ class App extends React.Component<{}, State> {
       return "There are unsaved changes.";
     } else {
       return undefined;
+    }
+  }
+
+  private showSnackbarMessage = (message: string) => {
+    if (this.appRootRef) {
+      this.appRootRef.showSnackbarMessage(message);
     }
   }
 }
