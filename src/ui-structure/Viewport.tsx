@@ -42,7 +42,7 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
       throw new Error("refs not set");
     }
 
-    this.zoom.scaleExtent([0.1, 3]).on("zoom", this.zoomed);
+    this.zoom.scaleExtent([0.025, 3]).on("zoom", this.zoomed);
 
     D3.select(this.outerRef).call(this.zoom).on("dblclick.zoom", null);
     this.setZoomState(this.props.initialZoomState || defaultZoomState());
