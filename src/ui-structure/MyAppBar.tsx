@@ -8,11 +8,11 @@ import MenuIcon from "@material-ui/icons/Menu";
 import * as React from "react";
 
 const stylesFunc = (theme: Theme) => ({
-  actionButton: {
-    marginRight: -16
-  },
   appBar: {
     zIndex: theme.zIndex.drawer + 1
+  },
+  lastActionButton: {
+    marginRight: -16
   },
   title: {
     flexGrow: 1
@@ -41,8 +41,7 @@ export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
 
 class MyAppBar extends React.PureComponent<Props, {}> {
   public render() {
-    const { classes } = this.props;
-
+    const { actionButtons, classes } = this.props;
     return (
       <AppBar position="static" className={classes.appBar}>
         <Toolbar variant="dense">
@@ -54,8 +53,10 @@ class MyAppBar extends React.PureComponent<Props, {}> {
           </Typography>
           <div>
             {
-              this.props.actionButtons
-                ? this.props.actionButtons.map(this.renderActionButton)
+              actionButtons
+                ? actionButtons.map((def, i) => {
+                    return this.renderActionButton(def, i === (actionButtons.length - 1));
+                  })
                 : null
             }
           </div>
@@ -64,11 +65,11 @@ class MyAppBar extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderActionButton = (def: ActionButtonDef) => {
+  private renderActionButton(def: ActionButtonDef, isLast: boolean) {
     return (
       <IconButton
         key={def.key || def.label}
-        className={this.props.classes.actionButton}
+        className={isLast ? this.props.classes.lastActionButton : undefined}
         color="inherit"
         aria-label={def.label}
         disabled={def.disabled}
