@@ -203,14 +203,14 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
           </IconButton>
         </ListItemSecondaryAction>
       </ListItem>),
-      (<ListItem button={false} key="updateButton">
+      (<ListItem button={false} key="updateButton" className="PropertiesDrawerContents-updateButtonListItem">
         <ListItemText
           primary={
             <Button variant="outlined" fullWidth={true} onClick={this.props.actions.mergeConnectedSpreadsheetData}>
               Update data
             </Button>
           }
-          className="PropertiesDrawerContents-updateButtonListItem"
+          className="PropertiesDrawerContents-updateButtonListItemText"
         />
       </ListItem>)
     ];
