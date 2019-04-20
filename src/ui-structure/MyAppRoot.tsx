@@ -1,9 +1,11 @@
 import Drawer from "@material-ui/core/Drawer";
+import Popover from "@material-ui/core/Popover";
 import {
   createStyles,
   withStyles,
   WithStyles
 } from "@material-ui/core/styles";
+
 import * as React from "react";
 
 import MyAppBar, { ActionButtonDef } from "./MyAppBar";
@@ -33,12 +35,14 @@ export interface Props extends WithStyles<typeof styles> {
 interface State {
   leftDrawerOpen: boolean;
   rightDrawerOpen: boolean;
+  searchPopoverOpen: boolean;
 }
 
 export class MyAppRootInner extends React.Component<Props, State> {
   public state: State = {
     leftDrawerOpen: false,
-    rightDrawerOpen: false
+    rightDrawerOpen: false,
+    searchPopoverOpen: false
   };
 
   public render() {
@@ -48,6 +52,9 @@ export class MyAppRootInner extends React.Component<Props, State> {
           title={this.props.title}
           onClickMenuButton={this.openLeftDrawer}
           actionButtons={this.props.appBarActionButtons}
+          showSearchField={true}
+          onSearchChanged={this.handleSearchChanged}
+          searchRef={this.setSearchRef}
         />
         <Drawer
           open={this.state.leftDrawerOpen}
@@ -61,8 +68,35 @@ export class MyAppRootInner extends React.Component<Props, State> {
         <div className={"MyAppRoot-contentContainerOuter " + this.props.classes.contentContainerOuterPadding}>
           <div className="MyAppRoot-contentContainerInner" children={this.props.children}/>
         </div>
+        {this.renderSearchPopover()}
         <MySnackbarHelper innerRef={this.setSnackbarHelperRef}/>
       </div>
+    );
+  }
+
+  private renderSearchPopover() {
+    const content = (
+      <div>This is the popover content.</div>
+    );
+
+    return (
+      <Popover
+        open={this.state.searchPopoverOpen}
+        children={content}
+        anchorReference="anchorEl"
+        anchorEl={this.searchElementRef}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right"
+        }}
+        disableAutoFocus={true}
+        disableEnforceFocus={true}
+        hideBackdrop={true}
+      />
     );
   }
 
@@ -86,6 +120,13 @@ export class MyAppRootInner extends React.Component<Props, State> {
     if (this.snackbarHelperRef) {
       this.snackbarHelperRef.showSnackbarMessage(message);
     }
+  }
+
+  private searchElementRef: HTMLElement | null = null;
+  private setSearchRef = (newRef: HTMLElement | null) => { this.searchElementRef = newRef; }
+
+  private handleSearchChanged = (newValue: string) => {
+    this.setState({ searchPopoverOpen: (newValue !== "") });
   }
 }
 

@@ -87,7 +87,12 @@ export interface ActionButtonDef {
 export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
   title: string;
   onClickMenuButton: () => void;
+
   actionButtons?: ActionButtonDef[];
+
+  showSearchField?: boolean;
+  onSearchChanged?: (newValue: string) => void;
+  searchRef?: (newRef: HTMLElement | null) => void;
 }
 
 class MyAppBar extends React.PureComponent<Props, {}> {
@@ -103,7 +108,7 @@ class MyAppBar extends React.PureComponent<Props, {}> {
             {this.props.title}
           </Typography>
           {
-            this.renderSearchField()
+            this.props.showSearchField ? this.renderSearchField() : null
           }
           <div>
             {
@@ -138,7 +143,7 @@ class MyAppBar extends React.PureComponent<Props, {}> {
     return (
       <React.Fragment>
         <div className={classes.grow} />
-        <div className={classes.search + " MyAppBar-search"}>
+        <div className={classes.search + " MyAppBar-search"} ref={this.props.searchRef}>
           <div className={classes.searchIcon}>
             <SearchIcon />
           </div>
@@ -148,10 +153,17 @@ class MyAppBar extends React.PureComponent<Props, {}> {
               root: classes.inputRoot,
               input: classes.inputInput,
             }}
+            onChange={this.handleSearchChange}
           />
         </div>
       </React.Fragment>
     );
+  }
+
+  private handleSearchChange = (event: React.ChangeEvent<{ value: string }>) => {
+    if (this.props.onSearchChanged) {
+      this.props.onSearchChanged(event.target.value);
+    }
   }
 }
 
