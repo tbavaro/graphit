@@ -115,6 +115,30 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
     }
   }
 
+  // if datastore, or more likely datastorestatus, changes, discard any loaded
+  // information about the sheet
+  // TODO find a way to do this without calling setState from within sCU
+  public shouldComponentUpdate(
+    nextProps: Readonly<Props>,
+    nextState: Readonly<State>,
+    nextContext: any
+  ): boolean {
+    if (this.props.datastore !== nextProps.datastore ||
+        this.props.datastoreStatus !== nextProps.datastoreStatus) {
+      this.loadingSheetId = null;
+      this.loadingSheetPromise = null;
+      if (nextState.loadedSheetId !== null) {
+        this.setState({ loadedSheetId: null });
+      }
+    }
+
+    if (super.shouldComponentUpdate) {
+      return super.shouldComponentUpdate(nextProps, nextState, nextContext);
+    } else {
+      return true;
+    }
+  }
+
   public render() {
     return (
       <div className="PropertiesDrawerContents">
