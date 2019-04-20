@@ -6,7 +6,7 @@ import {
 } from "@material-ui/core/styles";
 import * as React from "react";
 
-import MyAppBar from "./MyAppBar";
+import MyAppBar, { ActionButtonDef } from "./MyAppBar";
 import MySnackbarHelper, { MySnackbarHelperInner } from "./MySnackbarHelper";
 
 import "./MyAppRoot.css";
@@ -27,7 +27,7 @@ export interface Props extends WithStyles<typeof styles> {
   leftDrawerChildren: any;
   rightDrawerChildren: any;
   title: string;
-  documentIsLoaded: boolean;
+  appBarActionButtons?: ActionButtonDef[];
 }
 
 interface State {
@@ -46,9 +46,8 @@ export class MyAppRootInner extends React.Component<Props, State> {
       <div className="MyAppRoot">
         <MyAppBar
           title={this.props.title}
-          documentIsLoaded={this.props.documentIsLoaded}
-          onClickEditButton={this.toggleRightDrawer}
           onClickMenuButton={this.openLeftDrawer}
+          actionButtons={this.props.appBarActionButtons}
         />
         <Drawer
           open={this.state.leftDrawerOpen}
@@ -71,15 +70,11 @@ export class MyAppRootInner extends React.Component<Props, State> {
     this.setState({ leftDrawerOpen: false });
   }
 
-  public closeRightDrawer = () => {
-    this.setState({ rightDrawerOpen: false });
-  }
-
   private openLeftDrawer = () => {
     this.setState({ leftDrawerOpen: true });
   }
 
-  private toggleRightDrawer = () => {
+  public toggleRightDrawer = () => {
     this.setState({ rightDrawerOpen: !this.state.rightDrawerOpen });
   }
 

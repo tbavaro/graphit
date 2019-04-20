@@ -1,4 +1,6 @@
 import CssBaseline from "@material-ui/core/CssBaseline";
+import EditIcon from "@material-ui/icons/Edit";
+
 import * as QueryString from "query-string";
 import * as React from "react";
 
@@ -10,6 +12,7 @@ import { GraphDocument, SimulationPropertyField } from "./data/GraphDocument";
 import { SimpleListenable } from "./data/Listenable";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
+import { ActionButtonDef } from "./ui-structure/MyAppBar";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
@@ -114,6 +117,15 @@ class App extends React.Component<{}, State> {
       />
     );
 
+    const appBarActionButtons: ActionButtonDef[] = [
+      {
+        label: "Edit",
+        icon: EditIcon,
+        disabled: (this.state.document === null),
+        onClick: this.handleEditButtonClick
+      }
+    ];
+
     return (
       <React.Fragment>
         <CssBaseline/>
@@ -122,7 +134,7 @@ class App extends React.Component<{}, State> {
           rightDrawerChildren={propertiesDrawerContents}
           title={(this.state.document && this.state.document.name) || "GraphIt"}
           innerRef={this.setAppRootRef}
-          documentIsLoaded={this.state.document !== null}
+          appBarActionButtons={appBarActionButtons}
         >
           {this.renderBody()}
         </MyAppRoot>
@@ -183,9 +195,9 @@ class App extends React.Component<{}, State> {
       this.appRootRef.closeLeftDrawer();
     }
   };
-  private closeRightDrawer = () => {
+  private toggleRightDrawer = () => {
     if (this.appRootRef) {
-      this.appRootRef.closeRightDrawer();
+      this.appRootRef.toggleRightDrawer();
     }
   };
 
@@ -444,9 +456,6 @@ class App extends React.Component<{}, State> {
     save: this.save,
     saveAs: this.showSaveAsDialog,
 
-    // trigger UI events
-    closePropertiesDrawer: this.closeRightDrawer,
-
     // update doc
     setSimulationProperty: (field: SimulationPropertyField, value: number) => {
       const document = this.state.document;
@@ -491,6 +500,10 @@ class App extends React.Component<{}, State> {
     if (this.appRootRef) {
       this.appRootRef.showSnackbarMessage(message);
     }
+  }
+
+  private handleEditButtonClick = () => {
+    this.toggleRightDrawer();
   }
 }
 

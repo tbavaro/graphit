@@ -80,7 +80,6 @@ class MySliderListItem<F extends string> extends React.PureComponent<MySliderLis
 }
 
 export interface Actions {
-  closePropertiesDrawer: () => void;
   setSimulationProperty: (field: SimulationPropertyField, value: number) => void;
   connectSpreadsheet: () => void;
   disconnectSpreadsheet: () => void;
