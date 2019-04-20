@@ -322,17 +322,17 @@ class App extends React.Component<{}, State> {
   private markDocumentDirty = () => this.setDocumentIsDirty(true);
   private markDocumentClean = () => this.setDocumentIsDirty(false);
 
-  private importOrMergeGoogleSheet = (fileResult: GooglePickerHelper.FileResult, shouldMerge: boolean) => {
+  private importOrMergeGoogleSheet = (id: string, shouldMerge: boolean, sheetName?: string) => {
     this.showModalOverlayDuring(
-      shouldMerge ? "Merging..." : "Loading...",
-      SpreadsheetImporter.loadDocumentFromSheet(fileResult.id).then((serializedDocument) => {
+      shouldMerge ? "Updating..." : "Loading...",
+      SpreadsheetImporter.loadDocumentFromSheet(id).then((serializedDocument) => {
         let document: GraphDocument;
         let documentId: string | null;
         let merged: boolean;
         let canSave: boolean;
         if (!shouldMerge || (this.state.document === null)) {
           document = new GraphDocument({
-            name: fileResult.name,
+            name: sheetName === undefined ? "Imported sheet" : sheetName,
             data: GraphData.applyDefaults(serializedDocument)
           });
           documentId = null;
@@ -344,13 +344,16 @@ class App extends React.Component<{}, State> {
           merged = true;
           canSave = this.state.canSaveDocument;
         }
-        document.dataSource.connectedSpreadsheetId = fileResult.id;
+        document.dataSource.connectedSpreadsheetId = id;
         this.setDocument(document, documentId, canSave);
         if (merged) {
           this.markDocumentDirty();
         }
         this.refreshPropertiesDrawerContents();
         this.closeLeftDrawer();
+        if (merged) {
+          this.showSnackbarMessage("Updated data successfully");
+        }
       })
     )
   }
@@ -428,7 +431,7 @@ class App extends React.Component<{}, State> {
     openFromGoogle: () => {
       new GooglePickerHelper.default().createAnythingPicker((fileResult) => {
         if (fileResult.mimeType === GooglePickerHelper.SPREADSHEET_MIME_TYPE) {
-          this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/false);
+          this.importOrMergeGoogleSheet(fileResult.id, /*shouldMerge=*/false, fileResult.name);
         } else {
           this.loadDocumentById(fileResult.id);
         }
@@ -436,7 +439,7 @@ class App extends React.Component<{}, State> {
     },
     mergeGoogleSheet: () => {
       new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
-        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+        this.importOrMergeGoogleSheet(fileResult.id, /*shouldMerge=*/true, fileResult.name);
       });
     },
 
@@ -459,7 +462,7 @@ class App extends React.Component<{}, State> {
     // data source
     connectSpreadsheet: () => {
       new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
-        this.importOrMergeGoogleSheet(fileResult, /*shouldMerge=*/true);
+        this.importOrMergeGoogleSheet(fileResult.id, /*shouldMerge=*/true, fileResult.name);
       });
     },
     disconnectSpreadsheet: () => {
@@ -469,7 +472,11 @@ class App extends React.Component<{}, State> {
       }
     },
     mergeConnectedSpreadsheetData: () => {
-      this.showSnackbarMessage("Attempted to merge spreadsheet");
+      if (this.state.document === null || this.state.document.dataSource.connectedSpreadsheetId === null) {
+        this.showSnackbarMessage("Connect a spreadsheet to enable updating");
+        return;
+      }
+      this.importOrMergeGoogleSheet(this.state.document.dataSource.connectedSpreadsheetId, /*shouldMerge=*/true);
     }
   };
 
