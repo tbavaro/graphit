@@ -77,17 +77,20 @@ export class Datastore extends BasicListenable<"status_changed"> {
     return this.maybeGetProfileData(p => p.getImageUrl());
   }
 
-  private getFileMetadata(fileId: string): PromiseLike<GoogleApi.DriveFile> {
+  private getFileMetadata(fileId: string, fields: Array<keyof GoogleApi.DriveFile>): PromiseLike<GoogleApi.DriveFile> {
     return this.filesResource().get({
       fileId: fileId,
-      fields: "name, capabilities",
+      fields: fields.join(","),
       key: GoogleApi.config.API_KEY
     }).then((f) => f.result);
   }
 
-  public async getFileName(fileId: string): Promise<string> {
-    const result = await this.getFileMetadata(fileId);
-    return result.name || "<untitiled>";
+  public async getFileNameAndUrl(fileId: string): Promise<{ name: string, url?: string }> {
+    const result = await this.getFileMetadata(fileId, ["name", "webViewLink"]);
+    return {
+      name: result.name || "<untitiled>",
+      url: result.webViewLink
+    };
   }
 
   private addQueryParams(url: string, queryParams: { [k: string]: string }) {
@@ -142,7 +145,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
   }
 
   public canSave(fileId: string): PromiseLike<boolean> {
-    return this.getFileMetadata(fileId).then(
+    return this.getFileMetadata(fileId, ["capabilities"]).then(
       (metadata) => this.interpretCanSave(metadata),
       () => false
     );
@@ -150,7 +153,7 @@ export class Datastore extends BasicListenable<"status_changed"> {
 
   public async loadFile(fileId: string): Promise<DatastoreLoadFileResult<string>> {
     const [metadata, content] = await Promise.all([
-      this.getFileMetadata(fileId),
+      this.getFileMetadata(fileId, ["name", "capabilities"]),
       this.loadFileContent(fileId)
     ]);
 

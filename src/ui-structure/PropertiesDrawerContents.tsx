@@ -1,5 +1,6 @@
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
+import Link from "@material-ui/core/Link";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
@@ -98,6 +99,7 @@ interface State {
   loadedSheetDetails: {
     success: true;
     name: string;
+    url?: string;
   } | {
     success: false;
     message: string;
@@ -106,7 +108,7 @@ interface State {
 
 const FORMATTER_PRECISION_5 = ValueFormatters.fixedPrecision(5);
 
-class PropertiesDrawerContents extends React.PureComponent<Props, State> {
+class PropertiesDrawerContents extends React.Component<Props, State> {
   public state: State = {
     loadedSheetId: null,
     loadedSheetDetails: {
@@ -234,11 +236,13 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
   private renderConnectedSpreadsheetListItems(spreadsheetId: string) {
     let isLoaded = false;
     let label = "(loading...)";
+    let url: string | undefined;
 
     if (this.state.loadedSheetId === spreadsheetId) {
       if (this.state.loadedSheetDetails.success) {
         isLoaded = true;
         label = this.state.loadedSheetDetails.name;
+        url = this.state.loadedSheetDetails.url;
       } else {
         isLoaded = false;
         label = this.state.loadedSheetDetails.message;
@@ -247,23 +251,33 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
       this.fetchSheetDetailsIfNeeded(spreadsheetId);
     }
 
+    // set tabindex to -1 when things are clickable, to get around weird tab
+    // navigation issues (focusing on the link is ugly, and keyboard interaction
+    // on the list item doesn't cause the proper link behavior). but DON'T set it
+    // if these aren't active anyway, since having a tabindex causes the link to
+    // become focusable
+    // #checkCrossBrowser
+    const tabIndexOverrides = (url === undefined ? undefined : -1);
+
     return [
-      (<ListItem button={false} key="resource">
-        <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
-          <InsertDriveFileIcon />
-        </ListItemIcon>
-        <ListItemText
-          primary={label}
-          primaryTypographyProps={{ noWrap: true, color: isLoaded ? "default" : "error" }}
-          // secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
-          // secondaryTypographyProps={{ noWrap: true }}
-        />
-        <ListItemSecondaryAction>
-          <IconButton aria-label="disconnect" onClick={this.props.actions.disconnectSpreadsheet}>
-            <CloseIcon />
-          </IconButton>
-        </ListItemSecondaryAction>
-      </ListItem>),
+      (<Link href={url} target="#" underline="none" tabIndex={tabIndexOverrides}>
+        <ListItem button={url !== undefined} key="resource" tabIndex={tabIndexOverrides}>
+          <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
+            <InsertDriveFileIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary={label}
+            primaryTypographyProps={{ noWrap: true, color: isLoaded ? "default" : "error" }}
+            // secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
+            // secondaryTypographyProps={{ noWrap: true }}
+          />
+          <ListItemSecondaryAction>
+            <IconButton aria-label="disconnect" onClick={this.handleDisconnectSpreadsheet}>
+              <CloseIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </Link>),
       (<ListItem button={false} key="updateButton" className="PropertiesDrawerContents-updateButtonListItem">
         <ListItemText
           primary={
@@ -302,9 +316,11 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
       let details: State["loadedSheetDetails"];
 
       try {
+        const result = await this.props.datastore.getFileNameAndUrl(sheetId);
         details = {
           success: true,
-          name: await this.props.datastore.getFileName(sheetId)
+          name: result.name,
+          url: result.url
         };
       } catch (e) {
         console.log("file error", e);
@@ -325,6 +341,12 @@ class PropertiesDrawerContents extends React.PureComponent<Props, State> {
     myPromise = promise;
     this.loadingSheetPromise = promise;
   }
+
+  private handleDisconnectSpreadsheet = (event: any) => {
+    this.props.actions.disconnectSpreadsheet();
+    event.stopPropagation();
+    event.preventDefault();
+  };
 }
 
 export default PropertiesDrawerContents;
