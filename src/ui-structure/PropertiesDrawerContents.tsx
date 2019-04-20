@@ -259,8 +259,8 @@ class PropertiesDrawerContents extends React.Component<Props, State> {
     const tabIndexOverrides = (url === undefined ? undefined : -1);
 
     return [
-      (<Link href={url} target="#" underline="none" tabIndex={tabIndexOverrides}>
-        <ListItem button={url !== undefined} key="resource" tabIndex={tabIndexOverrides}>
+      (<Link key="resource" href={url} target="#" underline="none" tabIndex={tabIndexOverrides}>
+        <ListItem button={url !== undefined} tabIndex={tabIndexOverrides}>
           <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
             <InsertDriveFileIcon />
           </ListItemIcon>
