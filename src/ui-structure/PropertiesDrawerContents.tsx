@@ -1,3 +1,4 @@
+import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -81,6 +82,7 @@ export interface Actions {
   setSimulationProperty: (field: SimulationPropertyField, value: number) => void;
   connectSpreadsheet: () => void;
   disconnectSpreadsheet: () => void;
+  mergeConnectedSpreadsheetData: () => void;
 }
 
 interface Props {
@@ -164,7 +166,7 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
         {
           dataSource.connectedSpreadsheetId === null
             ? this.renderConnectSpreadsheetButtonListItem()
-            : this.renderConnectedSpreadsheetListItem(dataSource.connectedSpreadsheetId)
+            : this.renderConnectedSpreadsheetListItems(dataSource.connectedSpreadsheetId)
         }
       </List>
     );
@@ -183,9 +185,9 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
     );
   }
 
-  private renderConnectedSpreadsheetListItem(spreadsheetId: string) {
-    return (
-      <ListItem button={false}>
+  private renderConnectedSpreadsheetListItems(spreadsheetId: string) {
+    return [
+      (<ListItem button={false} key="resource">
         <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
           <InsertDriveFileIcon />
         </ListItemIcon>
@@ -200,8 +202,18 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
             <CloseIcon />
           </IconButton>
         </ListItemSecondaryAction>
-      </ListItem>
-    );
+      </ListItem>),
+      (<ListItem button={false} key="updateButton">
+        <ListItemText
+          primary={
+            <Button variant="outlined" fullWidth={true} onClick={this.props.actions.mergeConnectedSpreadsheetData}>
+              Update data
+            </Button>
+          }
+          className="PropertiesDrawerContents-updateButtonListItem"
+        />
+      </ListItem>)
+    ];
   }
 }
 

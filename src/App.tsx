@@ -467,6 +467,9 @@ class App extends React.Component<{}, State> {
         this.state.document.dataSource.connectedSpreadsheetId = null;
         this.refreshPropertiesDrawerContents();
       }
+    },
+    mergeConnectedSpreadsheetData: () => {
+      alert("ok");
     }
   };
 
