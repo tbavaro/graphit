@@ -281,7 +281,12 @@ class PropertiesDrawerContents extends React.Component<Props, State> {
       (<ListItem button={false} key="updateButton" className="PropertiesDrawerContents-updateButtonListItem">
         <ListItemText
           primary={
-            <Button variant="outlined" fullWidth={true} onClick={this.props.actions.mergeConnectedSpreadsheetData}>
+            <Button
+              variant="outlined"
+              fullWidth={true}
+              onClick={this.props.actions.mergeConnectedSpreadsheetData}
+              disabled={!isLoaded}
+            >
               Update data
             </Button>
           }
