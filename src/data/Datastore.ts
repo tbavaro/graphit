@@ -85,6 +85,11 @@ export class Datastore extends BasicListenable<"status_changed"> {
     }).then((f) => f.result);
   }
 
+  public async getFileName(fileId: string): Promise<string> {
+    const result = await this.getFileMetadata(fileId);
+    return result.name || "<untitiled>";
+  }
+
   private addQueryParams(url: string, queryParams: { [k: string]: string }) {
     const queryKeys = Object.keys(queryParams);
     if (queryKeys.length === 0) {

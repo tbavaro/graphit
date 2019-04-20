@@ -13,6 +13,7 @@ import Slider from "@material-ui/lab/Slider";
 
 import * as React from "react";
 
+import { Datastore, DatastoreStatus } from "../data/Datastore";
 import { GraphDocument, SimulationPropertyField } from "../data/GraphDocument";
 import { ValueFormatter, ValueFormatters } from "../ValueFormatters";
 
@@ -87,12 +88,33 @@ export interface Actions {
 
 interface Props {
   actions: Actions;
+  datastore: Datastore;
+  datastoreStatus: DatastoreStatus;
   document: GraphDocument | null;
+}
+
+interface State {
+  loadedSheetId: string | null;
+  loadedSheetDetails: {
+    success: true;
+    name: string;
+  } | {
+    success: false;
+    message: string;
+  }
 }
 
 const FORMATTER_PRECISION_5 = ValueFormatters.fixedPrecision(5);
 
-class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
+class PropertiesDrawerContents extends React.PureComponent<Props, State> {
+  public state: State = {
+    loadedSheetId: null,
+    loadedSheetDetails: {
+      success: false,
+      message: "not loaded"
+    }
+  }
+
   public render() {
     return (
       <div className="PropertiesDrawerContents">
@@ -186,14 +208,29 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
   }
 
   private renderConnectedSpreadsheetListItems(spreadsheetId: string) {
+    let isLoaded = false;
+    let label = "(loading...)";
+
+    if (this.state.loadedSheetId === spreadsheetId) {
+      if (this.state.loadedSheetDetails.success) {
+        isLoaded = true;
+        label = this.state.loadedSheetDetails.name;
+      } else {
+        isLoaded = false;
+        label = this.state.loadedSheetDetails.message;
+      }
+    } else {
+      this.fetchSheetDetailsIfNeeded(spreadsheetId);
+    }
+
     return [
       (<ListItem button={false} key="resource">
         <ListItemIcon className="PropertiesDrawerContents-spreadsheetIcon">
           <InsertDriveFileIcon />
         </ListItemIcon>
         <ListItemText
-          primary={spreadsheetId}
-          primaryTypographyProps={{ noWrap: true }}
+          primary={label}
+          primaryTypographyProps={{ noWrap: true, color: isLoaded ? "default" : "error" }}
           // secondary="Last updated xxx notahueontaeou nthaoeunthaoeunth"
           // secondaryTypographyProps={{ noWrap: true }}
         />
@@ -214,6 +251,55 @@ class PropertiesDrawerContents extends React.PureComponent<Props, {}> {
         />
       </ListItem>)
     ];
+  }
+
+  private loadingSheetId: string | null = null;
+  private loadingSheetPromise: Promise<void> | null = null;
+  private fetchSheetDetailsIfNeeded(sheetId: string) {
+    if (this.state.loadedSheetId === sheetId || this.loadingSheetId === sheetId) {
+      // already loaded or in the process of loading, so do nothing...
+      return;
+    }
+
+    // if the datastore is still initializing, we can't do anything yet. But we should
+    // get another shot at it when the status changes
+    if (this.props.datastoreStatus === DatastoreStatus.Initializing) {
+      return;
+    }
+
+    if (this.loadingSheetPromise !== null) {
+      // NB: would be nice if we could actually cancel it
+      this.loadingSheetPromise = null;
+    }
+
+    this.loadingSheetId = sheetId;
+    let myPromise: Promise<void> | null = null;
+    const promise = (async (): Promise<void> => {
+      let details: State["loadedSheetDetails"];
+
+      try {
+        details = {
+          success: true,
+          name: await this.props.datastore.getFileName(sheetId)
+        };
+      } catch (e) {
+        console.log("file error", e);
+        details = {
+          success: false,
+          message: "(unable to access)"
+        };
+      }
+
+      // make sure we're still the active promise
+      if (this.loadingSheetPromise === myPromise) {
+        this.setState({
+          loadedSheetId: sheetId,
+          loadedSheetDetails: details
+        });
+      }
+    })();
+    myPromise = promise;
+    this.loadingSheetPromise = promise;
   }
 }
 

@@ -108,6 +108,8 @@ class App extends React.Component<{}, State> {
       <PropertiesDrawerContents.default
         document={this.state.document}
         actions={this.actionManager}
+        datastore={this.datastore}
+        datastoreStatus={this.state.datastoreStatus}
         ref={this.setPropertiesDrawerContentsRef}
       />
     );
