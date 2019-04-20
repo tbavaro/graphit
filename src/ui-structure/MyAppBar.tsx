@@ -12,6 +12,8 @@ import SearchIcon from "@material-ui/icons/Search";
 
 import * as React from "react";
 
+import "./MyAppBar.css";
+
 const stylesFunc = (theme: Theme): StyleRules<string> => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1
@@ -136,18 +138,18 @@ class MyAppBar extends React.PureComponent<Props, {}> {
     return (
       <React.Fragment>
         <div className={classes.grow} />
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              <SearchIcon />
-            </div>
-            <InputBase
-              placeholder="Search…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-            />
+        <div className={classes.search + " MyAppBar-search"}>
+          <div className={classes.searchIcon}>
+            <SearchIcon />
           </div>
+          <InputBase
+            placeholder="Search…"
+            classes={{
+              root: classes.inputRoot,
+              input: classes.inputInput,
+            }}
+          />
+        </div>
       </React.Fragment>
     );
   }
