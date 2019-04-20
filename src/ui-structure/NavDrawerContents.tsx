@@ -24,7 +24,6 @@ export interface Actions {
   signOut: () => void;
 
   openFromGoogle: () => void;
-  mergeGoogleSheet: () => void;
   save: () => void;
   saveAs: () => void;
 }
@@ -108,11 +107,6 @@ class NavDrawerContents extends React.Component<Props, {}> {
                     label: "Save as...",
                     disabled: !this.props.documentIsLoaded,
                     action: this.props.actions.saveAs
-                  }),
-                  renderMenuOption({
-                    label: "Merge spreadsheet...",
-                    disabled: !this.props.documentIsLoaded,
-                    action: this.props.actions.mergeGoogleSheet
                   }),
                   <Divider key="div1"/>,
                   renderMenuOption({

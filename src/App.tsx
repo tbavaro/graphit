@@ -437,11 +437,6 @@ class App extends React.Component<{}, State> {
         }
       });
     },
-    mergeGoogleSheet: () => {
-      new GooglePickerHelper.default().createGoogleSheetPicker((fileResult) => {
-        this.importOrMergeGoogleSheet(fileResult.id, /*shouldMerge=*/true, fileResult.name);
-      });
-    },
 
     // save things
     save: this.save,
