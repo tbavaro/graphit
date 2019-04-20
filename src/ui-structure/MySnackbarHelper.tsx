@@ -1,6 +1,18 @@
 import * as React from "react";
 
+import IconButton from "@material-ui/core/IconButton";
 import Snackbar from "@material-ui/core/Snackbar";
+import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core/styles";
+
+import CloseIcon from "@material-ui/icons/Close";
+
+const stylesFunc = (theme: Theme) => ({
+  close: {
+    padding: theme.spacing.unit / 2,
+  }
+});
+
+const styles = createStyles(stylesFunc);
 
 let nextSnackbarMessageId = 0;
 
@@ -14,7 +26,9 @@ interface State {
   open: boolean;
 }
 
-export class MySnackbarHelper extends React.Component<{}, State> {
+interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {}
+
+export class MySnackbarHelperInner extends React.Component<Props, State> {
   public state: State = {
     open: false,
     currentEntry: null
@@ -40,6 +54,17 @@ export class MySnackbarHelper extends React.Component<{}, State> {
         autoHideDuration={6000}
         onClose={this.handleClose}
         onExited={this.processQueue}
+        action={
+          <IconButton
+            key="close"
+            aria-label="Close"
+            color="inherit"
+            onClick={this.handleClose}
+            className={this.props.classes.close}
+          >
+            <CloseIcon />
+          </IconButton>
+        }
       />
     );
   }
@@ -67,7 +92,7 @@ export class MySnackbarHelper extends React.Component<{}, State> {
     }
   }
 
-  private handleClose = (event: React.SyntheticEvent<any>, reason: string) => {
+  private handleClose = (event: React.SyntheticEvent<any>, reason?: string) => {
     // don't hide snackbar early just because we lose focus
     if (reason === "clickaway") {
       return;
@@ -77,4 +102,4 @@ export class MySnackbarHelper extends React.Component<{}, State> {
   }
 }
 
-export default MySnackbarHelper;
+export default withStyles(styles)(MySnackbarHelperInner);
