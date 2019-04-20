@@ -1,6 +1,5 @@
 import CssBaseline from "@material-ui/core/CssBaseline";
 import EditIcon from "@material-ui/icons/Edit";
-import SearchIcon from "@material-ui/icons/Search";
 
 import * as QueryString from "query-string";
 import * as React from "react";
@@ -119,12 +118,6 @@ class App extends React.Component<{}, State> {
     );
 
     const appBarActionButtons: ActionButtonDef[] = [
-      {
-        label: "Search",
-        icon: SearchIcon,
-        disabled: (this.state.document === null),
-        onClick: () => { alert("search"); }
-      },
       {
         label: "Edit",
         icon: EditIcon,
