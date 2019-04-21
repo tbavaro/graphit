@@ -180,10 +180,10 @@ class App extends React.Component<{}, State> {
 
   private maybeRenderSearchPopper = (query: string) => {
     query = query.trim();
-    if (query === "") {
+    if (query === "" || this.state.document === null) {
       return null;
     } else {
-      return <SearchPopperContents query={query}/>;
+      return <SearchPopperContents query={query} document={this.state.document}/>;
     }
   };
 
