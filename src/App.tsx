@@ -12,10 +12,12 @@ import { GraphDocument, SimulationPropertyField } from "./data/GraphDocument";
 import { SimpleListenable } from "./data/Listenable";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
+
 import { ActionButtonDef } from "./ui-structure/MyAppBar";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
+import SearchPopperContents from "./ui-structure/SearchPopperContents";
 import * as SimulationViewport from "./ui-structure/SimulationViewport";
 
 type AllActions =
@@ -135,6 +137,7 @@ class App extends React.Component<{}, State> {
           title={(this.state.document && this.state.document.name) || "GraphIt"}
           innerRef={this.setAppRootRef}
           appBarActionButtons={appBarActionButtons}
+          renderSearchPopperContents={this.maybeRenderSearchPopper}
         >
           {this.renderBody()}
         </MyAppRoot>
@@ -174,6 +177,15 @@ class App extends React.Component<{}, State> {
       </div>
     );
   }
+
+  private maybeRenderSearchPopper = (query: string) => {
+    query = query.trim();
+    if (query === "") {
+      return null;
+    } else {
+      return <SearchPopperContents query={query}/>;
+    }
+  };
 
   private onDatastoreStatusChanged = () => {
     const newStatus = this.datastore.status();

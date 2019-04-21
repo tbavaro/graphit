@@ -36,19 +36,20 @@ export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
   rightDrawerChildren: any;
   title: string;
   appBarActionButtons?: ActionButtonDef[];
+  renderSearchPopperContents?: (searchQuery: string) => JSX.Element | string | null;
 }
 
 interface State {
   leftDrawerOpen: boolean;
   rightDrawerOpen: boolean;
-  searchPopoverOpen: boolean;
+  searchQuery: string;
 }
 
 export class MyAppRootInner extends React.Component<Props, State> {
   public state: State = {
     leftDrawerOpen: false,
     rightDrawerOpen: false,
-    searchPopoverOpen: false
+    searchQuery: ""
   };
 
   public render() {
@@ -81,21 +82,31 @@ export class MyAppRootInner extends React.Component<Props, State> {
   }
 
   private renderSearchPopover() {
-    const content = (
-      <div>This is the popover content.</div>
+    let contents = (
+      this.props.renderSearchPopperContents === undefined
+        ? null
+        : this.props.renderSearchPopperContents(this.state.searchQuery)
     );
+
+    // keep the contents while fading out
+    const open = (contents !== null);
+    if (contents === null) {
+      contents = this.cachedSearchPopperContents;
+    } else {
+      this.cachedSearchPopperContents = contents;
+    }
 
     return (
       <Popper
         className={"MyAppRoot-searchPopover " + this.props.classes.searchPopover}
-        open={this.state.searchPopoverOpen}
+        open={open}
         anchorEl={this.searchElementRef}
         placement="bottom-end"
         transition={true}
       >
         {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={350}>
-            <Paper className={this.props.classes.searchPopoverContentContainer} children={content}/>
+          <Fade {...TransitionProps} timeout={350} onExited={this.handleSearchPopperExited}>
+            <Paper className={this.props.classes.searchPopoverContentContainer} children={contents}/>
           </Fade>
         )}
       </Popper>
@@ -126,9 +137,15 @@ export class MyAppRootInner extends React.Component<Props, State> {
 
   private searchElementRef: HTMLElement | null = null;
   private setSearchRef = (newRef: HTMLElement | null) => { this.searchElementRef = newRef; }
-
   private handleSearchChanged = (newValue: string) => {
-    this.setState({ searchPopoverOpen: (newValue !== "") });
+    this.setState({ searchQuery: newValue });
+  }
+
+  // this is to keep the last popper contents while fading out
+  private cachedSearchPopperContents: JSX.Element | string | null = null;
+  private handleSearchPopperExited = () => {
+    this.cachedSearchPopperContents = null;
+    this.forceUpdate();
   }
 }
 

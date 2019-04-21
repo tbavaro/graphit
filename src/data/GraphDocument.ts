@@ -1,3 +1,5 @@
+import { NodeSearchHelper } from "../util/SearchUtils";
+
 import * as GraphData from "./GraphData";
 import { MyLinkDatum, MyNodeDatum } from "./MyNodeDatum";
 
@@ -85,9 +87,11 @@ export type SimulationPropertyField = keyof ForceSimulationConfig;
 
 export class GraphDocument {
   public name: string;
-  public readonly nodes: MyNodeDatum[];
+  public readonly nodes: MyNodeDatum[];  // NB: if these change, clear cachedNodeSearchHelper
   public readonly links: MyLinkDatum[];
   private data: GraphData.Document;
+  private cachedNodeSearchHelper: NodeSearchHelper | null = null;
+
   get layoutState() {
     return this.data.layoutState;
   }
@@ -99,6 +103,12 @@ export class GraphDocument {
   }
   get dataSource() {
     return this.data.dataSource;
+  }
+  get nodeSearchHelper() {
+    if (this.cachedNodeSearchHelper === null) {
+      return new NodeSearchHelper(this.nodes);
+    }
+    return this.cachedNodeSearchHelper;
   }
 
   public static empty() {

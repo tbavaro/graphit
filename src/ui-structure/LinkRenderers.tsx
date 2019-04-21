@@ -84,7 +84,7 @@ export class MiddleArrowDirectedLinkRenderer extends LinkRenderer {
     ].join(" ");
   }
 
-  public renderLinks(links: MyLinkDatum[]) {
+  public renderLinks(links: ReadonlyArray<MyLinkDatum>) {
     return links.map((link, index) => {
       return (
         <path
@@ -96,7 +96,7 @@ export class MiddleArrowDirectedLinkRenderer extends LinkRenderer {
     });
   }
 
-  public updateLinkElements(parentElement: SVGGElement, links: MyLinkDatum[], index?: number) {
+  public updateLinkElements(parentElement: SVGGElement, links: ReadonlyArray<MyLinkDatum>, index?: number) {
     const linkElements: SVGLineElement[] = (parentElement.children as any);
     let start: number;
     let end: number;

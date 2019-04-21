@@ -14,7 +14,7 @@ import { NodeActionManager } from "./NodeView";
 import * as Viewport from "./Viewport";
 
 interface SVGLinesComponentProps {
-  links: MyLinkDatum[];
+  links: ReadonlyArray<MyLinkDatum>;
   gRef?: (newRef: SVGGElement) => void;
   onClick?: () => void;
 }
@@ -57,8 +57,8 @@ class SVGLinesComponent extends React.PureComponent<SVGLinesComponentProps, {}> 
 }
 
 export type Props = {
-  nodes: MyNodeDatum[];
-  links: MyLinkDatum[];
+  nodes: ReadonlyArray<MyNodeDatum>;
+  links: ReadonlyArray<MyLinkDatum>;
   zoomState: GraphData.ZoomState;
   nodeRenderMode: GraphData.NodeRenderMode;
   onChange?: () => void;
