@@ -1,4 +1,5 @@
 import * as SanitizeHtml from "sanitize-html";
+import sanitize from "sanitize-html";
 
 const EXTRA_TAGS_ALLOWED = [
   "img"
@@ -38,5 +39,5 @@ function options(): SanitizeHtml.IOptions {
 }
 
 export function sanitizeForDisplay(html: string) {
-  return SanitizeHtml(html, options());
+  return sanitize(html, options());
 }
