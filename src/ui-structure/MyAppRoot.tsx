@@ -43,13 +43,15 @@ interface State {
   leftDrawerOpen: boolean;
   rightDrawerOpen: boolean;
   searchQuery: string;
+  isSearchFieldFocused: boolean;
 }
 
 export class MyAppRootInner extends React.Component<Props, State> {
   public state: State = {
     leftDrawerOpen: false,
     rightDrawerOpen: false,
-    searchQuery: ""
+    searchQuery: "",
+    isSearchFieldFocused: false
   };
 
   public render() {
@@ -61,6 +63,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
           actionButtons={this.props.appBarActionButtons}
           showSearchField={true}
           onSearchChanged={this.handleSearchChanged}
+          onSearchFocusChanged={this.handleSearchFocusChanged}
           searchRef={this.setSearchRef}
         />
         <Drawer
@@ -89,7 +92,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
     );
 
     // keep the contents while fading out
-    const open = (contents !== null);
+    const open = (contents !== null) && this.state.isSearchFieldFocused;
     if (contents === null) {
       contents = this.cachedSearchPopperContents;
     } else {
@@ -137,9 +140,8 @@ export class MyAppRootInner extends React.Component<Props, State> {
 
   private searchElementRef: HTMLElement | null = null;
   private setSearchRef = (newRef: HTMLElement | null) => { this.searchElementRef = newRef; }
-  private handleSearchChanged = (newValue: string) => {
-    this.setState({ searchQuery: newValue });
-  }
+  private handleSearchChanged = (newValue: string) => this.setState({ searchQuery: newValue });
+  private handleSearchFocusChanged = (newValue: boolean) => this.setState({ isSearchFieldFocused: newValue });
 
   // this is to keep the last popper contents while fading out
   private cachedSearchPopperContents: JSX.Element | string | null = null;

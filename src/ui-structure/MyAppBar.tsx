@@ -92,6 +92,7 @@ export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
 
   showSearchField?: boolean;
   onSearchChanged?: (newValue: string) => void;
+  onSearchFocusChanged?: (newValue: boolean) => void;
   searchRef?: (newRef: HTMLElement | null) => void;
 }
 
@@ -154,6 +155,8 @@ class MyAppBar extends React.PureComponent<Props, {}> {
               input: classes.inputInput,
             }}
             onChange={this.handleSearchChange}
+            onFocus={this.handleFocus}
+            onBlur={this.handleBlur}
           />
         </div>
       </React.Fragment>
@@ -163,6 +166,18 @@ class MyAppBar extends React.PureComponent<Props, {}> {
   private handleSearchChange = (event: React.ChangeEvent<{ value: string }>) => {
     if (this.props.onSearchChanged) {
       this.props.onSearchChanged(event.target.value);
+    }
+  }
+
+  private handleFocus = () => {
+    if (this.props.onSearchFocusChanged) {
+      this.props.onSearchFocusChanged(true);
+    }
+  }
+
+  private handleBlur = () => {
+    if (this.props.onSearchFocusChanged) {
+      this.props.onSearchFocusChanged(false);
     }
   }
 }
