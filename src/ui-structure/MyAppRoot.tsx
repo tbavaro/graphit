@@ -40,6 +40,7 @@ export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
   title: string;
   appBarActionButtons?: ActionButtonDef[];
   renderSearchPopperContents?: (searchQuery: string) => JSX.Element | string | null;
+  onSearchFieldFocusChange?: (newValue: boolean) => void;
 }
 
 interface State {
@@ -145,7 +146,14 @@ export class MyAppRootInner extends React.Component<Props, State> {
   private searchElementRef: HTMLElement | null = null;
   private setSearchRef = (newRef: HTMLElement | null) => { this.searchElementRef = newRef; }
   private handleSearchChanged = (newValue: string) => this.setState({ searchQuery: newValue });
-  private handleSearchFocusChanged = (newValue: boolean) => this.setState({ isSearchFieldFocused: newValue });
+  private handleSearchFocusChanged = (newValue: boolean) => {
+    if (newValue !== this.state.isSearchFieldFocused) {
+      this.setState({ isSearchFieldFocused: newValue });
+      if (this.props.onSearchFieldFocusChange) {
+        this.props.onSearchFieldFocusChange(newValue);
+      }
+    }
+  }
 
   // this is to keep the last popper contents while fading out
   private cachedSearchPopperContents: JSX.Element | string | null = null;

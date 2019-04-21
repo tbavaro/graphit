@@ -142,6 +142,7 @@ class App extends React.Component<{}, State> {
           innerRef={this.setAppRootRef}
           appBarActionButtons={appBarActionButtons}
           renderSearchPopperContents={this.maybeRenderSearchPopper}
+          onSearchFieldFocusChange={this.setSimulationIsPaused}
         >
           {this.renderBody()}
         </MyAppRoot>
@@ -491,6 +492,12 @@ class App extends React.Component<{}, State> {
   private jumpToNode = (node: MyNodeDatum) => {
     if (this.simulationViewportRef) {
       this.simulationViewportRef.jumpToNode(node);
+    }
+  }
+
+  private setSimulationIsPaused = (newValue: boolean) => {
+    if (this.simulationViewportRef) {
+      this.simulationViewportRef.setIsPaused(newValue);
     }
   }
 

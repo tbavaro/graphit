@@ -85,7 +85,15 @@ function updateForces(simulation: D3.Simulation<any, any>, props: Props) {
 
 type MySimulation = D3.Simulation<MyNodeDatum, MyLinkDatum>;
 
-export class Component extends ListenerPureComponent<Props, {}> {
+interface State {
+  isPaused: boolean;
+}
+
+export class Component extends ListenerPureComponent<Props, State> {
+  public state: State = {
+    isPaused: false
+  };
+
   public bindings: Array<ListenerBinding<Props>> = [
     {
       propertyName: "simulationConfigListener",
@@ -132,6 +140,7 @@ export class Component extends ListenerPureComponent<Props, {}> {
     if (this.props.document !== newProps.document) {
       this.initializeSimulation(newProps.document);
       updateForces(this.simulation, newProps);
+      this.setState({ isPaused: false });
       this.restartSimulation();
     }
   }
@@ -162,7 +171,9 @@ export class Component extends ListenerPureComponent<Props, {}> {
 
   private restartSimulation = () => {
     this.simulation.alpha(1);
-    this.simulation.restart();
+    if (!this.state.isPaused) {
+      this.simulation.restart();
+    }
   }
 
   private onSimulationTick = () => {
@@ -181,6 +192,17 @@ export class Component extends ListenerPureComponent<Props, {}> {
   public jumpToNode(node: MyNodeDatum) {
     if (this.graphViewportRef) {
       this.graphViewportRef.jumpToNode(node);
+    }
+  }
+
+  public setIsPaused(newValue: boolean) {
+    if (this.state.isPaused !== newValue) {
+      if (newValue) {
+        this.simulation.stop();
+      } else {
+        this.simulation.restart();
+      }
+      this.setState({ isPaused: newValue });
     }
   }
 }
