@@ -1,10 +1,8 @@
 import Drawer from "@material-ui/core/Drawer";
-import Popover from "@material-ui/core/Popover";
-import {
-  createStyles,
-  withStyles,
-  WithStyles
-} from "@material-ui/core/styles";
+import Fade from "@material-ui/core/Fade";
+import Paper from "@material-ui/core/Paper";
+import Popper from "@material-ui/core/Popper";
+import { createStyles, StyleRules, Theme, withStyles, WithStyles } from "@material-ui/core/styles";
 
 import * as React from "react";
 
@@ -16,16 +14,24 @@ import "./MyAppRoot.css";
 // TODO: can I get the "dense" toolbar height from `theme`?
 const DENSE_APP_BAR_HEIGHT = 48;
 
-const styles = createStyles({
+const stylesFunc = (theme: Theme): StyleRules<string> => ({
   contentContainerOuterPadding: {
     paddingTop: DENSE_APP_BAR_HEIGHT
+  },
+  searchPopover: {
+    zIndex: theme.zIndex.drawer + 2
+  },
+  searchPopoverContentContainer: {
+    padding: theme.spacing.unit * 2
   },
   toolbar: {
     height: DENSE_APP_BAR_HEIGHT
   }
 });
 
-export interface Props extends WithStyles<typeof styles> {
+const styles = createStyles(stylesFunc);
+
+export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
   leftDrawerChildren: any;
   rightDrawerChildren: any;
   title: string;
@@ -80,23 +86,19 @@ export class MyAppRootInner extends React.Component<Props, State> {
     );
 
     return (
-      <Popover
+      <Popper
+        className={"MyAppRoot-searchPopover " + this.props.classes.searchPopover}
         open={this.state.searchPopoverOpen}
-        children={content}
-        anchorReference="anchorEl"
         anchorEl={this.searchElementRef}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right"
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right"
-        }}
-        disableAutoFocus={true}
-        disableEnforceFocus={true}
-        hideBackdrop={true}
-      />
+        placement="bottom-end"
+        transition={true}
+      >
+        {({ TransitionProps }) => (
+          <Fade {...TransitionProps} timeout={350}>
+            <Paper className={this.props.classes.searchPopoverContentContainer} children={content}/>
+          </Fade>
+        )}
+      </Popper>
     );
   }
 
