@@ -113,7 +113,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
         transition={true}
       >
         {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={350} onExited={this.handleSearchPopperExited}>
+          <Fade {...TransitionProps} timeout={350} onExited={this.handleSearchPopperExited} unmountOnExit={true}>
             <Paper className={this.props.classes.searchPopoverContentContainer} children={contents}/>
           </Fade>
         )}
