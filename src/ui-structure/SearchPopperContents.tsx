@@ -1,3 +1,7 @@
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+
 import * as React from "react";
 
 import { GraphDocument } from "../data/GraphDocument";
@@ -12,6 +16,21 @@ interface Props {
 
 interface State {
   maxHeightPx: number;
+}
+
+const elementHelper = document.createElement("div");
+
+// hack until i remove html labels
+function cleanLabel(label: string) {
+  let headersRemoved = label.replace(/\<[^\>]*\>/g, "\t").trim().replace(/\t+/g, " / ");
+
+  // fix html entities
+  if (/&/.exec(headersRemoved)) {
+    elementHelper.innerHTML = headersRemoved;
+    headersRemoved = elementHelper.innerText;
+  }
+
+  return headersRemoved;
 }
 
 class SearchPopperContents extends React.PureComponent<Props, State> {
@@ -41,13 +60,18 @@ class SearchPopperContents extends React.PureComponent<Props, State> {
     const results = document.nodeSearchHelper.search(this.props.query);
 
     return (
-      <div className="SearchPopperContents" style={{ maxHeight: `${this.state.maxHeightPx}px` }}>
+      <List
+        component="nav"
+        className="SearchPopperContents"
+        dense={true}
+        style={{ maxHeight: `${this.state.maxHeightPx}px` }}
+      >
         {
           results.length === 0
             ? this.renderEmptyState()
             : this.renderResults(results)
         }
-      </div>
+      </List>
     );
   }
 
@@ -56,14 +80,14 @@ class SearchPopperContents extends React.PureComponent<Props, State> {
   }
 
   private renderResults(results: MyNodeDatum[]) {
+    const limitedResults = results.slice(0, 50);
+
     return (
-      <ul>
-        {
-          results.map(result => (
-            <li>{result.label}</li>
-          ))
-        }
-      </ul>
+      limitedResults.map(result => (
+        <ListItem button={true} key={result.id}>
+          <ListItemText primary={cleanLabel(result.label)}/>
+        </ListItem>
+      ))
     );
   }
 
