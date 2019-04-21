@@ -177,4 +177,10 @@ export class Component extends ListenerPureComponent<Props, {}> {
   private setGraphViewportRef = (newRef: GraphViewport.Component | null) => {
     this.graphViewportRef = newRef;
   }
+
+  public jumpToNode(node: MyNodeDatum) {
+    if (this.graphViewportRef) {
+      this.graphViewportRef.jumpToNode(node);
+    }
+  }
 }

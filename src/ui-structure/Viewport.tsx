@@ -144,7 +144,7 @@ export class Viewport<DragSubject> extends React.Component<Props<DragSubject>, o
   }
 
   // private setCenterPoint(x: number, y: number, scale?: number) {
-  private setZoomState(zoomState: ZoomState) {
+  public setZoomState(zoomState: ZoomState) {
     if (!this.outerRef) {
       throw new Error("refs not set");
     }

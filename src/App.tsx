@@ -159,6 +159,7 @@ class App extends React.Component<{}, State> {
           document={this.state.document}
           simulationConfigListener={this.simulationConfigListener}
           onChange={this.markDocumentDirty}
+          ref={this.setSimulationViewportRef}
         />
       );
     }
@@ -507,7 +508,9 @@ class App extends React.Component<{}, State> {
 
     // graph navigation
     jumpToNode: (node: MyNodeDatum) => {
-      alert(`jumping to ${node.id}`);
+      if (this.simulationViewportRef) {
+        this.simulationViewportRef.jumpToNode(node);
+      }
     }
   };
 
@@ -529,6 +532,11 @@ class App extends React.Component<{}, State> {
 
   private handleEditButtonClick = () => {
     this.toggleRightDrawer();
+  }
+
+  private simulationViewportRef: SimulationViewport.Component | null = null;
+  private setSimulationViewportRef = (newRef: SimulationViewport.Component | null) => {
+    this.simulationViewportRef = newRef;
   }
 }
 

@@ -112,6 +112,7 @@ export class Component extends React.PureComponent<Props, State> {
         onDrag={this.onDrag}
         onDragStart={this.onDragStart}
         initialZoomState={this.props.zoomState}
+        ref={this.setViewportRef}
       />
     );
   }
@@ -247,5 +248,20 @@ export class Component extends React.PureComponent<Props, State> {
       this.props.onChange();
     }
     this.updatePositions(indexes);
+  }
+
+  private viewportRef: Viewport.Viewport<any> | null = null;
+  private setViewportRef = (newRef: Viewport.Viewport<any> | null) => {
+    this.viewportRef = newRef;
+  };
+
+  public jumpToNode(node: MyNodeDatum) {
+    if (this.viewportRef) {
+      this.viewportRef.setZoomState({
+        centerX: node.x || 0,
+        centerY: node.y || 0,
+        scale: Math.min(1.5, this.props.zoomState.scale)
+      });
+    }
   }
 }
