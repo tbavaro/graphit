@@ -194,6 +194,10 @@ class MyAppBar extends React.PureComponent<Props, {}> {
       if (callback) {
         callback();
       }
+      const activeElement = document.activeElement as any;
+      if (activeElement && activeElement.blur) {
+        activeElement.blur();
+      }
     }
   }
 }
