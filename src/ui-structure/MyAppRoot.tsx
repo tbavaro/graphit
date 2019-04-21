@@ -6,7 +6,7 @@ import { createStyles, StyleRules, Theme, withStyles, WithStyles } from "@materi
 
 import * as React from "react";
 
-import MyAppBar, { ActionButtonDef } from "./MyAppBar";
+import MyAppBar, { ActionButtonDef, Actions as MyAppBarActions } from "./MyAppBar";
 import MySnackbarHelper, { MySnackbarHelperInner } from "./MySnackbarHelper";
 
 import "./MyAppRoot.css";
@@ -31,7 +31,10 @@ const stylesFunc = (theme: Theme): StyleRules<string> => ({
 
 const styles = createStyles(stylesFunc);
 
+export type Actions = MyAppBarActions;
+
 export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
+  actions: Actions;
   leftDrawerChildren: any;
   rightDrawerChildren: any;
   title: string;
@@ -58,6 +61,7 @@ export class MyAppRootInner extends React.Component<Props, State> {
     return (
       <div className="MyAppRoot">
         <MyAppBar
+          actions={this.props.actions}
           title={this.props.title}
           onClickMenuButton={this.openLeftDrawer}
           actionButtons={this.props.appBarActionButtons}

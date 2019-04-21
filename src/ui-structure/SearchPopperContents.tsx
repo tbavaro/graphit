@@ -17,6 +17,7 @@ interface Props {
   actions: Actions;
   query: string;
   document: GraphDocument;
+  setFirstSearchResult?: (firstResult: MyNodeDatum | null) => void;
 }
 
 interface State {
@@ -63,6 +64,10 @@ class SearchPopperContents extends React.PureComponent<Props, State> {
   public render() {
     const { document } = this.props;
     const results = document.nodeSearchHelper.search(this.props.query);
+
+    if (this.props.setFirstSearchResult) {
+      this.props.setFirstSearchResult(results.length === 0 ? null : results[0]);
+    }
 
     return (
       <List

@@ -84,7 +84,13 @@ export interface ActionButtonDef {
   icon: typeof SvgIcon;
 }
 
+export interface Actions {
+  jumpToFirstSearchResult?: () => void;
+}
+
 export interface Props extends WithStyles<ReturnType<typeof stylesFunc>> {
+  actions: Actions;
+
   title: string;
   onClickMenuButton: () => void;
 
@@ -157,6 +163,7 @@ class MyAppBar extends React.PureComponent<Props, {}> {
             onChange={this.handleSearchChange}
             onFocus={this.handleFocus}
             onBlur={this.handleBlur}
+            onKeyUp={this.handleSearchKeyUp}
           />
         </div>
       </React.Fragment>
@@ -178,6 +185,15 @@ class MyAppBar extends React.PureComponent<Props, {}> {
   private handleBlur = () => {
     if (this.props.onSearchFocusChanged) {
       this.props.onSearchFocusChanged(false);
+    }
+  }
+
+  private handleSearchKeyUp = (event: React.KeyboardEvent<any>) => {
+    if (event.key === "Enter") {
+      const callback = this.props.actions.jumpToFirstSearchResult;
+      if (callback) {
+        callback();
+      }
     }
   }
 }

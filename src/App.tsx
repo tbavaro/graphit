@@ -15,13 +15,14 @@ import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
 
 import { ActionButtonDef } from "./ui-structure/MyAppBar";
-import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
+import MyAppRoot, { Actions as MyAppRootActions, MyAppRootInner } from "./ui-structure/MyAppRoot";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
 import * as SearchPopperContents from "./ui-structure/SearchPopperContents";
 import * as SimulationViewport from "./ui-structure/SimulationViewport";
 
 type AllActions =
+  MyAppRootActions &
   NavDrawerContents.Actions &
   PropertiesDrawerContents.Actions &
   SearchPopperContents.Actions;
@@ -134,6 +135,7 @@ class App extends React.Component<{}, State> {
       <React.Fragment>
         <CssBaseline/>
         <MyAppRoot
+          actions={this.actionManager}
           leftDrawerChildren={navDrawerContents}
           rightDrawerChildren={propertiesDrawerContents}
           title={(this.state.document && this.state.document.name) || "GraphIt"}
@@ -191,6 +193,7 @@ class App extends React.Component<{}, State> {
           actions={this.actionManager}
           query={query}
           document={this.state.document}
+          setFirstSearchResult={this.setFirstSearchResult}
         />
       );
     }
@@ -457,6 +460,40 @@ class App extends React.Component<{}, State> {
     );
   };
 
+  private onBeforeUnload = () => {
+    if (this.isDocumentDirty()) {
+      // NB: most modern browsers don't actually show this specific text,
+      // but returning *something* makes it prompt the user before leaving.
+      return "There are unsaved changes.";
+    } else {
+      return undefined;
+    }
+  }
+
+  private showSnackbarMessage = (message: string) => {
+    if (this.appRootRef) {
+      this.appRootRef.showSnackbarMessage(message);
+    }
+  }
+
+  private handleEditButtonClick = () => {
+    this.toggleRightDrawer();
+  }
+
+  private simulationViewportRef: SimulationViewport.Component | null = null;
+  private setSimulationViewportRef = (newRef: SimulationViewport.Component | null) => {
+    this.simulationViewportRef = newRef;
+  }
+
+  private firstSearchResult: MyNodeDatum | null = null;
+  private setFirstSearchResult = (node: MyNodeDatum | null) => { this.firstSearchResult = node; };
+
+  private jumpToNode = (node: MyNodeDatum) => {
+    if (this.simulationViewportRef) {
+      this.simulationViewportRef.jumpToNode(node);
+    }
+  }
+
   private actionManager: AllActions = {
     // sign in/out
     signIn: () => this.datastore.signIn(),
@@ -507,37 +544,13 @@ class App extends React.Component<{}, State> {
     },
 
     // graph navigation
-    jumpToNode: (node: MyNodeDatum) => {
-      if (this.simulationViewportRef) {
-        this.simulationViewportRef.jumpToNode(node);
+    jumpToNode: this.jumpToNode,
+    jumpToFirstSearchResult: () => {
+      if (this.firstSearchResult !== null) {
+        this.jumpToNode(this.firstSearchResult);
       }
     }
   };
-
-  private onBeforeUnload = () => {
-    if (this.isDocumentDirty()) {
-      // NB: most modern browsers don't actually show this specific text,
-      // but returning *something* makes it prompt the user before leaving.
-      return "There are unsaved changes.";
-    } else {
-      return undefined;
-    }
-  }
-
-  private showSnackbarMessage = (message: string) => {
-    if (this.appRootRef) {
-      this.appRootRef.showSnackbarMessage(message);
-    }
-  }
-
-  private handleEditButtonClick = () => {
-    this.toggleRightDrawer();
-  }
-
-  private simulationViewportRef: SimulationViewport.Component | null = null;
-  private setSimulationViewportRef = (newRef: SimulationViewport.Component | null) => {
-    this.simulationViewportRef = newRef;
-  }
 }
 
 export default App;
