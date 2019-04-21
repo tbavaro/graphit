@@ -9,7 +9,12 @@ import { MyNodeDatum } from "../data/MyNodeDatum";
 
 import "./SearchPopperContents.css";
 
+export interface Actions {
+  jumpToNode: (node: MyNodeDatum) => void;
+}
+
 interface Props {
+  actions: Actions;
   query: string;
   document: GraphDocument;
 }
@@ -82,17 +87,33 @@ class SearchPopperContents extends React.PureComponent<Props, State> {
   private renderResults(results: MyNodeDatum[]) {
     const limitedResults = results.slice(0, 50);
 
-    return (
-      limitedResults.map(result => (
-        <ListItem button={true} key={result.id}>
-          <ListItemText primary={cleanLabel(result.label)}/>
-        </ListItem>
-      ))
-    );
+    return limitedResults.map(result => (
+      <MyResultListItem key={result.id} node={result} jumpToNode={this.props.actions.jumpToNode}/>
+    ));
   }
 
   private updateMaxHeight = () => {
     this.setState({ maxHeightPx: Math.floor((window.innerHeight - 48) * 0.8) });
+  }
+}
+
+interface MyResultListItemProps {
+  node: MyNodeDatum;
+  jumpToNode: (node: MyNodeDatum) => void;
+};
+
+class MyResultListItem extends React.PureComponent<MyResultListItemProps, {}> {
+  private handleClick = () => {
+    this.props.jumpToNode(this.props.node);
+  }
+
+  public render() {
+    const { node } = this.props;
+    return (
+      <ListItem button={true} onClick={this.handleClick}>
+        <ListItemText primary={cleanLabel(node.label)}/>
+      </ListItem>
+    );
   }
 }
 

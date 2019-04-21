@@ -10,6 +10,7 @@ import { Datastore, DatastoreStatus } from "./data/Datastore";
 import * as GraphData from "./data/GraphData";
 import { GraphDocument, SimulationPropertyField } from "./data/GraphDocument";
 import { SimpleListenable } from "./data/Listenable";
+import { MyNodeDatum } from "./data/MyNodeDatum";
 import * as SpreadsheetImporter from "./data/SpreadsheetImporter";
 import * as GooglePickerHelper from "./google/GooglePickerHelper";
 
@@ -17,12 +18,13 @@ import { ActionButtonDef } from "./ui-structure/MyAppBar";
 import MyAppRoot, { MyAppRootInner } from "./ui-structure/MyAppRoot";
 import * as NavDrawerContents from "./ui-structure/NavDrawerContents";
 import * as PropertiesDrawerContents from "./ui-structure/PropertiesDrawerContents";
-import SearchPopperContents from "./ui-structure/SearchPopperContents";
+import * as SearchPopperContents from "./ui-structure/SearchPopperContents";
 import * as SimulationViewport from "./ui-structure/SimulationViewport";
 
 type AllActions =
   NavDrawerContents.Actions &
-  PropertiesDrawerContents.Actions;
+  PropertiesDrawerContents.Actions &
+  SearchPopperContents.Actions;
 
 interface State {
   canSaveDocument: boolean;
@@ -183,7 +185,13 @@ class App extends React.Component<{}, State> {
     if (query === "" || this.state.document === null) {
       return null;
     } else {
-      return <SearchPopperContents query={query} document={this.state.document}/>;
+      return (
+        <SearchPopperContents.default
+          actions={this.actionManager}
+          query={query}
+          document={this.state.document}
+        />
+      );
     }
   };
 
@@ -495,6 +503,11 @@ class App extends React.Component<{}, State> {
         return;
       }
       this.importOrMergeGoogleSheet(this.state.document.dataSource.connectedSpreadsheetId, /*shouldMerge=*/true);
+    },
+
+    // graph navigation
+    jumpToNode: (node: MyNodeDatum) => {
+      alert(`jumping to ${node.id}`);
     }
   };
 
