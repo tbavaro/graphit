@@ -1,5 +1,2 @@
-# graphit
-reusable document-based graphing app using d3 and google sheets
+moved to https://github.com/tbavaro/autograph / https://tbavaro.github.io/autograph
 
-# use it!
-https://tbavaro.github.io/graphit
